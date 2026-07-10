@@ -1,0 +1,273 @@
+.container {
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.hero {
+  position: relative;
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.heroBg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.heroOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(0, 104, 95, 0.7) 0%, rgba(0, 104, 95, 0.9) 100%);
+  z-index: 2;
+  mix-blend-mode: multiply;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 3;
+  color: white;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 42px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.subtitle {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
+.tags {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  background: var(--secondary-container);
+  color: var(--on-secondary-container);
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tagOutline {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(8px);
+}
+
+.toolsSection {
+  padding: 64px 20px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 32px;
+}
+
+.sectionTitle {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--on-surface);
+  margin-bottom: 8px;
+}
+
+.sectionDesc {
+  color: var(--on-surface-variant);
+  font-size: 16px;
+}
+
+.toolsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.toolCard {
+  background: var(--surface-container-lowest);
+  padding: 32px;
+  border-radius: 12px;
+  border: 1px solid var(--outline-variant);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+
+.toolCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  border-color: var(--primary);
+}
+
+.toolIcon {
+  width: 56px;
+  height: 56px;
+  background-color: rgba(0, 104, 95, 0.1);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  margin-bottom: 24px;
+  transition: transform 0.3s ease;
+}
+
+.toolCard:hover .toolIcon {
+  transform: scale(1.05);
+}
+
+.toolTitle {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  transition: color 0.3s ease;
+}
+
+.toolCard:hover .toolTitle {
+  color: var(--primary);
+}
+
+.toolDesc {
+  color: var(--on-surface-variant);
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 24px;
+  flex-grow: 1;
+}
+
+.toolLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 14px;
+  transition: gap 0.3s ease;
+}
+
+.toolCard:hover .toolLink {
+  gap: 12px;
+}
+
+.featuresSection {
+  background: var(--surface-container-low);
+  padding: 64px 20px;
+}
+
+.featuresContainer {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+}
+
+.featuresImgWrapper {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  position: relative;
+  aspect-ratio: 16 / 9;
+}
+
+.featuresImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.featuresPretitle {
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.featuresMainTitle {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: var(--on-surface);
+}
+
+.featuresList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 32px 0;
+}
+
+.featuresListItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.featuresListIcon {
+  color: var(--primary);
+}
+
+.featuresListText {
+  color: var(--on-surface);
+  font-size: 16px;
+}
+
+.premiumBtn {
+  background-color: var(--primary);
+  color: white;
+  padding: 12px 32px;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.premiumBtn:hover {
+  background-color: var(--primary-container);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .featuresContainer {
+    grid-template-columns: 1fr;
+  }
+  .sectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+}

@@ -1,0 +1,392 @@
+.container {
+  min-height: 100vh;
+  background: var(--background);
+}
+
+/* Hero Header */
+.hero {
+  padding: 40px 24px 32px;
+  background: var(--surface-container-lowest);
+  border-bottom: 1px solid var(--surface-container);
+}
+
+.heroInner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.heroTitle {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 6px;
+}
+
+.heroSubtitle {
+  font-size: 14px;
+  color: var(--on-surface-variant);
+  line-height: 1.5;
+  max-width: 480px;
+}
+
+/* Main two-column layout */
+.main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+/* On mobile: form (right col) shows first via order */
+.faqCol  { order: 2; }
+.formCol { order: 1; }
+
+/* Card */
+.card {
+  background: var(--surface-container-lowest);
+  border: 1px solid var(--surface-container);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.cardHeaderIcon {
+  color: var(--primary);
+  display: flex;
+}
+
+.cardTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--on-surface);
+}
+
+/* Accordion */
+.accordion {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--surface-container);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.accordionItem {
+  border-bottom: 1px solid var(--surface-container);
+}
+
+.accordionItem:last-child {
+  border-bottom: none;
+}
+
+.accordionBtn {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 13px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--on-surface);
+  transition: background 0.15s;
+  gap: 8px;
+}
+
+.accordionBtn:hover {
+  background: var(--surface-container-low);
+}
+
+.accordionChevron {
+  flex-shrink: 0;
+  transition: transform 0.2s;
+  color: var(--on-surface-variant);
+}
+
+.accordionChevron.open {
+  transform: rotate(180deg);
+}
+
+.accordionContent {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.25s ease;
+}
+
+.accordionContent.open {
+  max-height: 200px;
+}
+
+.accordionBody {
+  padding: 0 14px 14px;
+  font-size: 13px;
+  color: var(--on-surface-variant);
+  line-height: 1.6;
+}
+
+/* Still have questions */
+.stillBox {
+  background: var(--surface-container-low);
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.stillIcon {
+  background: var(--surface-container);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--primary);
+}
+
+.stillTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 3px;
+}
+
+.stillDesc {
+  font-size: 12px;
+  color: var(--on-surface-variant);
+  line-height: 1.5;
+}
+
+/* Feedback Form */
+.formGroup {
+  margin-bottom: 12px;
+}
+
+.label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--on-surface);
+  margin-bottom: 5px;
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--surface-container);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--on-surface);
+  background: var(--surface-container-lowest);
+  outline: none;
+  transition: border-color 0.15s;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  border-color: var(--primary);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+.submitBtn {
+  width: 100%;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 11px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+  margin-bottom: 12px;
+}
+
+.submitBtn:hover {
+  background: var(--primary-container);
+  transform: translateY(-1px);
+}
+
+.responseNote {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.responseNoteIcon {
+  color: var(--primary);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.responseNoteText {
+  font-size: 12px;
+  color: var(--on-surface-variant);
+  line-height: 1.5;
+}
+
+.responseNoteText strong {
+  color: var(--primary);
+}
+
+/* CTA Section */
+.cta {
+  margin: 0 auto;
+  max-width: 1100px;
+  padding: 0 24px 40px;
+}
+
+.ctaInner {
+  border-radius: 12px;
+  overflow: hidden;
+  padding: 36px 32px;
+  background: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.ctaTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 6px;
+}
+
+.ctaDesc {
+  font-size: 13px;
+  color: rgba(255,255,255,0.85);
+  max-width: 420px;
+  line-height: 1.6;
+}
+
+.ctaBtn {
+  background: white;
+  color: var(--primary);
+  border: none;
+  border-radius: 8px;
+  padding: 11px 24px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ctaBtn:hover {
+  background: var(--surface-container-low);
+}
+
+/* Success state */
+.successState {
+  text-align: center;
+  padding: 24px 0;
+  color: var(--primary);
+}
+
+.successIcon {
+  margin: 0 auto 10px;
+  display: block;
+}
+
+.successTitle {
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
+.successDesc {
+  font-size: 13px;
+  color: var(--on-surface-variant);
+}
+
+/* ===== RESPONSIVE ===== */
+/* On desktop: FAQ is left (order:1), Form is right (order:2) — natural DOM order */
+@media (min-width: 769px) {
+  .faqCol  { order: 1; }
+  .formCol { order: 2; }
+}
+
+/* On mobile: single column, Form first (order:1), FAQ second (order:2) */
+@media (max-width: 768px) {
+  .main {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .faqCol  { order: 2; }
+  .formCol { order: 1; }
+
+  .hero {
+    padding: 24px 16px 20px;
+  }
+
+  .heroTitle {
+    font-size: 24px;
+  }
+
+  .cta {
+    padding: 0 16px 28px;
+  }
+
+  .ctaInner {
+    padding: 24px 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .ctaBtn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .textarea {
+    min-height: 72px;
+  }
+}
+
+@media (max-width: 480px) {
+  .heroTitle {
+    font-size: 22px;
+  }
+}

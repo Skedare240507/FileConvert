@@ -1,0 +1,181 @@
+.container {
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ===== HERO ===== */
+.hero {
+  position: relative;
+  height: 300px;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 24px 36px;
+  background-color: #00504a;
+  background-size: cover;
+  background-position: center;
+}
+
+.heroOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,60,55,0.45) 0%, rgba(0,40,36,0.80) 100%);
+  z-index: 0;
+}
+
+.heroContent {
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.heroTitle {
+  font-size: 32px;
+  font-weight: 700;
+  color: white;
+  line-height: 1.15;
+  margin-bottom: 10px;
+}
+
+.heroSubtitle {
+  font-size: 13px;
+  color: rgba(255,255,255,0.88);
+  line-height: 1.6;
+  max-width: 440px;
+  margin-bottom: 20px;
+}
+
+.heroBtn {
+  background: white;
+  color: var(--primary);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 22px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.heroBtn:hover {
+  background: var(--surface-container-low);
+  transform: translateY(-1px);
+}
+
+/* ===== TOOLS SECTION ===== */
+.toolsSection {
+  padding: 36px 24px 48px;
+  background: var(--background);
+}
+
+.toolsContainer {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.toolsTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--on-surface);
+  margin-bottom: 4px;
+}
+
+.toolsSubtitle {
+  font-size: 13px;
+  color: var(--on-surface-variant);
+  margin-bottom: 24px;
+}
+
+.toolsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.toolCard {
+  background: var(--surface-container-lowest);
+  border: 1px solid var(--surface-container);
+  border-radius: 12px;
+  padding: 24px;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s;
+}
+
+.toolCard:hover {
+  border-color: var(--primary);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+  transform: translateY(-3px);
+}
+
+.toolIcon {
+  width: 44px;
+  height: 44px;
+  background: var(--surface-container-low);
+  color: var(--primary);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  transition: transform 0.2s;
+}
+
+.toolCard:hover .toolIcon {
+  transform: scale(1.08);
+}
+
+.toolCardTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--on-surface);
+  margin-bottom: 8px;
+}
+
+.toolCardDesc {
+  font-size: 13px;
+  color: var(--on-surface-variant);
+  line-height: 1.6;
+  flex-grow: 1;
+  margin-bottom: 20px;
+}
+
+.toolLink {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: gap 0.2s;
+}
+
+.toolCard:hover .toolLink {
+  gap: 10px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .heroTitle {
+    font-size: 26px;
+  }
+  .toolsGrid {
+    grid-template-columns: 1fr;
+  }
+  .hero {
+    height: auto;
+    padding: 64px 16px 32px;
+    align-items: flex-start;
+  }
+  .toolsSection {
+    padding: 28px 16px 36px;
+  }
+}
+
+@media (max-width: 480px) {
+  .heroTitle {
+    font-size: 22px;
+  }
+}
