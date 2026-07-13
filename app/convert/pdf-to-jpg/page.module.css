@@ -1,0 +1,418 @@
+.container {
+  position: relative;
+  min-height: 100vh;
+  background-color: var(--background);
+  display: flex;
+  flex-direction: column;
+}
+ 
+
+.hero {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 500px;
+  padding: 64px 24px;
+}
+
+/* Background Image Layer */
+.heroBgImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+}
+
+/* Frosted blur over the background image to make the card readable */
+.heroBgOverlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 0;
+}
+
+/* =========================================================================
+   GLASS CARD
+   ========================================================================= */
+.card {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 768px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 24px;
+  padding: 32px 40px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Card Typography */
+.cardTitle {
+  text-align: center;
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--primary);
+  margin: 0 0 8px 0;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.cardDesc {
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--on-surface-variant);
+  max-width: 600px;
+  margin: 0 auto 24px auto;
+}
+
+/* =========================================================================
+   QUALITY SELECTOR
+   ========================================================================= */
+.qualityLabel {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0 0 16px 0;
+}
+
+.qualityRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.qualityBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px;
+  background: var(--surface);
+  border: 2px solid rgba(188, 201, 198, 0.3);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.qualityBtn:hover {
+  border-color: rgba(0, 104, 95, 0.5);
+}
+
+.qualityActive {
+  background: rgba(0, 104, 95, 0.05) !important;
+  border-color: var(--primary) !important;
+}
+
+.qualityBtn .material-symbols-outlined {
+  color: var(--primary);
+}
+
+.qualityName {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--on-surface);
+}
+
+.qualityDpi {
+  font-size: 10px;
+  color: var(--on-surface-variant);
+}
+
+/* =========================================================================
+   DROP ZONE
+   ========================================================================= */
+.dropZone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 2px dashed var(--outline-variant);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dropZone:hover {
+  border-color: var(--primary);
+  background: rgba(0, 104, 95, 0.05);
+}
+
+.dropActive {
+  border-color: var(--primary) !important;
+  background: rgba(0, 104, 95, 0.05) !important;
+}
+
+.hiddenInput {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.dropIconCircle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  background-color: rgba(0, 104, 95, 0.1);
+  border-radius: 50%;
+  margin-bottom: 16px;
+  transition: transform 0.3s ease;
+}
+
+.dropZone:hover .dropIconCircle {
+  transform: scale(1.1);
+}
+
+.dropIconCircle .material-symbols-outlined {
+  color: var(--primary);
+  font-size: 28px !important;
+}
+
+.dropHeading {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--on-surface);
+  margin: 0 0 6px 0;
+}
+
+.dropSub {
+  font-size: 12px;
+  color: var(--on-surface-variant);
+  margin: 0 0 16px 0;
+}
+
+.chooseBtn {
+  background-color: var(--primary);
+  color: var(--on-primary);
+  font-weight: 700;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  box-shadow: 0 4px 6px -1px rgba(0, 104, 95, 0.2), 0 2px 4px -1px rgba(0, 104, 95, 0.1);
+  transition: all 0.2s ease;
+}
+
+.dropZone:hover .chooseBtn {
+  box-shadow: 0 10px 15px -3px rgba(0, 104, 95, 0.3), 0 4px 6px -2px rgba(0, 104, 95, 0.15);
+}
+
+/* =========================================================================
+   FILE LIST SECTION (Appears after selecting a file)
+   ========================================================================= */
+.fileSection {
+  margin-top: 32px;
+}
+
+.fileSectionHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.fileSectionTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.clearAllBtn {
+  background: none;
+  border: none;
+  color: var(--error);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+}
+
+.clearAllBtn:hover {
+  text-decoration: underline;
+}
+
+.fileItems {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.fileRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: #ffffff;
+  border: 1px solid rgba(188, 201, 198, 0.2);
+  border-radius: 12px;
+}
+
+.fileRowLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.fileRowName {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--on-surface);
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fileRowSize {
+  font-size: 10px;
+  color: var(--on-surface-variant);
+}
+
+.fileRemoveBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--on-surface-variant);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.fileRemoveBtn:hover {
+  color: var(--error);
+  background-color: rgba(186, 26, 26, 0.1);
+}
+
+.convertBtn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px;
+  background-color: var(--primary);
+  color: var(--on-primary);
+  border: none;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.convertBtn:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 104, 95, 0.3);
+  transform: translateY(-2px);
+}
+
+.convertBtn:active {
+  transform: translateY(0);
+}
+
+.convertBtnLoading {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* =========================================================================
+   INFO SECTION (Cards Below Hero)
+   ========================================================================= */
+.infoSection {
+  background-color: var(--surface);
+  padding: 64px 24px;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 24px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .infoGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.infoCard {
+  background-color: #ffffff;
+  padding: 32px;
+  border-radius: 24px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(188, 201, 198, 0.1);
+}
+
+.infoIcon {
+  font-size: 32px !important;
+  color: var(--primary);
+  margin-bottom: 16px;
+}
+
+.infoTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--on-surface);
+  margin: 0 0 8px 0;
+}
+
+.infoDesc {
+  font-size: 14px;
+  color: var(--on-surface-variant);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* =========================================================================
+   RESPONSIVE OVERRIDES
+   ========================================================================= */
+@media (max-width: 768px) {
+  .card {
+    padding: 32px 24px;
+  }
+
+  .cardTitle {
+    font-size: 32px;
+  }
+
+  .cardDesc {
+    font-size: 16px;
+  }
+
+  .qualityRow {
+    grid-template-columns: 1fr;
+  }
+
+  .dropZone {
+    padding: 40px 16px;
+  }
+}

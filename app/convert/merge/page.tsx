@@ -62,6 +62,14 @@ export default function MergePage() {
 
   return (
     <div className={styles.container}>
+      {/* Background Image */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/merge-bg.png"
+        alt="background image"
+        aria-hidden="true"
+        className={styles.bgImg}
+      />
       {/* Fixed blurred background */}
       <div className={styles.bgLayer} />
 

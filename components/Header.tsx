@@ -12,27 +12,19 @@ export default function Header() {
         <div className={styles.headerContainer}>
           {/* Logo */}
           <div className={styles.logo}>
-            <a href="/">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/logo.png"
-                alt="FileConvert"
-                width={36}
-                height={36}
-                style={{ borderRadius: '6px', objectFit: 'contain', display: 'block' }}
-              />
+            <a href="/public/logo.png">
               FileConvert
             </a>
           </div>
 
           {/* Desktop Nav */}
           <nav className={styles.nav}>
-            <a href="/convert/pdf-to-word">PDF Tools</a>
+            <a href="/convert/pdf">PDF Tools</a>
             <a href="/convert/image">Image Tools</a>
             <a href="/convert/spreadsheet">Spreadsheet Tools</a>
             <a href="/convert/word">Word Tools</a>
             <a href="/convert/ppt">PPT</a>
-            <a href="/merge">Merge</a>
+            <a href="/convert/merge">Merge</a>
           </nav>
 
           {/* Desktop Actions */}
@@ -89,12 +81,12 @@ export default function Header() {
         </div>
 
         <nav className={styles.sidebarNav}>
-          <a href="/convert/pdf-to-word" onClick={() => setIsSidebarOpen(false)}>PDF Tools</a>
+          <a href="/convert/pdf" onClick={() => setIsSidebarOpen(false)}>PDF Tools</a>
           <a href="/convert/image" onClick={() => setIsSidebarOpen(false)}>Image Tools</a>
           <a href="/convert/spreadsheet" onClick={() => setIsSidebarOpen(false)}>Spreadsheet Tools</a>
           <a href="/convert/word" onClick={() => setIsSidebarOpen(false)}>Word Tools</a>
           <a href="/convert/ppt" onClick={() => setIsSidebarOpen(false)}>PPT Tools</a>
-          <a href="/merge" onClick={() => setIsSidebarOpen(false)}>Merge</a>
+          <a href="/convert/merge" onClick={() => setIsSidebarOpen(false)}>Merge</a>
           <hr style={{ margin: '16px 0', border: 'none', borderTop: '1px solid var(--surface-variant)' }} />
           <a href="/help" onClick={() => setIsSidebarOpen(false)}>Support / Help</a>
           <hr style={{ margin: '16px 0', border: 'none', borderTop: '1px solid var(--surface-variant)' }} />
