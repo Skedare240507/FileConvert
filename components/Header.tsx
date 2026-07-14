@@ -12,7 +12,15 @@ export default function Header() {
         <div className={styles.headerContainer}>
           {/* Logo */}
           <div className={styles.logo}>
-            <a href="/public/logo.png">
+            <a href="/">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/logo.png"
+                alt="FileConvert Logo"
+                width={48}
+                height={48}
+                style={{ borderRadius: '8px', objectFit: 'contain', display: 'block', marginRight: '10px' }}
+              />
               FileConvert
             </a>
           </div>
