@@ -78,7 +78,7 @@ export default function JpgToPptPage() {
               <input
                 ref={inputRef}
                 type="file"
-                accept=".jpg,.jpeg"
+                accept="image/*,.jpg,.jpeg,.png,.webp,.bmp,.gif,.tiff"
                 multiple
                 className={styles.dropZoneHiddenInput}
                 onChange={(e) => { addFiles(e.target.files); e.target.value = ''; }}

@@ -114,7 +114,7 @@ export default function JpgToPdf() {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/jpeg,image/jpg"
+                accept="image/*,.jpg,.jpeg,.png,.webp,.bmp,.gif,.tiff"
                 multiple
                 style={{ display: 'none' }}
                 onChange={e => addFiles(e.target.files)}

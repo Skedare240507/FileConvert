@@ -1,0 +1,105 @@
+/* app/privacy/page.module.css */
+.container {
+  background-color: #ffffff;
+  color: #333333;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  line-height: 1.6;
+}
+
+.header {
+  background: linear-gradient(135deg, #00685f 0%, #16a34a 100%);
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.title {
+  font-size: 42px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 12px 0;
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+.main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 60px 20px;
+}
+
+@media (max-width: 768px) {
+  .main {
+    padding: 40px 20px;
+  }
+}
+
+.section {
+  margin-bottom: 40px;
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.sectionTitle {
+  font-size: 24px;
+  font-weight: 600;
+  color: #212529;
+  margin: 0 0 20px 0;
+}
+
+.text {
+  font-size: 16px;
+  color: #495057;
+  margin: 0 0 16px 0;
+}
+
+.list {
+  margin: 0 0 16px 0;
+  padding-left: 24px;
+  color: #495057;
+}
+
+.list li {
+  margin-bottom: 8px;
+}
+
+.toolsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.toolBadge {
+  background-color: #e9ecef;
+  color: #495057;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.link {
+  color: #00685f;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.footer {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+  font-size: 14px;
+  border-top: 1px solid #e9ecef;
+  background-color: #ffffff;
+}
