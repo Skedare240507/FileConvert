@@ -1,0 +1,365 @@
+/* app/convert/csv-to-excel/page.module.css */
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f5faf8;
+  color: #171d1c;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Hero Section */
+.hero {
+  position: relative;
+  width: 100%;
+  min-height: 70vh;
+  padding: 60px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.heroBg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+  opacity: 0.4;
+}
+
+.heroOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(245, 250, 248, 0.3), rgba(245, 250, 248, 0.9), #f5faf8);
+  z-index: 1;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #007230; /* Green color for CSV to Excel */
+  margin: 0 0 16px 0;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+@media (min-width: 768px) {
+  .title {
+    font-size: 44px;
+  }
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #3d4947;
+  max-width: 650px;
+  margin: 0 auto 32px auto;
+  line-height: 1.6;
+}
+
+@media (min-width: 768px) {
+  .subtitle {
+    font-size: 16px;
+    margin-bottom: 48px;
+  }
+}
+
+/* Dropzone Workspace */
+.workspace {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 24px;
+  border: 2px dashed #bcc9c6;
+  padding: 40px 20px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  position: relative;
+}
+
+@media (min-width: 768px) {
+  .workspace {
+    padding: 64px 32px;
+  }
+}
+
+.workspace:hover, .workspaceActive {
+  border-color: #00685f;
+  background-color: rgba(0, 104, 95, 0.05);
+}
+
+.fileInput {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.dropContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.dropIconWrap {
+  width: 80px;
+  height: 80px;
+  background-color: rgba(0, 131, 120, 0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #00685f;
+  transition: transform 0.3s ease;
+}
+
+.workspace:hover .dropIconWrap {
+  transform: scale(1.1);
+}
+
+.dropHeading {
+  font-size: 20px;
+  font-weight: 600;
+  color: #171d1c;
+  margin: 0 0 4px 0;
+}
+
+.dropSub {
+  font-size: 14px;
+  color: #3d4947;
+  margin: 0;
+}
+
+.cloudButtons {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.cloudBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #ffffff;
+  border: 1px solid #bcc9c6;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #171d1c;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  z-index: 20;
+  position: relative;
+}
+
+.cloudBtn:hover {
+  background-color: #f0f5f2;
+}
+
+/* Selected Files Area */
+.selectedFiles {
+  margin-top: 32px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid rgba(188, 201, 198, 0.3);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  text-align: left;
+}
+
+.selectedHeader {
+  font-size: 14px;
+  font-weight: 600;
+  color: #3d4947;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 16px 0;
+}
+
+.fileList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fileItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background-color: #f5faf8;
+  border-radius: 8px;
+  border: 1px solid rgba(188, 201, 198, 0.3);
+  transition: border-color 0.2s;
+}
+
+.fileItem:hover {
+  border-color: rgba(0, 104, 95, 0.3);
+}
+
+.fileItemLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.fileIcon {
+  padding: 8px;
+  background-color: rgba(0, 104, 95, 0.1);
+  color: #00685f;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fileName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #171d1c;
+  margin: 0 0 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250px;
+}
+
+.fileSize {
+  font-size: 12px;
+  color: #3d4947;
+  margin: 0;
+}
+
+.removeBtn {
+  color: #ba1a1a;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.removeBtn:hover {
+  background-color: rgba(186, 26, 26, 0.1);
+}
+
+.actionRow {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(188, 201, 198, 0.2);
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+}
+
+.clearBtn {
+  background: none;
+  border: none;
+  color: #3d4947;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.clearBtn:hover {
+  color: #ba1a1a;
+}
+
+.convertBtn {
+  background-color: #00685f;
+  color: #ffffff;
+  padding: 12px 28px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 104, 95, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s;
+}
+
+.convertBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 104, 95, 0.3);
+}
+
+/* Features Section */
+.featuresSection {
+  padding: 60px 20px;
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .featuresGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.featureCard {
+  background-color: #f0f5f2;
+  border: 1px solid rgba(188, 201, 198, 0.2);
+  padding: 32px;
+  border-radius: 16px;
+  transition: all 0.3s;
+}
+
+.featureCard:hover {
+  box-shadow: 0 10px 20px rgba(0, 104, 95, 0.05);
+  transform: translateY(-4px);
+}
+
+.featureIcon {
+  color: #00685f;
+  margin-bottom: 24px;
+}
+
+.featureTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #171d1c;
+  margin: 0 0 10px 0;
+}
+
+.featureDesc {
+  font-size: 14px;
+  color: #3d4947;
+  line-height: 1.6;
+  margin: 0;
+}
