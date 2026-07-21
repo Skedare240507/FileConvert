@@ -32,6 +32,19 @@ const tools = [
     cta: 'Start Conversion'
   },
   {
+    title: 'PPT to JPG',
+    desc: 'Turn your PowerPoint slides into high-quality images. Maintain crisp resolution and perfect layout consistency.',
+    link: '/convert/ppt-to-jpg',
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+        <polyline points="21 15 16 10 5 21"></polyline>
+      </svg>
+    ),
+    cta: 'Start Conversion'
+  },
+  {
     title: 'Merge PPT',
     desc: 'Combine multiple PowerPoint presentations into a single cohesive file seamlessly.',
     link: '/merge',
