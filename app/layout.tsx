@@ -64,6 +64,14 @@ export default function RootLayout({
               <a href="/convert/spreadsheet">All Spreadsheet Tools</a>
             </div>
 
+            {/* PPT Tools */}
+            <div className={styles.footerCol}>
+              <h4 className={styles.footerColTitle}>PPT Tools</h4>
+              <a href="/convert/ppt-to-pdf">PPT to PDF</a>
+              <a href="/convert/pdf-to-ppt">PPT to JPG</a>
+              <a href="/convert/jpg-to-ppt">PPT to WORD</a>
+            </div>
+
             {/* Company */}
             <div className={styles.footerCol}>
               <h4 className={styles.footerColTitle}>Company</h4>
