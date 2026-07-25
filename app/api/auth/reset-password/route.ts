@@ -8,15 +8,15 @@ const STRONG_PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-
 export async function POST(request: Request) {
   try {
     const ip = request.headers.get("x-forwarded-for") || "unknown";
-    
+
     // Rate limit: 5 requests per 15 minutes per IP
     if (!checkRateLimit(`reset-password:${ip}`, 5, 15 * 60 * 1000)) {
       return NextResponse.json({ message: "Too many requests. Please try again later." }, { status: 429 });
     }
 
-    const { email, password, otpCode } = await request.json();
+    const { email, password, token } = await request.json();
 
-    if (!email || !password || !otpCode) {
+    if (!email || !password || !token) {
       return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
     }
 
@@ -24,11 +24,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Password is not strong enough." }, { status: 400 });
     }
 
-    // Verify OTP
-    const validOtp = await prisma.otp.findFirst({
+    // Verify the magic link token
+    const validToken = await prisma.otp.findFirst({
       where: {
         email,
-        code: otpCode,
+        code: token,
         purpose: "reset_password",
         expires_at: {
           gt: new Date(),
@@ -36,8 +36,8 @@ export async function POST(request: Request) {
       },
     });
 
-    if (!validOtp) {
-      return NextResponse.json({ message: "Invalid or expired OTP" }, { status: 400 });
+    if (!validToken) {
+      return NextResponse.json({ message: "This reset link is invalid or has expired. Please request a new one." }, { status: 400 });
     }
 
     const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -45,19 +45,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
-    // Hash password
+    // Hash and update password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Update User
     await prisma.user.update({
       where: { email },
-      data: {
-        password: hashedPassword,
-      },
+      data: { password: hashedPassword },
     });
 
-    // Delete used OTP
-    await prisma.otp.delete({ where: { id: validOtp.id } });
+    // Invalidate the used token
+    await prisma.otp.delete({ where: { id: validToken.id } });
 
     return NextResponse.json({ message: "Password reset successfully" }, { status: 200 });
 
