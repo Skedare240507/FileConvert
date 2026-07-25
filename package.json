@@ -9,16 +9,22 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@auth/prisma-adapter": "^2.11.3",
+    "next": "16.2.10",
+    "next-auth": "^4.24.15",
+    "nodemailer": "^7.0.13",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "next": "16.2.10"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@prisma/client": "^5.22.0",
     "@types/node": "^20",
+    "@types/nodemailer": "^8.0.1",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "eslint": "^9.0.0",
-    "eslint-config-next": "16.2.10"
+    "eslint-config-next": "16.2.10",
+    "prisma": "^5.22.0",
+    "typescript": "^5"
   }
 }

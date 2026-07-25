@@ -1,0 +1,14 @@
+[33m014d50a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{0}: reset: moving to origin/main
+[33m014d50a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{1}: commit: Completion of the All conversions pages from pdf tools to ppt tools
+[33m6dcb12a[m HEAD@{2}: commit: Making the word to jpg pages and word to ppt screen also modifying the contents in the layout of the footer
+[33ma091836[m HEAD@{3}: commit: Adding the Excel tools and word tools page
+[33m621caca[m HEAD@{4}: commit: Adding the Excel tools,modifying the jpg to ppt page,adding the privay policy
+[33mf69ed60[m HEAD@{5}: Branch: renamed refs/heads/main to refs/heads/main
+[33mf69ed60[m HEAD@{7}: commit: Modifications of the pdf to word nd pdf to jpg page UI
+[33m0fd1f12[m HEAD@{8}: commit: Modifications of the pdf to word nd pdf to jpg page UI
+[33mf64ac41[m HEAD@{9}: commit: developing the conversion pages of pdf tools
+[33m22c13e9[m HEAD@{10}: rebase (abort): returning to refs/heads/main
+[33m39984a3[m HEAD@{11}: pull origin main --rebase (start): checkout 39984a34923ff060d4f51b5a2c9c057238a23661
+[33m22c13e9[m HEAD@{12}: commit: remove pdf to word.html
+[33m7a617b9[m HEAD@{13}: Branch: renamed refs/heads/master to refs/heads/main
+[33m7a617b9[m HEAD@{15}: commit (initial): adding the pdf tools,merge pag

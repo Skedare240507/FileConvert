@@ -78,15 +78,6 @@ export default function JpgToPdf() {
         <div className={styles.heroWhiteOverlay}></div>
 
         <div className={styles.heroContent}>
-          {/* Breadcrumb */}
-          <div className={styles.breadcrumb}>
-            <a href="/">Home</a>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
-            <a href="/convert/image">Image Tools</a>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
-            <span>JPG to PDF</span>
-          </div>
-
           <h1 className={styles.heroTitle}>JPG to PDF</h1>
           <p className={styles.heroSubtitle}>
             Convert your images to high-quality PDF documents in seconds. Professional, secure, and perfectly formatted every time.

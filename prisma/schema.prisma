@@ -1,0 +1,137 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email         String   @unique
+  auth_provider String // 'email' | 'google'
+  created_at    DateTime @default(now()) @db.Timestamptz
+
+  conversion_jobs ConversionJob[]
+  merge_sessions  MergeSession[]
+  usage_counters  UsageCounter[]
+  audit_logs      AuditLog[]
+  accounts        Account[]
+  sessions        Session[]
+
+  @@map("users")
+}
+
+model ConversionJob {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id          String    @db.Uuid
+  source_type      String
+  target_type      String
+  status           String // 'queued' | 'scanning' | 'processing' | 'completed' | 'failed' | 'dead_letter'
+  worker_type      String // 'document' | 'image' | 'ocr'
+  engine_used      String // 'gotenberg' | 'imagemagick' | 'tesseract' | 'cloudconvert'
+  retry_count      Int       @default(0)
+  clam_scan_result String? // 'clean' | 'infected' | 'error'
+  file_count       Int       @default(1)
+  r2_input_key     String?
+  r2_output_key    String?
+  error_message    String?
+  created_at       DateTime  @default(now()) @db.Timestamptz
+  completed_at     DateTime? @db.Timestamptz
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("conversion_jobs")
+}
+
+model MergeSession {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id       String   @db.Uuid
+  file_type     String // 'pdf' | 'word' | 'ppt'
+  file_count    Int
+  status        String // 'queued' | 'processing' | 'completed' | 'failed'
+  r2_output_key String?
+  created_at    DateTime @default(now()) @db.Timestamptz
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("merge_sessions")
+}
+
+model UsageCounter {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id      String   @db.Uuid
+  counter_type String // 'merge_session' | 'conversion'
+  count        Int      @default(0)
+  window_date  DateTime @db.Date
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, window_date])
+  @@map("usage_counters")
+}
+
+model Feedback {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String
+  email      String
+  message    String
+  category   String // 'bug' | 'feature' | 'billing' | 'other'
+  status     String   @default("open") // 'open' | 'resolved'
+  created_at DateTime @default(now()) @db.Timestamptz
+
+  @@map("feedback")
+}
+
+model AuditLog {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String?  @db.Uuid
+  action     String
+  metadata   Json?
+  created_at DateTime @default(now()) @db.Timestamptz
+
+  user User? @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
+}
+
+// NextAuth Required Models for Supabase Adapter
+model Account {
+  id                String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId            String  @db.Uuid
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionToken String   @unique
+  userId       String   @db.Uuid
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
