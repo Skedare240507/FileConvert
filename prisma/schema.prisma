@@ -16,6 +16,8 @@ model User {
   password      String?
   auth_provider String    @default("google") // 'email' | 'google'
   created_at    DateTime  @default(now()) @db.Timestamptz
+  failedLoginAttempts Int       @default(0)
+  lockedUntil   DateTime? @db.Timestamptz
 
   conversion_jobs ConversionJob[]
   merge_sessions  MergeSession[]
