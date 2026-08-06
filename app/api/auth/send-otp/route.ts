@@ -5,7 +5,8 @@ import nodemailer from "nodemailer";
 import crypto from "crypto";
 
 function generateOTP() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  // crypto.randomInt is cryptographically secure unlike Math.random()
+  return crypto.randomInt(100000, 1000000).toString();
 }
 
 function generateSecureToken() {
@@ -17,7 +18,7 @@ export async function POST(request: Request) {
     const ip = request.headers.get("x-forwarded-for") || "unknown";
 
     // Rate limit: 5 requests per 15 minutes per IP
-    if (!checkRateLimit(`send-otp:${ip}`, 5, 15 * 60 * 1000)) {
+    if (process.env.NODE_ENV !== "development" && !checkRateLimit(`send-otp:${ip}`, 5, 15 * 60 * 1000)) {
       return NextResponse.json({ message: "Too many requests. Please try again later." }, { status: 429 });
     }
 
@@ -25,6 +26,12 @@ export async function POST(request: Request) {
 
     if (!email || !purpose) {
       return NextResponse.json({ message: "Email and purpose are required" }, { status: 400 });
+    }
+
+    // Validate purpose against strict allowlist
+    const ALLOWED_PURPOSES = ['signup', 'reset_password'];
+    if (!ALLOWED_PURPOSES.includes(purpose)) {
+      return NextResponse.json({ message: "Invalid purpose" }, { status: 400 });
     }
 
     if (purpose === "signup") {
@@ -41,7 +48,7 @@ export async function POST(request: Request) {
     }
 
     // Rate limit by email to prevent spamming a specific inbox (3 per 15 mins)
-    if (!checkRateLimit(`send-otp-email:${email}`, 3, 15 * 60 * 1000)) {
+    if (process.env.NODE_ENV !== "development" && !checkRateLimit(`send-otp-email:${email}`, 3, 15 * 60 * 1000)) {
       return NextResponse.json({ message: "If this email is registered, a reset link has been sent." }, { status: 200 });
     }
 
@@ -50,7 +57,12 @@ export async function POST(request: Request) {
     const code = isReset ? generateSecureToken() : generateOTP();
     const expiresAt = new Date(Date.now() + (isReset ? 60 : 3) * 60 * 1000); // 60 min for reset, 3 min for OTP
 
-    // Store in DB
+    // Delete any old unused OTPs for this email+purpose to prevent DB accumulation
+    await prisma.otp.deleteMany({
+      where: { email, purpose },
+    });
+
+    // Store new OTP in DB
     await prisma.otp.create({
       data: {
         email,

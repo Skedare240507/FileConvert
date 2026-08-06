@@ -2,6 +2,7 @@ import './globals.css';
 import styles from './layout.module.css';
 import dynamic from 'next/dynamic';
 import type { Metadata } from 'next';
+import NextTopLoader from 'nextjs-toploader';
 
 const Header = dynamic(() => import('../components/Header'), { ssr: true });
 import { Providers } from './providers';
@@ -23,6 +24,16 @@ export default function RootLayout({
       </head>
       <body>
         <Providers>
+          <NextTopLoader
+            color="#00685f"
+            initialPosition={0.08}
+            crawlSpeed={200}
+            height={3}
+            crawl={true}
+            showSpinner={false}
+            easing="ease"
+            speed={200}
+          />
           <Header />
 
           <main>{children}</main>

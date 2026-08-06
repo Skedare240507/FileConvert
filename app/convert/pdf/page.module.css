@@ -143,9 +143,7 @@
   }
 }
 
-.toolCard:hover {
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
+
 
 .iconWrap {
   width: 48px;
@@ -158,9 +156,7 @@
   transition: transform 0.3s;
 }
 
-.toolCard:hover .iconWrap {
-  transform: scale(1.1);
-}
+
 
 /* Icon Colors */
 .bgPrimary { background: rgba(0, 104, 95, 0.1); color: var(--primary); }
@@ -197,11 +193,7 @@
   transition: all 0.3s;
 }
 
-.toolCard:hover .toolLink {
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  gap: 12px;
-}
+
 
 .toolLink .material-symbols-outlined {
   font-size: 18px;

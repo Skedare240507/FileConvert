@@ -215,11 +215,7 @@
   border: 1px solid var(--surface-variant);
 }
 
-.toolCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
-  border-color: transparent;
-}
+
 
 .toolIconWrap {
   width: 48px;

@@ -10,14 +10,30 @@ export async function POST(request: Request) {
     const ip = request.headers.get("x-forwarded-for") || "unknown";
     
     // Rate limit: 5 requests per 15 minutes per IP
-    if (!checkRateLimit(`register:${ip}`, 5, 15 * 60 * 1000)) {
+    if (process.env.NODE_ENV !== "development" && !checkRateLimit(`register:${ip}`, 5, 15 * 60 * 1000)) {
       return NextResponse.json({ message: "Too many requests. Please try again later." }, { status: 429 });
     }
 
-    const { name, email, password, otpCode } = await request.json();
+    const { name: rawName, email: rawEmail, password, otpCode } = await request.json();
+    const name = typeof rawName === 'string' ? rawName.trim() : '';
+    const email = typeof rawEmail === 'string' ? rawEmail.trim().toLowerCase() : '';
 
     if (!name || !email || !password || !otpCode) {
       return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
+    }
+
+    // Length limits to prevent oversized payloads
+    if (name.length > 100) {
+      return NextResponse.json({ message: "Name must be 100 characters or fewer" }, { status: 400 });
+    }
+    if (email.length > 200) {
+      return NextResponse.json({ message: "Email address is too long" }, { status: 400 });
+    }
+
+    // Server-side email format validation
+    const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!EMAIL_REGEX.test(email)) {
+      return NextResponse.json({ message: "Invalid email address format" }, { status: 400 });
     }
 
     if (!STRONG_PASSWORD_REGEX.test(password)) {
@@ -65,8 +81,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ message: "User created successfully", user: { id: user.id, email: user.email, name: user.name } }, { status: 201 });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error in register:", error);
-    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ message: "Internal server error", error: error?.message || String(error) }, { status: 500 });
   }
 }

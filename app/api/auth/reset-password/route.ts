@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     const ip = request.headers.get("x-forwarded-for") || "unknown";
 
     // Rate limit: 5 requests per 15 minutes per IP
-    if (!checkRateLimit(`reset-password:${ip}`, 5, 15 * 60 * 1000)) {
+    if (process.env.NODE_ENV !== "development" && !checkRateLimit(`reset-password:${ip}`, 5, 15 * 60 * 1000)) {
       return NextResponse.json({ message: "Too many requests. Please try again later." }, { status: 429 });
     }
 

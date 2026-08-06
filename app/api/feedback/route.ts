@@ -38,14 +38,43 @@ export async function POST(req: Request) {
         to: process.env.ADMIN_EMAIL || process.env.SMTP_USER,
         subject: `New FileConvert Feedback: ${category}`,
         text: `You have received new feedback from ${name} (${email}).\n\nCategory: ${category}\n\nMessage:\n${message}`,
-        html: `<p>You have received new feedback.</p>
-               <p><strong>Name:</strong> ${name}</p>
-               <p><strong>Email:</strong> ${email}</p>
-               <p><strong>Category:</strong> ${category}</p>
-               <p><strong>Message:</strong></p>
-               <blockquote style="border-left: 4px solid #ccc; padding-left: 10px; color: #555;">
-                 ${message.replace(/\n/g, '<br/>')}
-               </blockquote>`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto; padding: 32px; background: #13141a; border-radius: 12px; border: 1px solid #2a2d3a;">
+            <div style="text-align: center; margin-bottom: 24px;">
+              <h2 style="color: #ffffff; margin: 0;">New User Feedback</h2>
+              <p style="color: #8b8d98; margin-top: 8px;">A user has submitted a new feedback request via the help center.</p>
+            </div>
+            
+            <div style="background: #1e1f2a; padding: 20px; border-radius: 8px; margin-bottom: 24px;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; color: #8b8d98; width: 80px; font-size: 14px;">Name</td>
+                  <td style="padding: 8px 0; color: #ffffff; font-size: 15px; font-weight: bold;">${name}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #8b8d98; font-size: 14px;">Email</td>
+                  <td style="padding: 8px 0; color: #7c6ef5; font-size: 15px; font-weight: bold;">
+                    <a href="mailto:${email}" style="color: #7c6ef5; text-decoration: none;">${email}</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #8b8d98; font-size: 14px;">Category</td>
+                  <td style="padding: 8px 0; color: #ffffff; font-size: 15px; font-weight: bold;">
+                    <span style="background: #2a2d3a; padding: 4px 10px; border-radius: 16px; font-size: 13px;">${category}</span>
+                  </td>
+                </tr>
+              </table>
+            </div>
+
+            <h3 style="color: #ffffff; font-size: 16px; margin-bottom: 12px;">Message</h3>
+            <div style="background: #1e1f2a; padding: 16px; border-radius: 8px; border-left: 4px solid #7c6ef5;">
+              <p style="color: #d1d5db; margin: 0; font-size: 14px; line-height: 1.6; white-space: pre-wrap;">${message}</p>
+            </div>
+            
+            <hr style="border: none; border-top: 1px solid #2a2d3a; margin: 32px 0 24px 0;" />
+            <p style="color: #555; font-size: 12px; text-align: center;">FileConvert Internal Notification System</p>
+          </div>
+        `,
       };
 
       await transporter.sendMail(mailOptions);

@@ -1,9 +1,7 @@
-import { PrismaClient } from '@prisma/client';
-
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
-};
-
-export const prisma = globalForPrisma.prisma ?? new PrismaClient();
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+/**
+ * @deprecated Use `@/backend/db/client` instead.
+ *
+ * This file is kept for backwards compatibility while existing imports
+ * are migrated. All new code should import from `@/backend/db/client`.
+ */
+export { prisma } from './db/client';

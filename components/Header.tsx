@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import Link from 'next/link';
 import styles from '../app/layout.module.css';
 
 export default function Header() {
@@ -12,7 +13,7 @@ export default function Header() {
         <div className={styles.headerContainer}>
           {/* Logo */}
           <div className={styles.logo}>
-            <a href="/">
+            <Link href="/">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/logo.png"
@@ -22,30 +23,30 @@ export default function Header() {
                 style={{ borderRadius: '8px', objectFit: 'contain', display: 'block', marginRight: '10px' }}
               />
               FileConvert
-            </a>
+            </Link>
           </div>
 
           {/* Desktop Nav */}
           <nav className={styles.nav}>
-            <a href="/convert/pdf">PDF Tools</a>
-            <a href="/convert/image">Image Tools</a>
-            <a href="/convert/spreadsheet">Spreadsheet Tools</a>
-            <a href="/convert/word">Word Tools</a>
-            <a href="/convert/ppt">PPT</a>
-            <a href="/convert/merge">Merge</a>
+            <Link href="/convert/pdf">PDF Tools</Link>
+            <Link href="/convert/image">Image Tools</Link>
+            <Link href="/convert/spreadsheet">Spreadsheet Tools</Link>
+            <Link href="/convert/word">Word Tools</Link>
+            <Link href="/convert/ppt">PPT</Link>
+            <Link href="/convert/merge">Merge</Link>
           </nav>
 
           {/* Desktop Actions */}
           <div className={styles.actions}>
-            <a href="/help" className={styles.helpIcon} aria-label="Help">
+            <Link href="/help" className={styles.helpIcon} aria-label="Help">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
                 <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
                 <line x1="12" y1="17" x2="12.01" y2="17"></line>
               </svg>
-            </a>
-            <a href="/login" className={styles.loginText}>Login</a>
-            <a href="/signup" className={styles.signupBtn}>Sign Up</a>
+            </Link>
+            <Link href="/login" className={styles.loginText}>Login</Link>
+            <Link href="/signup" className={styles.signupBtn}>Sign Up</Link>
           </div>
 
           {/* Hamburger (Mobile) */}
@@ -81,25 +82,25 @@ export default function Header() {
 
         {/* Sidebar Logo */}
         <div style={{ marginBottom: '24px', paddingBottom: '24px', borderBottom: '1px solid var(--surface-variant)' }}>
-          <a href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 700, fontSize: '18px', color: 'var(--primary)', textDecoration: 'none' }}>
+          <Link href="/" onClick={() => setIsSidebarOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 700, fontSize: '18px', color: 'var(--primary)', textDecoration: 'none' }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="FileConvert" width={28} height={28} style={{ borderRadius: '6px', objectFit: 'contain' }} />
             FileConvert
-          </a>
+          </Link>
         </div>
 
         <nav className={styles.sidebarNav}>
-          <a href="/convert/pdf" onClick={() => setIsSidebarOpen(false)}>PDF Tools</a>
-          <a href="/convert/image" onClick={() => setIsSidebarOpen(false)}>Image Tools</a>
-          <a href="/convert/spreadsheet" onClick={() => setIsSidebarOpen(false)}>Spreadsheet Tools</a>
-          <a href="/convert/word" onClick={() => setIsSidebarOpen(false)}>Word Tools</a>
-          <a href="/convert/ppt" onClick={() => setIsSidebarOpen(false)}>PPT Tools</a>
-          <a href="/convert/merge" onClick={() => setIsSidebarOpen(false)}>Merge</a>
+          <Link href="/convert/pdf" onClick={() => setIsSidebarOpen(false)}>PDF Tools</Link>
+          <Link href="/convert/image" onClick={() => setIsSidebarOpen(false)}>Image Tools</Link>
+          <Link href="/convert/spreadsheet" onClick={() => setIsSidebarOpen(false)}>Spreadsheet Tools</Link>
+          <Link href="/convert/word" onClick={() => setIsSidebarOpen(false)}>Word Tools</Link>
+          <Link href="/convert/ppt" onClick={() => setIsSidebarOpen(false)}>PPT Tools</Link>
+          <Link href="/convert/merge" onClick={() => setIsSidebarOpen(false)}>Merge</Link>
           <hr style={{ margin: '16px 0', border: 'none', borderTop: '1px solid var(--surface-variant)' }} />
-          <a href="/help" onClick={() => setIsSidebarOpen(false)}>Support / Help</a>
+          <Link href="/help" onClick={() => setIsSidebarOpen(false)}>Support / Help</Link>
           <hr style={{ margin: '16px 0', border: 'none', borderTop: '1px solid var(--surface-variant)' }} />
-          <a href="/login" onClick={() => setIsSidebarOpen(false)}>Login</a>
-          <a href="/signup" onClick={() => setIsSidebarOpen(false)} style={{ color: 'var(--primary)', fontWeight: 600 }}>Sign Up →</a>
+          <Link href="/login" onClick={() => setIsSidebarOpen(false)}>Login</Link>
+          <Link href="/signup" onClick={() => setIsSidebarOpen(false)} style={{ color: 'var(--primary)', fontWeight: 600 }}>Sign Up →</Link>
         </nav>
       </div>
     </>

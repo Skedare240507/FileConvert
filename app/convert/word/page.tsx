@@ -56,7 +56,7 @@ const allTools = [
     id: 'merge-word',
     title: 'Merge Word',
     desc: 'Combine multiple Word files into a single master document seamlessly.',
-    link: '/merge',
+    link: '/convert/merge',
     featured: false,
     badge: null,
     iconColor: 'iconMerge',

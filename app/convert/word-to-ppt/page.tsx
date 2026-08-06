@@ -11,7 +11,9 @@ interface SelectedFile {
 export default function WordToPpt() {
   const [files, setFiles] = useState<SelectedFile[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const addFiles = useCallback((newFiles: FileList | null) => {
     if (!newFiles) return;
@@ -23,6 +25,16 @@ export default function WordToPpt() {
       })),
     ]);
   }, []);
+
+  const togglePlay = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) {
+      video.play();
+    } else {
+      video.pause();
+    }
+  };
 
   const removeFile = (id: string) =>
     setFiles(prev => prev.filter(f => f.id !== id));
@@ -175,16 +187,23 @@ export default function WordToPpt() {
           <div className={styles.seoVisual}>
             <div className={styles.seoImgOverlay} />
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCYx9WPUPAQS_JGV1NnyGbrhIY2EYkWYDvL0qonV3KAPDH7iT4RXWmCBq1q9rotI9Ax2Gh5kIdJcAhBx2KO6570OmC5LmjG_qS38ctCB7pBrqQvnPgAKJk1ElcVqLlOP1-XLATvngbMMFNcc2tYbyVxIJzrzGJVPoxzdwgACAYsNZWWtmsNIo4LIKsZ6MRhvNxOQke6FnIyooQnUr0pM338Z3xARxRKjPgts1MtFzI0wPC1SfQby7doqP6gtxweeAZZ_vMVJsaqRA"
-              alt="Word to PPT visualization"
+            <video
+              ref={videoRef}
+              src="/fileconvert.mp4"
               className={styles.seoImg}
+              controls
+              playsInline
+              onPlay={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
+              onEnded={() => setIsPlaying(false)}
             />
-            <div className={styles.playBtnWrap}>
-              <button className={styles.playBtn} aria-label="Play demo video">
-                <span className="material-symbols-outlined" style={{ fontSize: 36, fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
-              </button>
-            </div>
+            {!isPlaying && (
+              <div className={styles.playBtnWrap}>
+                <button className={styles.playBtn} onClick={togglePlay} aria-label="Play demo video">
+                  <span className="material-symbols-outlined" style={{ fontSize: 36, fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </section>
