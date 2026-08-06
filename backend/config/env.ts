@@ -59,9 +59,9 @@ export const env = {
   CLOUDCONVERT_API_KEY: optional('CLOUDCONVERT_API_KEY'),
 
   // ── Razorpay ──────────────────────────────────────────────────────────────
-  RAZORPAY_KEY_ID: required('RAZORPAY_KEY_ID'),
-  RAZORPAY_KEY_SECRET: required('RAZORPAY_KEY_SECRET'),
-  RAZORPAY_WEBHOOK_SECRET: required('RAZORPAY_WEBHOOK_SECRET'),
+  RAZORPAY_KEY_ID: optional('RAZORPAY_KEY_ID'),
+  RAZORPAY_KEY_SECRET: optional('RAZORPAY_KEY_SECRET'),
+  RAZORPAY_WEBHOOK_SECRET: optional('RAZORPAY_WEBHOOK_SECRET'),
 
   // ── Sentry ────────────────────────────────────────────────────────────────
   SENTRY_DSN: optional('SENTRY_DSN'),

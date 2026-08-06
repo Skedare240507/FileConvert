@@ -68,6 +68,10 @@ export async function tryCloudConvertFallback(
     }
 
     const file = exportTask.result.files[0];
+    if (!file || !file.url) {
+      throw new Error('Export task did not return a valid file URL');
+    }
+    
     const response = await fetch(file.url);
     if (!response.ok) {
       throw new Error(`Failed to download from CloudConvert: ${response.statusText}`);
