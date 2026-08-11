@@ -16,6 +16,17 @@ import { JOB_STATUS } from '@/backend/config/constants';
 import type { ConversionJobPayload } from '@/backend/queue/jobs/conversionJob';
 import { logger } from '@/backend/utils/logger';
 
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import path from 'path';
+import os from 'os';
+import { promises as fs } from 'fs';
+import JSZip from 'jszip';
+import { PDFDocument } from 'pdf-lib';
+import PptxGenJS from 'pptxgenjs';
+
+const execAsync = promisify(exec);
+
 export async function processImageJob(job: Job<ConversionJobPayload>): Promise<void> {
   const { jobId, sourceType, targetType, r2InputKey, dpi } = job.data;
   const conversionKey = `${sourceType}:${targetType}`;
@@ -28,26 +39,70 @@ export async function processImageJob(job: Job<ConversionJobPayload>): Promise<v
 
   switch (conversionKey) {
     case 'pdf:jpg': {
-      // TODO: Implement PDF → JPG rasterisation via poppler/libvips
-      // Multi-page output should be zipped
       outputExt = 'zip';
-      throw new Error('PDF→JPG: implementation pending (Phase 4)');
+      const tmpId = crypto.randomUUID();
+      const tmpPdfPath = path.join(os.tmpdir(), `${tmpId}.pdf`);
+      const tmpJpgPrefix = path.join(os.tmpdir(), `${tmpId}_page_`);
+      
+      await fs.writeFile(tmpPdfPath, inputBuffer);
+      
+      try {
+        // Run ImageMagick: convert -density 150 input.pdf output_page_%03d.jpg
+        const dpiVal = dpi || 150;
+        await execAsync(`magick -density ${dpiVal} "${tmpPdfPath}" "${tmpJpgPrefix}%03d.jpg"`);
+        
+        // Find all generated jpg files
+        const files = await fs.readdir(os.tmpdir());
+        const generatedJpgs = files.filter(f => f.startsWith(`${tmpId}_page_`) && f.endsWith('.jpg'));
+        
+        if (generatedJpgs.length === 0) {
+          throw new Error('ImageMagick generated no files');
+        }
+        
+        const zip = new JSZip();
+        for (const file of generatedJpgs) {
+          const filePath = path.join(os.tmpdir(), file);
+          const fileData = await fs.readFile(filePath);
+          zip.file(file, fileData);
+          await fs.unlink(filePath); // clean up
+        }
+        
+        outputBuffer = await zip.generateAsync({ type: 'nodebuffer' });
+      } finally {
+        await fs.unlink(tmpPdfPath).catch(() => {});
+      }
+      break;
     }
     case 'jpg:pdf': {
-      // TODO: Implement JPG → PDF via pdf-lib
-      throw new Error('JPG→PDF: implementation pending (Phase 4)');
+      const pdfDoc = await PDFDocument.create();
+      const image = await pdfDoc.embedJpg(inputBuffer);
+      const { width, height } = image.scale(1);
+      const page = pdfDoc.addPage([width, height]);
+      page.drawImage(image, { x: 0, y: 0, width, height });
+      
+      const pdfBytes = await pdfDoc.save();
+      outputBuffer = Buffer.from(pdfBytes);
+      break;
     }
     case 'jpg:pptx': {
-      // TODO: Implement JPG → PPT via pptxgen
       outputExt = 'pptx';
-      throw new Error('JPG→PPT: implementation pending (Phase 4)');
+      const pptx = new PptxGenJS();
+      const slide = pptx.addSlide();
+      
+      // pptxgenjs expects an absolute path or base64 string for data
+      const base64Data = `image/jpeg;base64,${inputBuffer.toString('base64')}`;
+      slide.addImage({ data: base64Data, x: 0, y: 0, w: '100%', h: '100%' });
+      
+      const pptxBuffer = await pptx.write({ outputType: 'nodebuffer' }) as Buffer;
+      outputBuffer = pptxBuffer;
+      break;
     }
     default:
       throw new Error(`ImageWorker: unsupported conversion ${conversionKey}`);
   }
 
   const r2OutputKey = `output/${jobId}.${outputExt}`;
-  await uploadToR2(r2OutputKey, outputBuffer!);
+  await uploadToR2(r2OutputKey, outputBuffer);
 
   await updateConversionJobStatus(jobId, JOB_STATUS.COMPLETED, {
     r2OutputKey,
