@@ -3,7 +3,7 @@ import { withAuth } from '@/backend/middleware/withAuth';
 import { withRateLimit } from '@/backend/middleware/withRateLimit';
 import { uploadInitSchema } from '@/backend/validation/upload';
 import { buildR2UploadKey } from '@/backend/utils/sanitize';
-import { getSignedUploadUrl } from '@/backend/services/storage/r2';
+import { getSignedUploadUrl } from '@/backend/services/storage/storage';
 import { logger } from '@/backend/utils/logger';
 
 export const POST = withRateLimit(

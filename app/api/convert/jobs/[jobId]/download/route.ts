@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { withAuth } from '@/backend/middleware/withAuth';
 import { getConversionJobById } from '@/backend/db/queries/conversionJobs';
-import { getSignedDownloadUrl } from '@/backend/services/storage/r2';
+import { getSignedDownloadUrl } from '@/backend/services/storage/storage';
 import { logger } from '@/backend/utils/logger';
 
 export const GET = withAuth(async (req, ctx) => {

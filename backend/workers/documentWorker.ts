@@ -14,7 +14,7 @@ import type { Job } from 'bullmq';
 import { convertWithGotenberg } from '@/backend/services/conversion/gotenberg';
 import { convertExcelCsv } from '@/backend/services/conversion/sheetjs';
 import { tryCloudConvertFallback } from '@/backend/services/conversion/fallback';
-import { downloadFromR2, uploadToR2 } from '@/backend/services/storage/r2';
+import { downloadFromR2, uploadToR2 } from '@/backend/services/storage/storage';
 import { updateConversionJobStatus } from '@/backend/db/queries/conversionJobs';
 import { JOB_STATUS } from '@/backend/config/constants';
 import type { ConversionJobPayload } from '@/backend/queue/jobs/conversionJob';

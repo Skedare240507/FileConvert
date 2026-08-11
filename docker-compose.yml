@@ -1,0 +1,65 @@
+# docker-compose.yml
+#
+# Spins up the backing services needed for local development and production.
+# Next.js app and workers run via `npm run dev` outside Docker for hot-reloading.
+#
+# Usage:
+#   Start:  docker compose up -d
+#   Stop:   docker compose down
+#   Logs:   docker compose logs -f
+
+services:
+  # ── Redis (BullMQ queue, rate limiting, session counters) ──────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: fileconvert-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Gotenberg (Document conversion engine: PDF, Word, PPT) ─────────────────
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    container_name: fileconvert-gotenberg
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    command:
+      - "gotenberg"
+      - "--chromium-disable-javascript=true"
+      - "--chromium-allow-list=file:///tmp/.*"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # ── ClamAV (Malware scanning daemon) ──────────────────────────────────────
+  clamav:
+    image: clamav/clamav:stable
+    container_name: fileconvert-clamav
+    restart: unless-stopped
+    ports:
+      - "3310:3310"
+    volumes:
+      - clamav_data:/var/lib/clamav
+    environment:
+      - CLAMAV_NO_FRESHCLAM=false
+    healthcheck:
+      # clamdscan returns 0 on clean, non-zero on error/virus
+      test: ["CMD", "clamdcheck.sh"]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 120s  # wait for DB download on first run
+
+volumes:
+  redis_data:
+  clamav_data:

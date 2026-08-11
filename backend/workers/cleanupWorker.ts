@@ -12,7 +12,7 @@
 import { Worker } from 'bullmq';
 import { redisConnection } from '@/backend/queue/client';
 import { QUEUE_NAMES, FILE_TTL_MS } from '@/backend/config/constants';
-import { deleteFromR2 } from '@/backend/services/storage/r2';
+import { deleteFromR2 } from '@/backend/services/storage/storage';
 import { prisma } from '@/backend/db/client';
 import type { CleanupJobPayload } from '@/backend/queue/jobs/cleanupJob';
 import { logger } from '@/backend/utils/logger';

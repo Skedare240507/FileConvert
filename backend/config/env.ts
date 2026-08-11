@@ -36,11 +36,12 @@ export const env = {
   GOOGLE_CLIENT_ID: required('GOOGLE_CLIENT_ID'),
   GOOGLE_CLIENT_SECRET: required('GOOGLE_CLIENT_SECRET'),
 
-  // ── Cloudflare R2 ─────────────────────────────────────────────────────────
-  R2_ACCOUNT_ID: required('R2_ACCOUNT_ID'),
-  R2_ACCESS_KEY_ID: required('R2_ACCESS_KEY_ID'),
-  R2_SECRET_ACCESS_KEY: required('R2_SECRET_ACCESS_KEY'),
-  R2_BUCKET: required('R2_BUCKET'),
+  // ── Backblaze B2 ──────────────────────────────────────────────────────────
+  B2_ENDPOINT: required('B2_ENDPOINT'),
+  B2_REGION: required('B2_REGION'),
+  B2_ACCESS_KEY_ID: required('B2_ACCESS_KEY_ID'),
+  B2_SECRET_ACCESS_KEY: required('B2_SECRET_ACCESS_KEY'),
+  B2_BUCKET: required('B2_BUCKET'),
 
   // ── Redis ─────────────────────────────────────────────────────────────────
   REDIS_URL: required('REDIS_URL'),

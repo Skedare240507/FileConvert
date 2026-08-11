@@ -9,7 +9,7 @@
  */
 
 import type { Job } from 'bullmq';
-import { downloadFromR2, uploadToR2 } from '@/backend/services/storage/r2';
+import { downloadFromR2, uploadToR2 } from '@/backend/services/storage/storage';
 import { updateConversionJobStatus } from '@/backend/db/queries/conversionJobs';
 import { JOB_STATUS } from '@/backend/config/constants';
 import type { ConversionJobPayload } from '@/backend/queue/jobs/conversionJob';
