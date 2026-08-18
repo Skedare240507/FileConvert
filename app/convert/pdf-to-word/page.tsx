@@ -21,11 +21,17 @@ export default function PdfToWord() {
   const [isDragging, setIsDragging] = useState(false);
   const [converting, setConverting] = useState(false);
   const [done, setDone]           = useState(false);
+  
+  // Real implementation state
+  const [progress, setProgress]   = useState<{ status: string; percent: number }>({ status: 'idle', percent: 0 });
+  const [errorMsg, setErrorMsg]   = useState<string | null>(null);
+  
   const inputRef = useRef<HTMLInputElement>(null);
 
   const addFiles = (incoming: FileList | null) => {
     if (!incoming) return;
     setDone(false);
+    setErrorMsg(null);
     const next = Array.from(incoming).map((f) => ({
       file: f,
       id: `${f.name}-${Date.now()}-${Math.random()}`,
@@ -36,6 +42,7 @@ export default function PdfToWord() {
   const removeFile = (id: string) => {
     setFiles((prev) => prev.filter((f) => f.id !== id));
     setDone(false);
+    setErrorMsg(null);
   };
 
   const onDragOver  = useCallback((e: React.DragEvent) => { e.preventDefault(); setIsDragging(true); }, []);
@@ -46,10 +53,119 @@ export default function PdfToWord() {
     addFiles(e.dataTransfer.files);
   }, []);
 
-  const handleConvert = () => {
+  const handleConvert = async () => {
+    if (files.length === 0) return;
+    
     setConverting(true);
     setDone(false);
-    setTimeout(() => { setConverting(false); setDone(true); }, 2800);
+    setErrorMsg(null);
+    setProgress({ status: 'initializing upload...', percent: 10 });
+
+    try {
+      // Process first file for now in this proof-of-concept
+      const fileObj = files[0].file;
+      const sourceType = 'pdf';
+      const targetType = format;
+      
+      // 1. Upload Init
+      const initRes = await fetch('/api/convert/upload/init', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filename: fileObj.name,
+          mimeType: fileObj.type || 'application/pdf',
+          fileSizeBytes: fileObj.size,
+          sourceType,
+          targetType,
+        }),
+      });
+
+      if (!initRes.ok) {
+        const err = await initRes.json();
+        throw new Error(err.error || 'Upload initialization failed');
+      }
+
+      const { r2Key, uploadUrl } = await initRes.json();
+
+      // 2. Direct B2 Upload
+      setProgress({ status: 'uploading to B2...', percent: 20 });
+      const uploadRes = await fetch(uploadUrl, {
+        method: 'PUT',
+        body: fileObj,
+        headers: {
+          'Content-Type': fileObj.type || 'application/pdf',
+        },
+      });
+
+      if (!uploadRes.ok) {
+        throw new Error('Failed to upload file to storage');
+      }
+
+      // 3. Create Job
+      setProgress({ status: 'creating job...', percent: 40 });
+      const jobRes = await fetch('/api/convert/jobs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          r2InputKey: r2Key,
+          sourceType,
+          targetType,
+          fileCount: 1,
+        }),
+      });
+
+      if (!jobRes.ok) {
+        const err = await jobRes.json();
+        throw new Error(err.error || 'Failed to create conversion job');
+      }
+
+      const { jobId } = await jobRes.json();
+
+      // 4. SSE Progress
+      setProgress({ status: 'queued', percent: 45 });
+      
+      await new Promise<void>((resolve, reject) => {
+        const es = new EventSource(`/api/convert/jobs/${jobId}/live`);
+        
+        es.onmessage = (e) => {
+          try {
+            const data = JSON.parse(e.data);
+            if (data.status === 'completed') {
+              setProgress({ status: 'completed', percent: 100 });
+              es.close();
+              resolve();
+            } else if (data.status === 'failed') {
+              es.close();
+              reject(new Error(data.error || 'Conversion worker failed'));
+            } else {
+              // Update progress state
+              setProgress({ 
+                status: data.status || 'processing', 
+                percent: data.progress || 50 
+              });
+            }
+          } catch (err) {
+            console.error('SSE JSON parse error', err);
+          }
+        };
+
+        es.onerror = (e) => {
+          es.close();
+          reject(new Error('SSE connection disconnected unexpectedly'));
+        };
+      });
+
+      // 5. Download Trigger
+      setProgress({ status: 'downloading...', percent: 100 });
+      setDone(true);
+      window.location.href = `/api/convert/jobs/${jobId}/download`;
+
+    } catch (err: any) {
+      console.error('Conversion flow error:', err);
+      setErrorMsg(err.message || 'An unexpected error occurred.');
+    } finally {
+      setConverting(false);
+    }
   };
 
   const formatSize = (bytes: number) =>
@@ -178,6 +294,20 @@ export default function PdfToWord() {
                 ))}
               </div>
 
+              {/* Error Message */}
+              {errorMsg && (
+                <div className={styles.errorMessage} style={{ color: '#ef4444', background: '#fee2e2', padding: '12px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px', border: '1px solid #fca5a5' }}>
+                  <strong>Error: </strong> {errorMsg}
+                </div>
+              )}
+
+              {/* Progress UI */}
+              {converting && !errorMsg && (
+                <div style={{ marginBottom: '16px', background: '#f3f4f6', borderRadius: '8px', overflow: 'hidden', height: '8px' }}>
+                  <div style={{ height: '100%', background: '#2563eb', width: `${progress.percent}%`, transition: 'width 0.3s ease' }} />
+                </div>
+              )}
+
               {/* Convert / Done button */}
               {done ? (
                 <button className={`${styles.convertBtn} ${styles.convertBtnDone}`} onClick={() => { setFiles([]); setDone(false); }}>
@@ -195,7 +325,7 @@ export default function PdfToWord() {
                   {converting ? (
                     <>
                       <span className={styles.spinner} />
-                      Converting…
+                      {progress.status} ({progress.percent}%)
                     </>
                   ) : (
                     <>
