@@ -31,7 +31,7 @@ model User {
 
 model ConversionJob {
   id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id          String    @db.Uuid
+  user_id          String?   @db.Uuid
   source_type      String
   target_type      String
   status           String // 'queued' | 'scanning' | 'processing' | 'completed' | 'failed' | 'dead_letter'
@@ -46,7 +46,7 @@ model ConversionJob {
   created_at       DateTime  @default(now()) @db.Timestamptz
   completed_at     DateTime? @db.Timestamptz
 
-  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [user_id], references: [id], onDelete: SetNull)
 
   @@map("conversion_jobs")
 }

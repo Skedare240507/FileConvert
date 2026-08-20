@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useCallback } from 'react';
 import styles from './page.module.css';
+import { useConverter } from '@/hooks/useConverter';
 
 type Format = 'docx' | 'doc';
 
@@ -19,19 +20,14 @@ export default function PdfToWord() {
   const [format, setFormat]       = useState<Format>('docx');
   const [files, setFiles]         = useState<SelectedFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
-  const [converting, setConverting] = useState(false);
-  const [done, setDone]           = useState(false);
   
-  // Real implementation state
-  const [progress, setProgress]   = useState<{ status: string; percent: number }>({ status: 'idle', percent: 0 });
-  const [errorMsg, setErrorMsg]   = useState<string | null>(null);
+  const { converting, done, progress, errorMsg, startConversion, reset } = useConverter();
   
   const inputRef = useRef<HTMLInputElement>(null);
 
   const addFiles = (incoming: FileList | null) => {
     if (!incoming) return;
-    setDone(false);
-    setErrorMsg(null);
+    reset();
     const next = Array.from(incoming).map((f) => ({
       file: f,
       id: `${f.name}-${Date.now()}-${Math.random()}`,
@@ -41,8 +37,7 @@ export default function PdfToWord() {
 
   const removeFile = (id: string) => {
     setFiles((prev) => prev.filter((f) => f.id !== id));
-    setDone(false);
-    setErrorMsg(null);
+    reset();
   };
 
   const onDragOver  = useCallback((e: React.DragEvent) => { e.preventDefault(); setIsDragging(true); }, []);
@@ -51,121 +46,11 @@ export default function PdfToWord() {
     e.preventDefault();
     setIsDragging(false);
     addFiles(e.dataTransfer.files);
-  }, []);
+  }, [addFiles]);
 
   const handleConvert = async () => {
     if (files.length === 0) return;
-    
-    setConverting(true);
-    setDone(false);
-    setErrorMsg(null);
-    setProgress({ status: 'initializing upload...', percent: 10 });
-
-    try {
-      // Process first file for now in this proof-of-concept
-      const fileObj = files[0].file;
-      const sourceType = 'pdf';
-      const targetType = format;
-      
-      // 1. Upload Init
-      const initRes = await fetch('/api/convert/upload/init', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          filename: fileObj.name,
-          mimeType: fileObj.type || 'application/pdf',
-          fileSizeBytes: fileObj.size,
-          sourceType,
-          targetType,
-        }),
-      });
-
-      if (!initRes.ok) {
-        const err = await initRes.json();
-        throw new Error(err.error || 'Upload initialization failed');
-      }
-
-      const { r2Key, uploadUrl } = await initRes.json();
-
-      // 2. Direct B2 Upload
-      setProgress({ status: 'uploading to B2...', percent: 20 });
-      const uploadRes = await fetch(uploadUrl, {
-        method: 'PUT',
-        body: fileObj,
-        headers: {
-          'Content-Type': fileObj.type || 'application/pdf',
-        },
-      });
-
-      if (!uploadRes.ok) {
-        throw new Error('Failed to upload file to storage');
-      }
-
-      // 3. Create Job
-      setProgress({ status: 'creating job...', percent: 40 });
-      const jobRes = await fetch('/api/convert/jobs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          r2InputKey: r2Key,
-          sourceType,
-          targetType,
-          fileCount: 1,
-        }),
-      });
-
-      if (!jobRes.ok) {
-        const err = await jobRes.json();
-        throw new Error(err.error || 'Failed to create conversion job');
-      }
-
-      const { jobId } = await jobRes.json();
-
-      // 4. SSE Progress
-      setProgress({ status: 'queued', percent: 45 });
-      
-      await new Promise<void>((resolve, reject) => {
-        const es = new EventSource(`/api/convert/jobs/${jobId}/live`);
-        
-        es.onmessage = (e) => {
-          try {
-            const data = JSON.parse(e.data);
-            if (data.status === 'completed') {
-              setProgress({ status: 'completed', percent: 100 });
-              es.close();
-              resolve();
-            } else if (data.status === 'failed') {
-              es.close();
-              reject(new Error(data.error || 'Conversion worker failed'));
-            } else {
-              // Update progress state
-              setProgress({ 
-                status: data.status || 'processing', 
-                percent: data.progress || 50 
-              });
-            }
-          } catch (err) {
-            console.error('SSE JSON parse error', err);
-          }
-        };
-
-        es.onerror = (e) => {
-          es.close();
-          reject(new Error('SSE connection disconnected unexpectedly'));
-        };
-      });
-
-      // 5. Download Trigger
-      setProgress({ status: 'downloading...', percent: 100 });
-      setDone(true);
-      window.location.href = `/api/convert/jobs/${jobId}/download`;
-
-    } catch (err: any) {
-      console.error('Conversion flow error:', err);
-      setErrorMsg(err.message || 'An unexpected error occurred.');
-    } finally {
-      setConverting(false);
-    }
+    await startConversion(files[0].file, 'pdf', format, 1);
   };
 
   const formatSize = (bytes: number) =>

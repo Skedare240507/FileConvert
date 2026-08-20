@@ -1,10 +1,9 @@
 import { NextRequest } from 'next/server';
-import { withAuth } from '@/backend/middleware/withAuth';
 import { getConversionJobById } from '@/backend/db/queries/conversionJobs';
 import { getSignedDownloadUrl } from '@/backend/services/storage/storage';
 import { logger } from '@/backend/utils/logger';
 
-export const GET = withAuth(async (req, ctx) => {
+export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
     const parts = url.pathname.split('/');
@@ -15,7 +14,7 @@ export const GET = withAuth(async (req, ctx) => {
       return Response.json({ error: 'Missing jobId' }, { status: 400 });
     }
 
-    const jobRecord = await getConversionJobById(jobId, ctx.userId);
+    const jobRecord = await getConversionJobById(jobId);
     
     if (!jobRecord) {
       return Response.json({ error: 'Job not found' }, { status: 404 });
@@ -33,4 +32,5 @@ export const GET = withAuth(async (req, ctx) => {
     logger.error('[API] /convert/jobs/[jobId]/download failed', err);
     return Response.json({ error: 'Internal server error' }, { status: 500 });
   }
-});
+}
+

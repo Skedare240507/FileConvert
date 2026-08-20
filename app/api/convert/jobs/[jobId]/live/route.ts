@@ -15,8 +15,6 @@
  */
 
 import { NextRequest } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { getConversionJobById } from '@/backend/db/queries/conversionJobs';
 
 const POLL_INTERVAL_MS = 2000;
@@ -28,11 +26,6 @@ export async function GET(
   req: NextRequest,
   { params }: { params: { jobId: string } }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
-    return new Response('Unauthorized', { status: 401 });
-  }
-
   const { jobId } = params;
 
   const encoder = new TextEncoder();
@@ -65,7 +58,7 @@ export async function GET(
           break;
         }
 
-        if (!job || job.userId !== session.user.id) {
+        if (!job) {
           send({ jobId, status: 'error', message: 'Job not found' });
           controller.close();
           break;
@@ -75,11 +68,11 @@ export async function GET(
         send({
           jobId,
           status: job.status,
-          sourceType: job.sourceType,
-          targetType: job.targetType,
-          r2OutputKey: job.r2OutputKey ?? null,
-          createdAt: job.createdAt,
-          completedAt: job.completedAt ?? null,
+          sourceType: job.source_type,
+          targetType: job.target_type,
+          r2OutputKey: job.r2_output_key ?? null,
+          createdAt: job.created_at,
+          completedAt: job.completed_at ?? null,
         });
 
         // Close stream on terminal status

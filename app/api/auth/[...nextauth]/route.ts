@@ -11,6 +11,13 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+      allowDangerousEmailAccountLinking: true,
+      authorization: {
+        params: {
+          prompt: 'select_account',
+          access_type: 'offline',
+        },
+      },
     }),
     CredentialsProvider({
       name: "Credentials",
@@ -117,6 +124,10 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
+    async signIn({ user, account, profile }) {
+      // Allow all sign-ins; email linking is handled by allowDangerousEmailAccountLinking
+      return true;
+    },
     async session({ session, token }) {
       if (session.user && token.sub) {
         // @ts-ignore
@@ -127,6 +138,7 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/login',
+    error: '/login',
   }
 };
 

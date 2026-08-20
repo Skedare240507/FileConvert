@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useCallback } from 'react';
 import styles from './page.module.css';
+import { useConverter } from '@/hooks/useConverter';
 
 interface FileWithId {
   file: File;
@@ -11,12 +12,12 @@ interface FileWithId {
 export default function JpgToPdf() {
   const [files, setFiles] = useState<FileWithId[]>([]);
   const [dragging, setDragging] = useState(false);
-  const [converting, setConverting] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [autoRotate, setAutoRotate] = useState(true);
   const [keepQuality, setKeepQuality] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const idRef = useRef(0);
+
+  const { converting, done, progress, errorMsg, startConversion, reset } = useConverter();
 
   const addFiles = useCallback((incoming: FileList | null) => {
     if (!incoming) return;
@@ -28,10 +29,12 @@ export default function JpgToPdf() {
       ...prev,
       ...jpgs.map(f => ({ file: f, id: ++idRef.current }))
     ]);
-  }, []);
+    reset();
+  }, [reset]);
 
   const removeFile = (id: number) => {
     setFiles(prev => prev.filter(f => f.id !== id));
+    reset();
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -40,26 +43,9 @@ export default function JpgToPdf() {
     addFiles(e.dataTransfer.files);
   };
 
-  const handleConvert = () => {
-    if (!files.length || converting) return;
-    setConverting(true);
-    setProgress(0);
-    const interval = setInterval(() => {
-      setProgress(prev => {
-        const next = prev + Math.random() * 18;
-        if (next >= 100) {
-          clearInterval(interval);
-          setTimeout(() => {
-            setConverting(false);
-            setProgress(0);
-            setFiles([]);
-            alert('Conversion complete! Your PDF is ready for download.');
-          }, 400);
-          return 100;
-        }
-        return next;
-      });
-    }, 280);
+  const handleConvert = async () => {
+    if (!files.length) return;
+    await startConversion(files[0].file, 'jpg', 'pdf', 1);
   };
 
   const formatSize = (bytes: number) =>
@@ -169,25 +155,41 @@ export default function JpgToPdf() {
             {converting && (
               <div className={styles.progressContainer}>
                 <div className={styles.progressHeader}>
-                  <span className={styles.progressLabel}>Converting...</span>
-                  <span className={styles.progressPct}>{Math.round(progress)}%</span>
+                  <span className={styles.progressLabel}>{progress.status}</span>
+                  <span className={styles.progressPct}>{Math.round(progress.percent)}%</span>
                 </div>
                 <div className={styles.progressTrack}>
-                  <div className={styles.progressFill} style={{ width: `${progress}%` }}></div>
+                  <div className={styles.progressFill} style={{ width: `${progress.percent}%` }}></div>
                 </div>
+              </div>
+            )}
+
+            {errorMsg && (
+              <div style={{ color: '#ef4444', background: '#fee2e2', padding: '12px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px', border: '1px solid #fca5a5' }}>
+                <strong>Error: </strong> {errorMsg}
               </div>
             )}
 
             <button
               className={styles.convertBtn}
-              onClick={handleConvert}
-              disabled={converting}
+              onClick={done ? () => { setFiles([]); reset(); } : handleConvert}
+              disabled={converting && !done}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
+                {done ? (
+                  <>
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </>
+                ) : (
+                  <>
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                  </>
+                )}
               </svg>
-              {converting ? 'Converting...' : 'Convert to PDF'}
+              {converting ? 'Converting...' : done ? 'Download PDF' : 'Convert to PDF'}
             </button>
           </div>
         </section>

@@ -8,7 +8,7 @@ import { prisma } from '../client';
 import type { JobStatus, WorkerType, Engine } from '@/backend/config/constants';
 
 export interface CreateConversionJobInput {
-  userId: string;
+  userId?: string | null;
   sourceType: string;
   targetType: string;
   workerType: WorkerType;
@@ -20,7 +20,7 @@ export interface CreateConversionJobInput {
 export async function createConversionJob(data: CreateConversionJobInput) {
   return prisma.conversionJob.create({
     data: {
-      user_id: data.userId,
+      user_id: data.userId ?? undefined,
       source_type: data.sourceType,
       target_type: data.targetType,
       status: 'queued',
@@ -32,9 +32,9 @@ export async function createConversionJob(data: CreateConversionJobInput) {
   });
 }
 
-export async function getConversionJobById(jobId: string, userId: string) {
+export async function getConversionJobById(jobId: string) {
   return prisma.conversionJob.findFirst({
-    where: { id: jobId, user_id: userId },
+    where: { id: jobId },
   });
 }
 

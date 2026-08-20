@@ -17,7 +17,15 @@ import { env } from '@/backend/config/env';
 import type { NextRequest } from 'next/server';
 
 // Reuse the same Redis client as BullMQ (or create a minimal one here)
-const redis = new Redis(env.REDIS_URL, { maxRetriesPerRequest: 3 });
+const redis = new Redis(env.REDIS_URL, {
+  maxRetriesPerRequest: 1,
+  lazyConnect: true,
+  retryStrategy: (times: number) => {
+    if (times > 2) return null; // give up quickly
+    return 1000;
+  },
+});
+redis.on('error', () => { /* suppress ioredis connection errors — handled via try/catch below */ });
 
 interface RateLimitOptions {
   /** Max requests allowed in the window */
@@ -41,25 +49,29 @@ export function withRateLimit(handler: Handler, options: RateLimitOptions): Hand
 
     const key = `${prefix}:${ip}`;
 
-    const pipeline = redis.pipeline();
-    pipeline.incr(key);
-    pipeline.expire(key, windowSec);
-    const results = await pipeline.exec();
+    try {
+      const pipeline = redis.pipeline();
+      pipeline.incr(key);
+      pipeline.expire(key, windowSec);
+      const results = await pipeline.exec();
 
-    const count = (results?.[0]?.[1] as number) ?? 0;
+      const count = (results?.[0]?.[1] as number) ?? 0;
 
-    if (count > limit) {
-      return Response.json(
-        { error: 'Too many requests — please slow down.' },
-        {
-          status: 429,
-          headers: {
-            'Retry-After': String(windowSec),
-            'X-RateLimit-Limit': String(limit),
-            'X-RateLimit-Remaining': '0',
-          },
-        }
-      );
+      if (count > limit) {
+        return Response.json(
+          { error: 'Too many requests — please slow down.' },
+          {
+            status: 429,
+            headers: {
+              'Retry-After': String(windowSec),
+              'X-RateLimit-Limit': String(limit),
+              'X-RateLimit-Remaining': '0',
+            },
+          }
+        );
+      }
+    } catch {
+      // Redis unavailable — allow the request through (fail open)
     }
 
     return handler(req);

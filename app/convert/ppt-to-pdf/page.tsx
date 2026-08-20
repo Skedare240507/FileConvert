@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useCallback } from 'react';
 import styles from './page.module.css';
+import { useConverter } from '@/hooks/useConverter';
 
 interface SelectedFile {
   file: File;
@@ -13,6 +14,8 @@ export default function PptToPdf() {
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const { converting, done, progress, errorMsg, startConversion, reset } = useConverter();
+
   const addFiles = useCallback((newFiles: FileList | null) => {
     if (!newFiles) return;
     setFiles(prev => [
@@ -22,10 +25,18 @@ export default function PptToPdf() {
         id: Math.random().toString(36).substring(7),
       })),
     ]);
-  }, []);
+    reset();
+  }, [reset]);
 
-  const removeFile = (id: string) =>
+  const removeFile = (id: string) => {
     setFiles(prev => prev.filter(f => f.id !== id));
+    reset();
+  };
+
+  const handleConvert = async () => {
+    if (files.length === 0) return;
+    await startConversion(files[0].file, 'ppt', 'pdf', 1);
+  };
 
   const formatMB = (bytes: number) =>
     `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
@@ -107,16 +118,30 @@ export default function PptToPdf() {
                         </div>
                       </div>
                       <div className={styles.fileItemRight}>
-                        <div className={styles.progressBarWrap}>
-                          <div className={styles.progressBar} />
-                        </div>
-                        <button className={styles.convertTextBtn}>CONVERT</button>
+                        {converting && (
+                          <div className={styles.progressBarWrap}>
+                            <div className={styles.progressBar} style={{ width: `${progress.percent}%` }} />
+                          </div>
+                        )}
+                        <button 
+                          className={styles.convertTextBtn}
+                          onClick={done ? () => { setFiles([]); reset(); } : handleConvert}
+                          disabled={converting && !done}
+                        >
+                          {converting ? `${progress.status} (${progress.percent}%)` : done ? 'DOWNLOAD' : 'CONVERT'}
+                        </button>
                         <button className={styles.removeBtn} onClick={() => removeFile(id)} aria-label="Remove file">
                           <span className="material-symbols-outlined">close</span>
                         </button>
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+
+              {errorMsg && (
+                <div style={{ marginTop: '1rem', color: '#ef4444', background: '#fee2e2', padding: '12px', borderRadius: '8px', fontSize: '14px', border: '1px solid #fca5a5' }}>
+                  <strong>Error: </strong> {errorMsg}
                 </div>
               )}
             </div>

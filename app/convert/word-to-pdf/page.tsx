@@ -2,50 +2,39 @@
 
 import React, { useState, useRef, useCallback } from 'react';
 import styles from './page.module.css';
+import { useConverter } from '@/hooks/useConverter';
 
 interface SelectedFile {
   file: File;
   id: string;
-  progress: number;
 }
 
 export default function WordToPdf() {
   const [files, setFiles] = useState<SelectedFile[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
-  const [isConverting, setIsConverting] = useState(false);
-  const [isDone, setIsDone] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { converting, done, progress, errorMsg, startConversion, reset } = useConverter();
 
   const addFiles = useCallback((newFiles: FileList | null) => {
     if (!newFiles) return;
     const filesArray = Array.from(newFiles).map(file => ({
       file,
       id: Math.random().toString(36).substring(7),
-      progress: 0
     }));
     setFiles(prev => [...prev, ...filesArray]);
-    setIsDone(false); // Reset conversion state if new files added
-  }, []);
+    reset(); // Reset conversion state if new files added
+  }, [reset]);
 
   const removeFile = (idToRemove: string) => {
     setFiles(prev => prev.filter(f => f.id !== idToRemove));
+    reset();
   };
 
-  const handleConvert = () => {
-    setIsConverting(true);
-    
-    // Simulate progress per file
-    files.forEach((file, idx) => {
-      setTimeout(() => {
-        setFiles(prev => prev.map(f => f.id === file.id ? { ...f, progress: 100 } : f));
-      }, idx * 200 + 100);
-    });
-
-    // Simulate completion
-    setTimeout(() => {
-      setIsConverting(false);
-      setIsDone(true);
-    }, 2500);
+  const handleConvert = async () => {
+    if (files.length === 0) return;
+    // For now we process the first file, you can map multiple files if desired
+    await startConversion(files[0].file, 'word', 'pdf', 1);
   };
 
   const formatBytes = (bytes: number) => {
@@ -116,7 +105,7 @@ export default function WordToPdf() {
                 </div>
                 
                 <div className={styles.fileList}>
-                  {files.map(({ file, id, progress }) => (
+                  {files.map(({ file, id }) => (
                     <div key={id} className={styles.fileItem}>
                       <div className={styles.fileItemLeft}>
                         <div className={styles.fileIcon}>
@@ -128,9 +117,11 @@ export default function WordToPdf() {
                         </div>
                       </div>
                       <div className={styles.fileItemRight}>
-                        <div className={styles.progressBarContainer}>
-                          <div className={styles.progressBar} style={{ width: `${progress}%` }}></div>
-                        </div>
+                        {converting && (
+                          <div className={styles.progressBarContainer}>
+                            <div className={styles.progressBar} style={{ width: `${progress.percent}%` }}></div>
+                          </div>
+                        )}
                         <button 
                           className={styles.removeBtn} 
                           onClick={() => removeFile(id)}
@@ -143,18 +134,24 @@ export default function WordToPdf() {
                   ))}
                 </div>
 
+                {errorMsg && (
+                  <div style={{ color: '#ef4444', background: '#fee2e2', padding: '12px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px', border: '1px solid #fca5a5' }}>
+                    <strong>Error: </strong> {errorMsg}
+                  </div>
+                )}
+
                 <div className={styles.actionRow}>
                   <button 
-                    className={`${styles.convertBtn} ${isDone ? styles.convertBtnSuccess : ''}`}
-                    onClick={handleConvert}
-                    disabled={isConverting}
+                    className={`${styles.convertBtn} ${done ? styles.convertBtnSuccess : ''}`}
+                    onClick={done ? () => { setFiles([]); reset(); } : handleConvert}
+                    disabled={converting && !done}
                   >
-                    {isConverting ? (
+                    {converting ? (
                       <>
                         <span className={`material-symbols-outlined ${styles.spinIcon}`}>sync</span>
-                        Converting...
+                        {progress.status} ({progress.percent}%)
                       </>
-                    ) : isDone ? (
+                    ) : done ? (
                       <>
                         <span className="material-symbols-outlined">download</span>
                         Download All PDF Files
