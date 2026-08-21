@@ -20,7 +20,7 @@ export interface CreateConversionJobInput {
 export async function createConversionJob(data: CreateConversionJobInput) {
   return prisma.conversionJob.create({
     data: {
-      user_id: data.userId ?? undefined,
+      ...(data.userId ? { user_id: data.userId } : {}),
       source_type: data.sourceType,
       target_type: data.targetType,
       status: 'queued',

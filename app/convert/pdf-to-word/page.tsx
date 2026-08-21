@@ -151,7 +151,7 @@ export default function PdfToWord() {
             <div className={styles.fileSection}>
               <div className={styles.fileSectionHead}>
                 <span className={styles.fileSectionTitle}>SELECTED FILES ({files.length})</span>
-                <button className={styles.clearAllBtn} onClick={() => { setFiles([]); setDone(false); }}>
+                <button className={styles.clearAllBtn} onClick={() => { setFiles([]); reset(); }}>
                   Clear all
                 </button>
               </div>
@@ -195,7 +195,7 @@ export default function PdfToWord() {
 
               {/* Convert / Done button */}
               {done ? (
-                <button className={`${styles.convertBtn} ${styles.convertBtnDone}`} onClick={() => { setFiles([]); setDone(false); }}>
+                <button className={`${styles.convertBtn} ${styles.convertBtnDone}`} onClick={() => { setFiles([]); reset(); }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="20 6 9 17 4 12"/>
                   </svg>
