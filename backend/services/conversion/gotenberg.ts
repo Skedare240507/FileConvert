@@ -35,17 +35,20 @@ export async function convertWithGotenberg(
   const form = new FormData();
   form.append('files', new Blob([new Uint8Array(inputBuffer)], { type: getMimeType(sourceType) }), `input.${sourceType}`);
 
-  // Gotenberg accepts a nativePdfFormat option for better fidelity
+  // Tell Gotenberg (LibreOffice) the desired output format via file extension
+  form.append('outputFilename', `output.${targetType}`);
+
+  // Gotenberg accepts a nativePdfFormat option for better fidelity when converting TO pdf
   if (targetType === 'pdf') {
     form.append('nativePdfFormat', 'PDF/A-2b');
   }
 
-  logger.info(`[Gotenberg] Converting ${sourceType} → ${targetType}`);
+  logger.info(`[Gotenberg] Converting ${sourceType} -> ${targetType}`);
 
   const response = await fetch(url, {
     method: 'POST',
     body: form,
-    signal: AbortSignal.timeout(120_000), // 2-minute timeout for large files
+    signal: AbortSignal.timeout(120_000),
   });
 
   if (!response.ok) {

@@ -88,16 +88,34 @@ export function useConverter(options?: UseConverterOptions) {
           }
         };
 
-        es.onerror = (e) => {
+        es.onerror = async () => {
           es.close();
-          reject(new Error('SSE connection disconnected unexpectedly'));
+          // SSE can fire onerror on normal stream close — poll once for final status
+          try {
+            const statusRes = await fetch(`/api/convert/jobs/${jobId}/download`);
+            if (statusRes.ok) {
+              // Job completed — treat as success
+              setProgress({ status: 'completed', percent: 100 });
+              resolve();
+            } else {
+              reject(new Error('SSE connection lost. Please try again.'));
+            }
+          } catch {
+            reject(new Error('SSE connection lost. Please try again.'));
+          }
         };
       });
 
-      // 5. Download Trigger
+      // 5. Fetch signed download URL then trigger download
       setProgress({ status: 'downloading...', percent: 100 });
       setDone(true);
-      window.location.href = `/api/convert/jobs/${jobId}/download`;
+      const dlRes = await fetch(`/api/convert/jobs/${jobId}/download`);
+      if (dlRes.ok) {
+        const { downloadUrl } = await dlRes.json();
+        window.location.href = downloadUrl;
+      } else {
+        throw new Error('Failed to get download link');
+      }
       
       options?.onSuccess?.(jobId);
 
