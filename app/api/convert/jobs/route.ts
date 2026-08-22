@@ -25,7 +25,17 @@ function getDefaultEngine(workerType: string, sourceType: string, targetType: st
 export const POST = withRateLimit(
   async (req: NextRequest) => {
     try {
-      const body = await req.json();
+      // Read body as text first — avoids a Turbopack req.json() parsing quirk
+      // where URL-like strings (e.g. r2InputKey containing '/') can cause
+      // "Bad escaped character in JSON" errors with certain Turbopack versions.
+      const rawBody = await req.text();
+      let body: unknown;
+      try {
+        body = JSON.parse(rawBody);
+      } catch (parseErr) {
+        logger.error('[API] /convert/jobs body parse failed — raw body:', rawBody);
+        return Response.json({ error: 'Invalid JSON body' }, { status: 400 });
+      }
       const parsed = createConversionJobSchema.safeParse(body);
       
       if (!parsed.success) {
