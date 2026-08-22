@@ -14,7 +14,7 @@ import type { Job } from 'bullmq';
 import { convertWithGotenberg } from '@/backend/services/conversion/gotenberg';
 import { convertExcelCsv } from '@/backend/services/conversion/sheetjs';
 import { tryCloudConvertFallback } from '@/backend/services/conversion/fallback';
-import { downloadFromR2, uploadToR2 } from '@/backend/services/storage/storage';
+import { downloadFromB2, uploadToB2 } from '@/backend/services/storage/storage';
 import { updateConversionJobStatus } from '@/backend/db/queries/conversionJobs';
 import { JOB_STATUS } from '@/backend/config/constants';
 import type { ConversionJobPayload } from '@/backend/queue/jobs/conversionJob';
@@ -29,7 +29,7 @@ export async function processDocumentJob(job: Job<ConversionJobPayload>): Promis
   logger.info(`[DocumentWorker] Processing ${conversionKey} for job ${jobId}`);
 
   // 1. Download the input file from R2
-  const inputBuffer = await downloadFromR2(r2InputKey);
+  const inputBuffer = await downloadFromB2(r2InputKey);
 
   let outputBuffer: Buffer;
 
@@ -47,7 +47,7 @@ export async function processDocumentJob(job: Job<ConversionJobPayload>): Promis
 
   // 3. Upload the output to R2
   const r2OutputKey = `output/${jobId}.${targetType}`;
-  await uploadToR2(r2OutputKey, outputBuffer);
+  await uploadToB2(r2OutputKey, outputBuffer);
 
   // 4. Mark job completed
   await updateConversionJobStatus(jobId, JOB_STATUS.COMPLETED, {

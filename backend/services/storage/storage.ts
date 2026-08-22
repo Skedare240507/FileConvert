@@ -39,7 +39,7 @@ const BUCKET = env.B2_BUCKET;
 
 // ── Upload ────────────────────────────────────────────────────────────────
 
-export async function uploadToR2(
+export async function uploadToB2(
   key: string,
   body: Buffer | Uint8Array,
   contentType?: string
@@ -56,7 +56,7 @@ export async function uploadToR2(
 
 // ── Download ──────────────────────────────────────────────────────────────
 
-export async function downloadFromR2(key: string): Promise<Buffer> {
+export async function downloadFromB2(key: string): Promise<Buffer> {
   const response = await b2.send(new GetObjectCommand({ Bucket: BUCKET, Key: key }));
   if (!response.Body) throw new Error(`B2 object not found: ${key}`);
   const chunks: Uint8Array[] = [];
@@ -68,7 +68,7 @@ export async function downloadFromR2(key: string): Promise<Buffer> {
 
 // ── Delete ────────────────────────────────────────────────────────────────
 
-export async function deleteFromR2(key: string): Promise<void> {
+export async function deleteFromB2(key: string): Promise<void> {
   await b2.send(new DeleteObjectCommand({ Bucket: BUCKET, Key: key }));
 }
 

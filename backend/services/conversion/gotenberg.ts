@@ -9,7 +9,6 @@
  * Docs: https://gotenberg.dev/docs/routes
  */
 
-import FormData from 'form-data';
 import { env } from '@/backend/config/env';
 import { logger } from '@/backend/utils/logger';
 
@@ -34,10 +33,7 @@ export async function convertWithGotenberg(
   const url = `${GOTENBERG_BASE}${route}`;
 
   const form = new FormData();
-  form.append('files', inputBuffer, {
-    filename: `input.${sourceType}`,
-    contentType: getMimeType(sourceType),
-  });
+  form.append('files', new Blob([new Uint8Array(inputBuffer)], { type: getMimeType(sourceType) }), `input.${sourceType}`);
 
   // Gotenberg accepts a nativePdfFormat option for better fidelity
   if (targetType === 'pdf') {
@@ -48,8 +44,7 @@ export async function convertWithGotenberg(
 
   const response = await fetch(url, {
     method: 'POST',
-    body: form as unknown as BodyInit,
-    headers: form.getHeaders(),
+    body: form,
     signal: AbortSignal.timeout(120_000), // 2-minute timeout for large files
   });
 

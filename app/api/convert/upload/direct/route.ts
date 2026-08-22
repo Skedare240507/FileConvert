@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { buildR2UploadKey } from '@/backend/utils/sanitize';
-import { uploadToR2 } from '@/backend/services/storage/storage';
+import { uploadToB2 } from '@/backend/services/storage/storage';
 import { logger } from '@/backend/utils/logger';
 
 export async function POST(req: NextRequest) {
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     
-    await uploadToR2(r2Key, buffer, file.type || 'application/octet-stream');
+    await uploadToB2(r2Key, buffer, file.type || 'application/octet-stream');
     
     return Response.json({ r2Key });
   } catch (err) {

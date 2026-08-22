@@ -21,9 +21,7 @@ function optional(name: string, fallback = ''): string {
 
 export const env = {
   // ── Supabase ──────────────────────────────────────────────────────────────
-  NEXT_PUBLIC_SUPABASE_URL: required('NEXT_PUBLIC_SUPABASE_URL'),
-  SUPABASE_ANON_KEY: required('SUPABASE_ANON_KEY'),
-  SUPABASE_SERVICE_ROLE_KEY: required('SUPABASE_SERVICE_ROLE_KEY'),
+
 
   // ── Prisma / Postgres ─────────────────────────────────────────────────────
   DATABASE_URL: required('DATABASE_URL'),

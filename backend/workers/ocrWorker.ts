@@ -9,7 +9,7 @@
  */
 
 import type { Job } from 'bullmq';
-import { downloadFromR2, uploadToR2 } from '@/backend/services/storage/storage';
+import { downloadFromB2, uploadToB2 } from '@/backend/services/storage/storage';
 import { updateConversionJobStatus } from '@/backend/db/queries/conversionJobs';
 import { JOB_STATUS } from '@/backend/config/constants';
 import type { ConversionJobPayload } from '@/backend/queue/jobs/conversionJob';
@@ -29,7 +29,7 @@ export async function processOcrJob(job: Job<ConversionJobPayload>): Promise<voi
   const { jobId, r2InputKey, targetType, sourceType } = job.data;
   logger.info(`[OcrWorker] Running Tesseract OCR for job ${jobId}`);
 
-  const inputBuffer = await downloadFromR2(r2InputKey);
+  const inputBuffer = await downloadFromB2(r2InputKey);
   let extractedText = '';
 
   const tmpId = crypto.randomUUID();
@@ -76,7 +76,7 @@ export async function processOcrJob(job: Job<ConversionJobPayload>): Promise<voi
   const outputBuffer = Buffer.from(extractedText, 'utf-8');
   const r2OutputKey = `output/${jobId}.txt`;
   
-  await uploadToR2(r2OutputKey, outputBuffer);
+  await uploadToB2(r2OutputKey, outputBuffer);
   await updateConversionJobStatus(jobId, JOB_STATUS.COMPLETED, { r2OutputKey, completedAt: new Date() });
   
   logger.info(`[OcrWorker] Job ${jobId} completed — text extracted`);

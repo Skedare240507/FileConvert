@@ -12,7 +12,7 @@
 import { Worker } from 'bullmq';
 import { redisConnection } from '@/backend/queue/client';
 import { QUEUE_NAMES, FILE_TTL_MS } from '@/backend/config/constants';
-import { deleteFromR2 } from '@/backend/services/storage/storage';
+import { deleteFromB2 } from '@/backend/services/storage/storage';
 import { prisma } from '@/backend/db/client';
 import type { CleanupJobPayload } from '@/backend/queue/jobs/cleanupJob';
 import { logger } from '@/backend/utils/logger';
@@ -27,7 +27,7 @@ export const cleanupWorker = new Worker<CleanupJobPayload>(
     let deleted = 0;
     for (const key of r2Keys) {
       try {
-        await deleteFromR2(key);
+        await deleteFromB2(key);
         deleted++;
       } catch (err) {
         logger.error(`[CleanupWorker] Failed to delete ${key}:`, err);

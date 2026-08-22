@@ -15,7 +15,7 @@ export const GET = withAuth(async (req, ctx) => {
       return Response.json({ error: 'Missing jobId' }, { status: 400 });
     }
 
-    const jobRecord = await getConversionJobById(jobId, ctx.userId);
+    const jobRecord = await getConversionJobById(jobId);
     
     if (!jobRecord) {
       return Response.json({ error: 'Job not found' }, { status: 404 });
