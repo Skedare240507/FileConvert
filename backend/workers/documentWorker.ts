@@ -13,7 +13,7 @@
 import type { Job } from 'bullmq';
 import { convertWithGotenberg } from '@/backend/services/conversion/gotenberg';
 import { convertExcelCsv } from '@/backend/services/conversion/sheetjs';
-import { tryCloudConvertFallback } from '@/backend/services/conversion/fallback';
+import { convertPdfToDocx } from '@/backend/services/conversion/pdf2docx';
 import { downloadFromB2, uploadToB2 } from '@/backend/services/storage/storage';
 import { updateConversionJobStatus } from '@/backend/db/queries/conversionJobs';
 import { JOB_STATUS } from '@/backend/config/constants';
@@ -24,8 +24,8 @@ const SHEETJS_TYPES = new Set(['xlsx:csv', 'csv:xlsx']);
 
 // Gotenberg/LibreOffice cannot reliably convert FROM pdf to editable formats.
 // It uses a Draw/Impress extension that produces structurally broken DOCX/PPTX
-// files which Word/PowerPoint refuse to open. Route these directly to CloudConvert.
-const CLOUDCONVERT_ONLY_TYPES = new Set(['pdf:docx', 'pdf:pptx', 'pdf:doc']);
+// files which Word/PowerPoint refuse to open. Route these directly to pdf2docx.
+const PDF2DOCX_TYPES = new Set(['pdf:docx', 'pdf:doc']);
 
 export async function processDocumentJob(job: Job<ConversionJobPayload>): Promise<void> {
   const { jobId, sourceType, targetType, r2InputKey, engineUsed } = job.data;
@@ -41,17 +41,13 @@ export async function processDocumentJob(job: Job<ConversionJobPayload>): Promis
   // 2. Route to correct engine
   if (SHEETJS_TYPES.has(conversionKey)) {
     outputBuffer = await convertExcelCsv(inputBuffer, sourceType, targetType);
-  } else if (CLOUDCONVERT_ONLY_TYPES.has(conversionKey)) {
-    // PDF → Word/PPT: must use CloudConvert — LibreOffice produces broken output
-    logger.info(`[DocumentWorker] Routing ${conversionKey} to CloudConvert (LibreOffice incompatible)`);
-    outputBuffer = await tryCloudConvertFallback(inputBuffer, sourceType, targetType);
+  } else if (PDF2DOCX_TYPES.has(conversionKey)) {
+    // PDF → Word: use dedicated Python microservice
+    logger.info(`[DocumentWorker] Routing ${conversionKey} to pdf2docx`);
+    outputBuffer = await convertPdfToDocx(inputBuffer);
   } else {
-    try {
-      outputBuffer = await convertWithGotenberg(inputBuffer, sourceType, targetType);
-    } catch (gotenbergErr) {
-      logger.warn(`[DocumentWorker] Gotenberg failed, trying CloudConvert fallback:`, gotenbergErr);
-      outputBuffer = await tryCloudConvertFallback(inputBuffer, sourceType, targetType);
-    }
+    // All other conversions (Word -> PDF, Excel -> PDF, PPT -> PDF, PDF merges) use Gotenberg
+    outputBuffer = await convertWithGotenberg(inputBuffer, sourceType, targetType);
   }
 
   // 3. Upload the output to R2

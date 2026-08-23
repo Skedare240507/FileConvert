@@ -45,7 +45,8 @@ export const env = {
   REDIS_URL: required('REDIS_URL'),
 
   // ── Gotenberg (Document Worker) ───────────────────────────────────────────
-  GOTENBERG_URL: optional('GOTENBERG_URL', 'http://localhost:3000'),
+  GOTENBERG_URL: optional('GOTENBERG_URL', 'http://localhost:3001'),
+  PDF_CONVERTER_URL: optional('PDF_CONVERTER_URL', 'http://localhost:8080'),
 
   // ── ClamAV ────────────────────────────────────────────────────────────────
   CLAMAV_HOST: optional('CLAMAV_HOST', 'localhost'),
