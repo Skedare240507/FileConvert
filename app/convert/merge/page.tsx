@@ -15,14 +15,10 @@ interface UploadedFile {
 
 const TAB_LABELS: { key: FileTab; label: string }[] = [
   { key: 'pdf', label: 'PDF' },
-  { key: 'word', label: 'Word' },
-  { key: 'ppt', label: 'PPT' },
 ];
 
 const ACCEPT_MAP: Record<FileTab, string> = {
   pdf: '.pdf',
-  word: '.doc,.docx',
-  ppt: '.ppt,.pptx',
 };
 
 function formatSize(bytes: number): string {
@@ -190,9 +186,7 @@ export default function MergePage() {
             <div>
               <p className={styles.dropzoneTitle}>Select or drop files here</p>
               <p className={styles.dropzoneHint}>
-                {activeTab === 'pdf' && 'Supports PDF up to 50 MB each'}
-                {activeTab === 'word' && 'Supports .doc & .docx up to 50 MB each'}
-                {activeTab === 'ppt' && 'Supports .ppt & .pptx up to 50 MB each'}
+                Supports PDF up to 50 MB each
               </p>
             </div>
             <button className={styles.chooseBtn} type="button">Choose Files</button>
