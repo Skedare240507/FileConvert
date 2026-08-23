@@ -60,6 +60,54 @@ export async function convertWithGotenberg(
   return Buffer.from(arrayBuffer);
 }
 
+/**
+ * Merges multiple files into a single PDF using Gotenberg.
+ *
+ * @param inputBuffers - Array of file buffers to merge
+ * @param sourceType  - e.g. 'pdf', 'docx', 'pptx'
+ * @returns The merged PDF as a Buffer
+ */
+export async function mergeWithGotenberg(
+  inputBuffers: Buffer[],
+  sourceType: string
+): Promise<Buffer> {
+  const isPdf = sourceType === 'pdf';
+  const route = isPdf ? '/forms/pdfengines/merge' : '/forms/libreoffice/convert';
+  const url = `${GOTENBERG_BASE}${route}`;
+
+  const form = new FormData();
+  
+  // Append files in order. Gotenberg processes them in alphabetical order of filename.
+  // We use padded numbers to ensure correct merge order (e.g. 00.pdf, 01.pdf)
+  inputBuffers.forEach((buffer, index) => {
+    const filename = `${String(index).padStart(2, '0')}.${sourceType}`;
+    form.append('files', new Blob([new Uint8Array(buffer)], { type: getMimeType(sourceType) }), filename);
+  });
+
+  if (!isPdf) {
+    // For LibreOffice, we must tell it to merge the converted PDFs
+    form.append('merge', 'true');
+    form.append('outputFilename', 'merged.pdf');
+    form.append('nativePdfFormat', 'PDF/A-2b');
+  }
+
+  logger.info(`[Gotenberg] Merging ${inputBuffers.length} ${sourceType} files -> pdf`);
+
+  const response = await fetch(url, {
+    method: 'POST',
+    body: form,
+    signal: AbortSignal.timeout(180_000), // 3 min timeout for merges
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Gotenberg merge error ${response.status}: ${text}`);
+  }
+
+  const arrayBuffer = await response.arrayBuffer();
+  return Buffer.from(arrayBuffer);
+}
+
 function getMimeType(ext: string): string {
   const mimeMap: Record<string, string> = {
     pdf: 'application/pdf',

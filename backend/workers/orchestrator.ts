@@ -84,4 +84,24 @@ orchestratorWorker.on('failed', (job: Job<ConversionJobPayload> | undefined, err
   logger.error(`[Orchestrator] Job ${job?.data?.jobId} failed permanently:`, err.message);
 });
 
-export default orchestratorWorker;
+import { processMergeJob } from './mergeWorker';
+import type { MergeJobPayload } from '@/backend/queue/jobs/mergeJob';
+
+export const mergeOrchestratorWorker = new Worker<MergeJobPayload>(
+  QUEUE_NAMES.MERGE,
+  processMergeJob,
+  {
+    connection: redisConnection,
+    concurrency: 2, // Merging can be CPU/memory intensive
+  }
+);
+
+mergeOrchestratorWorker.on('completed', (job: Job<MergeJobPayload>) => {
+  logger.info(`[MergeWorker] Job ${job.data.sessionId} completed successfully`);
+});
+
+mergeOrchestratorWorker.on('failed', (job: Job<MergeJobPayload> | undefined, err: Error) => {
+  logger.error(`[MergeWorker] Job ${job?.data?.sessionId} failed:`, err.message);
+});
+
+export default { orchestratorWorker, mergeOrchestratorWorker };
