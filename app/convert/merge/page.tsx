@@ -3,7 +3,7 @@
 import React, { useState, useRef } from 'react';
 import styles from './page.module.css';
 
-type FileTab = 'pdf' | 'word' | 'ppt';
+type FileTab = 'pdf';
 type PageState = 'idle' | 'processing' | 'success';
 
 interface UploadedFile {
