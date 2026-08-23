@@ -58,7 +58,7 @@ export async function tryCloudConvertFallback(
     const stream = Readable.from(inputBuffer);
     
     // The SDK expects a ReadStream or similar readable with a known file name
-    await cloudConvert.tasks.upload(uploadTask, stream as any, `input.${sourceType}`);
+    await cloudConvert.tasks.upload(uploadTask, stream as any, `input.${sourceType}`, inputBuffer.byteLength);
 
     const finishedJob = await cloudConvert.jobs.wait(job.id);
     const exportTask = finishedJob.tasks.find((task) => task.name === 'export-my-file');

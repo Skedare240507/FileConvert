@@ -22,13 +22,18 @@ import { logger } from '@/backend/utils/logger';
 
 const SHEETJS_TYPES = new Set(['xlsx:csv', 'csv:xlsx']);
 
+// Gotenberg/LibreOffice cannot reliably convert FROM pdf to editable formats.
+// It uses a Draw/Impress extension that produces structurally broken DOCX/PPTX
+// files which Word/PowerPoint refuse to open. Route these directly to CloudConvert.
+const CLOUDCONVERT_ONLY_TYPES = new Set(['pdf:docx', 'pdf:pptx', 'pdf:doc']);
+
 export async function processDocumentJob(job: Job<ConversionJobPayload>): Promise<void> {
   const { jobId, sourceType, targetType, r2InputKey, engineUsed } = job.data;
   const conversionKey = `${sourceType}:${targetType}`;
 
   logger.info(`[DocumentWorker] Processing ${conversionKey} for job ${jobId}`);
 
-  // 1. Download the input file from R2
+  // 1. Download the input file from B2
   const inputBuffer = await downloadFromB2(r2InputKey);
 
   let outputBuffer: Buffer;
@@ -36,6 +41,10 @@ export async function processDocumentJob(job: Job<ConversionJobPayload>): Promis
   // 2. Route to correct engine
   if (SHEETJS_TYPES.has(conversionKey)) {
     outputBuffer = await convertExcelCsv(inputBuffer, sourceType, targetType);
+  } else if (CLOUDCONVERT_ONLY_TYPES.has(conversionKey)) {
+    // PDF → Word/PPT: must use CloudConvert — LibreOffice produces broken output
+    logger.info(`[DocumentWorker] Routing ${conversionKey} to CloudConvert (LibreOffice incompatible)`);
+    outputBuffer = await tryCloudConvertFallback(inputBuffer, sourceType, targetType);
   } else {
     try {
       outputBuffer = await convertWithGotenberg(inputBuffer, sourceType, targetType);

@@ -59,6 +59,9 @@ services:
       timeout: 30s
       retries: 5
       start_period: 120s  # wait for DB download on first run
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
 
 volumes:
   redis_data:
