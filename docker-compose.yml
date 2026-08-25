@@ -1,21 +1,12 @@
-# docker-compose.yml
-#
-# Spins up the backing services needed for local development and production.
-# Next.js app and workers run via `npm run dev` outside Docker for hot-reloading.
-#
-# Usage:
-#   Start:  docker compose up -d
-#   Stop:   docker compose down
-#   Logs:   docker compose logs -f
-
 services:
-  # ── Redis (BullMQ queue, rate limiting, session counters) ──────────────────
   redis:
     image: redis:7-alpine
     container_name: fileconvert-redis
     restart: unless-stopped
     ports:
       - "6379:6379"
+    environment:
+      TZ: Asia/Kolkata
     volumes:
       - redis_data:/data
     healthcheck:
@@ -24,13 +15,14 @@ services:
       timeout: 5s
       retries: 5
 
-  # ── Gotenberg (Document conversion engine: PDF, Word, PPT) ─────────────────
   gotenberg:
     image: gotenberg/gotenberg:8
     container_name: fileconvert-gotenberg
     restart: unless-stopped
     ports:
       - "3001:3000"
+    environment:
+      TZ: Asia/Kolkata
     command:
       - "gotenberg"
       - "--chromium-disable-javascript=true"
@@ -41,28 +33,27 @@ services:
       timeout: 5s
       retries: 5
 
-  # ── ClamAV (Malware scanning daemon) ──────────────────────────────────────
   clamav:
     image: clamav/clamav:stable
     container_name: fileconvert-clamav
     restart: unless-stopped
     ports:
       - "3310:3310"
+    environment:
+      TZ: Asia/Kolkata
+      CLAMAV_NO_FRESHCLAM: "false"
     volumes:
       - clamav_data:/var/lib/clamav
-    environment:
-      - CLAMAV_NO_FRESHCLAM=false
     healthcheck:
-      # clamdscan returns 0 on clean, non-zero on error/virus
       test: ["CMD", "clamdcheck.sh"]
       interval: 60s
       timeout: 30s
       retries: 5
-      start_period: 120s  # wait for DB download on first run
+      start_period: 120s
     dns:
       - 8.8.8.8
       - 1.1.1.1
-  # ── PDF Converter (Python pdf2docx microservice) ────────────────────────
+
   pdf-converter:
     build:
       context: ./pdf-converter
@@ -70,11 +61,29 @@ services:
     restart: unless-stopped
     ports:
       - "8080:8080"
+    environment:
+      TZ: Asia/Kolkata
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 15s
       timeout: 5s
       retries: 5
+
+  nginx:
+    image: nginx:alpine
+    container_name: fileconvert-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - redis
+      - gotenberg
+      - clamav
+      - pdf-converter
 
 volumes:
   redis_data:

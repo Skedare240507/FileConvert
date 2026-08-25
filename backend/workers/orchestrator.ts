@@ -104,4 +104,13 @@ mergeOrchestratorWorker.on('failed', (job: Job<MergeJobPayload> | undefined, err
   logger.error(`[MergeWorker] Job ${job?.data?.sessionId} failed:`, err.message);
 });
 
-export default { orchestratorWorker, mergeOrchestratorWorker };
+import { cleanupWorker, scheduleExpiredFileCleanup } from './cleanupWorker';
+
+// Schedule the cleanup job every 15 minutes
+setInterval(() => {
+  scheduleExpiredFileCleanup().catch((err) => {
+    logger.error('[CleanupScheduler] Failed to schedule cleanup jobs:', err);
+  });
+}, 15 * 60 * 1000); // 15 minutes
+
+export default { orchestratorWorker, mergeOrchestratorWorker, cleanupWorker };
