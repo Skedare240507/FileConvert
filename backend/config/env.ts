@@ -10,6 +10,14 @@
 function required(name: string): string {
   const value = process.env[name];
   if (!value) {
+    // Skip validation during the Next.js build phase
+    if (
+      process.env.npm_lifecycle_event === 'build' ||
+      process.env.SKIP_ENV_VALIDATION === '1'
+    ) {
+      console.warn(`[WARNING] Skipping validation for missing env var: ${name} (build phase)`);
+      return '';
+    }
     throw new Error(`Missing required environment variable: ${name}`);
   }
   return value;
