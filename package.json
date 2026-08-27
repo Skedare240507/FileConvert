@@ -6,7 +6,7 @@
     "dev": "next dev --turbo",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint .",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "worker": "tsx --env-file=.env backend/workers/orchestrator.ts"
   },
   "dependencies": {
@@ -41,7 +41,7 @@
     "@types/nodemailer": "^8.0.1",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "eslint": "^9.0.0",
+    "eslint": "^8.57.1",
     "eslint-config-next": "16.2.10",
     "prisma": "^5.22.0",
     "tsx": "^4.23.12",
