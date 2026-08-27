@@ -4,7 +4,7 @@
  * Processes image conversion jobs:
  *   PDF → JPG  (poppler / libvips, multi-page → ZIP)
  *   JPG → PDF  (pdf-lib, multi-image → multi-page PDF)
- *   JPG → PPT  (pptxgen, one slide per image)
+ *   JPG → PPT  (Gotenberg/LibreOffice, one slide per image)
  *
  * Primary engine: ImageMagick / libvips / pdf-lib / pptxgen
  */
@@ -23,7 +23,7 @@ import os from 'os';
 import { promises as fs } from 'fs';
 import JSZip from 'jszip';
 import { PDFDocument } from 'pdf-lib';
-import PptxGenJS from 'pptxgenjs';
+import FormData from 'form-data';
 
 const execAsync = promisify(exec);
 
@@ -86,15 +86,22 @@ export async function processImageJob(job: Job<ConversionJobPayload>): Promise<v
     }
     case 'jpg:pptx': {
       outputExt = 'pptx';
-      const pptx = new PptxGenJS();
-      const slide = pptx.addSlide();
-      
-      // pptxgenjs expects an absolute path or base64 string for data
-      const base64Data = `image/jpeg;base64,${inputBuffer.toString('base64')}`;
-      slide.addImage({ data: base64Data, x: 0, y: 0, w: '100%', h: '100%' });
-      
-      const pptxBuffer = await pptx.write({ outputType: 'nodebuffer' }) as Buffer;
-      outputBuffer = pptxBuffer;
+      // Build a minimal HTML slide and convert via Gotenberg → LibreOffice
+      const base64Img = inputBuffer.toString('base64');
+      const htmlSlide = `<!DOCTYPE html><html><head><style>
+        body { margin: 0; padding: 0; width: 25.4cm; height: 19.05cm; }
+        img { width: 100%; height: 100%; object-fit: contain; }
+      </style></head><body><img src="data:image/jpeg;base64,${base64Img}" /></body></html>`;
+      const formData = new FormData();
+      formData.append('files', Buffer.from(htmlSlide), { filename: 'index.html', contentType: 'text/html' });
+      const gotenbergUrl = process.env.GOTENBERG_URL ?? 'http://localhost:3001';
+      const res = await fetch(`${gotenbergUrl}/forms/libreoffice/convert`, {
+        method: 'POST',
+        body: formData as unknown as BodyInit,
+        headers: formData.getHeaders(),
+      });
+      if (!res.ok) throw new Error(`Gotenberg pptx conversion failed: ${res.status}`);
+      outputBuffer = Buffer.from(await res.arrayBuffer());
       break;
     }
     default:
