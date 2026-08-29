@@ -35,11 +35,13 @@ export function useConverter(options?: UseConverterOptions) {
       });
 
       if (!uploadRes.ok) {
-        const err = await uploadRes.json();
-        throw new Error(err.error || 'Failed to upload file');
+        const rawErr = await uploadRes.text();
+        let errMsg = 'Failed to upload file';
+        try { errMsg = (JSON.parse(rawErr) as { error?: string }).error ?? errMsg; } catch { /* non-JSON body */ }
+        throw new Error(errMsg);
       }
 
-      const { r2Key } = await uploadRes.json();
+      const { r2Key } = JSON.parse(await uploadRes.text()) as { r2Key: string };
 
       // 2. Create Job
       setProgress({ status: 'creating job...', percent: 40 });
@@ -55,11 +57,14 @@ export function useConverter(options?: UseConverterOptions) {
       });
 
       if (!jobRes.ok) {
-        const err = await jobRes.json();
-        throw new Error(err.error || 'Failed to create conversion job');
+        const rawErr = await jobRes.text();
+        let errMsg = 'Failed to create conversion job';
+        try { errMsg = (JSON.parse(rawErr) as { error?: string }).error ?? errMsg; } catch { /* non-JSON body */ }
+        throw new Error(errMsg);
       }
 
-      const { jobId } = await jobRes.json();
+      const jobRaw = await jobRes.text();
+      const { jobId } = JSON.parse(jobRaw) as { jobId: string };
 
       // 4. SSE Progress
       setProgress({ status: 'queued', percent: 45 });

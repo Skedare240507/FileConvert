@@ -12,10 +12,10 @@ import { env } from '@/backend/config/env';
 export const redisConnection = new Redis(env.REDIS_URL, {
   maxRetriesPerRequest: null,
   enableReadyCheck: false,
-  lazyConnect: true,
-  // Don't spam reconnect attempts — let Docker handle availability
+  lazyConnect: false,
+  // Let Docker handle availability, but retry enough times during startup
   retryStrategy: (times: number) => {
-    if (times > 3) return null; // stop retrying after 3 attempts
+    if (times > 10) return null; // stop retrying after 10 attempts
     return Math.min(times * 500, 3000);
   },
 });

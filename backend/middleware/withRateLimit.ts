@@ -16,10 +16,11 @@ import { Redis } from 'ioredis';
 import { env } from '@/backend/config/env';
 import type { NextRequest } from 'next/server';
 
-// Reuse the same Redis client as BullMQ (or create a minimal one here)
 const redis = new Redis(env.REDIS_URL, {
   maxRetriesPerRequest: 1,
   lazyConnect: true,
+  enableOfflineQueue: false,
+  commandTimeout: 1000,
   retryStrategy: (times: number) => {
     if (times > 2) return null; // give up quickly
     return 1000;

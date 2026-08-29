@@ -41,26 +41,39 @@ export async function scanBuffer(buffer: Buffer): Promise<ScanOutcome> {
       resolve({ result: 'error' });
     });
 
-    socket.on('connect', () => {
+    socket.on('connect', async () => {
       // INSTREAM protocol: send the command, then 4-byte big-endian chunk sizes
       socket.write('zINSTREAM\0');
 
       const chunkSize = 8192;
       let offset = 0;
 
-      while (offset < buffer.length) {
-        const chunk = buffer.slice(offset, offset + chunkSize);
-        const lengthBuf = Buffer.alloc(4);
-        lengthBuf.writeUInt32BE(chunk.length, 0);
-        socket.write(lengthBuf);
-        socket.write(chunk);
-        offset += chunkSize;
-      }
+      const writeAsync = (data: Buffer | string) => new Promise<void>((resolve, reject) => {
+        if (!socket.write(data)) {
+          socket.once('drain', resolve);
+        } else {
+          resolve();
+        }
+        socket.once('error', reject);
+      });
 
-      // Terminate with a 0-length chunk
-      const end = Buffer.alloc(4);
-      end.writeUInt32BE(0, 0);
-      socket.write(end);
+      try {
+        while (offset < buffer.length) {
+          const chunk = buffer.slice(offset, offset + chunkSize);
+          const lengthBuf = Buffer.alloc(4);
+          lengthBuf.writeUInt32BE(chunk.length, 0);
+          await writeAsync(lengthBuf);
+          await writeAsync(chunk);
+          offset += chunkSize;
+        }
+
+        // Terminate with a 0-length chunk
+        const end = Buffer.alloc(4);
+        end.writeUInt32BE(0, 0);
+        await writeAsync(end);
+      } catch (err) {
+        logger.error('[ClamAV] Error writing to socket:', err);
+      }
     });
 
     socket.on('data', (data) => chunks.push(data));
