@@ -7,7 +7,7 @@
 import { prisma } from '../client';
 
 export async function createMergeSession(data: {
-  userId: string;
+  userId: string | null;
   fileType: 'pdf' | 'word' | 'ppt';
   fileCount: number;
 }) {
@@ -21,9 +21,12 @@ export async function createMergeSession(data: {
   });
 }
 
-export async function getMergeSessionById(sessionId: string, userId: string) {
+export async function getMergeSessionById(sessionId: string, userId?: string | null) {
   return prisma.mergeSession.findFirst({
-    where: { id: sessionId, user_id: userId },
+    where: { 
+      id: sessionId,
+      ...(userId !== undefined && { user_id: userId })
+    },
   });
 }
 

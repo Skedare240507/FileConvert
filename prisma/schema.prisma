@@ -53,14 +53,14 @@ model ConversionJob {
 
 model MergeSession {
   id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id       String   @db.Uuid
+  user_id       String?  @db.Uuid
   file_type     String // 'pdf' | 'word' | 'ppt'
   file_count    Int
   status        String // 'queued' | 'processing' | 'completed' | 'failed'
   r2_output_key String?
   created_at    DateTime @default(now()) @db.Timestamptz
 
-  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("merge_sessions")
 }

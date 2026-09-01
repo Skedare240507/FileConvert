@@ -63,7 +63,15 @@ export function verifyPaymentSignature(params: {
     .createHmac('sha256', env.RAZORPAY_KEY_SECRET)
     .update(body)
     .digest('hex');
-  return expectedSignature === params.signature;
+  // Use timingSafeEqual to prevent timing attacks on the HMAC comparison
+  try {
+    return crypto.timingSafeEqual(
+      Buffer.from(expectedSignature, 'hex'),
+      Buffer.from(params.signature, 'hex')
+    );
+  } catch {
+    return false; // Buffer length mismatch means invalid signature
+  }
 }
 
 // ── Webhook signature verification ───────────────────────────────────────
@@ -76,7 +84,15 @@ export function verifyWebhookSignature(rawBody: string, signature: string): bool
     .createHmac('sha256', env.RAZORPAY_WEBHOOK_SECRET)
     .update(rawBody)
     .digest('hex');
-  return expectedSignature === signature;
+  // Use timingSafeEqual to prevent timing attacks on the HMAC comparison
+  try {
+    return crypto.timingSafeEqual(
+      Buffer.from(expectedSignature, 'hex'),
+      Buffer.from(signature, 'hex')
+    );
+  } catch {
+    return false; // Buffer length mismatch means invalid signature
+  }
 }
 
 // ── Supported webhook event types ─────────────────────────────────────────

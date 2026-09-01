@@ -43,9 +43,12 @@ export function withRateLimit(handler: Handler, options: RateLimitOptions): Hand
   const { limit, windowSec, prefix = 'rl' } = options;
 
   return async function (req: NextRequest): Promise<Response> {
+    // Prioritize x-real-ip: Nginx sets this from the actual socket address
+    // (see nginx.conf: proxy_set_header X-Real-IP $remote_addr).
+    // x-forwarded-for can be spoofed by a client to bypass rate limits.
     const ip =
-      req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
       req.headers.get('x-real-ip') ??
+      req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
       'unknown';
 
     const key = `${prefix}:${ip}`;

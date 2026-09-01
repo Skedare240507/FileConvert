@@ -11,7 +11,7 @@ export default function SpreadsheetTools() {
         <div className={styles.heroOverlay}></div>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGpcRdVKIbSdz4ZBDajMV_gJnk5eipF_AaGT2qSaz3lHkCXNvdiwncTQnyKBKmS-hrZ-ovlL_RqabdvTTiomxTSiputTaFnkZTCZeYlZAyeLKkAmHolQAAsT2LB6x0z7N7u10EnDotuqkbzrlUEb-Wv0KmEDrWdctDlaB4IZjPFRJRZkj9BuyLvHZCHbjAmJYYUD0yzQQ3195INFzpeA6UeTXgnkdOYlGDQX7E4P0RQ-p4teKY0_hKVBK1Wkax5jIXRznb3Vmtaw"
+          src="/spreadsheet.png"
           alt="background"
           aria-hidden="true"
           className={styles.heroBg}
@@ -91,7 +91,7 @@ export default function SpreadsheetTools() {
           <div className={styles.featuresImgWrapper}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgKLuAFIQpwpqQJ2OsGKr05YVu7DWgXTBqNuxlUqywFYyvKKAZk_hcu-3ENT0YUPAmYW4km0Fbi2eIArRlCbsdVwStbOm6KKY8_366vIUcJiHOfoMWGqeLhqyUr1SjMoygtuUBRVA68qckwaJymxSD4_2bktAZpiYqOpdTNkdkR614AkOunRrzSncQZd9nswfm_Nz7TAwRwxjEAznI57t2N700-TFGyDv5aLjoBb3kLqwtCCK03YPYh-L0WtuZsiK5KVnQEYPapQ"
+              src="/unnamed.png"
               className={styles.featuresImg}
               alt="Professional features"
             />

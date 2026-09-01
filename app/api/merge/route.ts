@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
       return Response.json({ error: 'fileType is required' }, { status: 400 });
     }
 
-    const userId = 'anonymous'; // Using anonymous for unauthenticated
+    const userId = null; // Using null for unauthenticated
 
     // Create session in DB
     const session = await createMergeSession({
