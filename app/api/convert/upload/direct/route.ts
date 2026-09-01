@@ -21,9 +21,13 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(arrayBuffer);
     
     const scanResult = await scanBuffer(buffer);
-    if (!scanResult.isClean) {
-      logger.warn(`[API] /convert/upload/direct rejected malware: ${scanResult.viruses.join(', ')}`);
-      return Response.json({ error: 'Malware detected', details: scanResult.viruses }, { status: 400 });
+    if (scanResult.result === 'infected') {
+      logger.warn(`[API] /convert/upload/direct rejected malware: ${scanResult.virusName}`);
+      return Response.json({ error: 'Malware detected', details: scanResult.virusName }, { status: 400 });
+    }
+    if (scanResult.result === 'error') {
+      logger.error('[API] /convert/upload/direct ClamAV unavailable — rejecting upload for safety');
+      return Response.json({ error: 'File scanning service unavailable, please try again' }, { status: 503 });
     }
     
     await uploadToB2(r2Key, buffer, file.type || 'application/octet-stream');

@@ -34,13 +34,17 @@ export async function POST(req: NextRequest) {
     // Upload files sequentially to maintain order
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      const r2Key = buildR2UploadKey(userId, `${session.id}_${i}_${file.name}`);
+      const r2Key = buildR2UploadKey('anonymous', `${session.id}_${i}_${file.name}`);
       const buffer = Buffer.from(await file.arrayBuffer());
       
       const scanResult = await scanBuffer(buffer);
-      if (!scanResult.isClean) {
-        logger.warn(`[API] /merge rejected malware in file ${file.name}: ${scanResult.viruses.join(', ')}`);
-        return Response.json({ error: `Malware detected in file ${file.name}`, details: scanResult.viruses }, { status: 400 });
+      if (scanResult.result === 'infected') {
+        logger.warn(`[API] /merge rejected malware in file ${file.name}: ${scanResult.virusName}`);
+        return Response.json({ error: `Malware detected in file ${file.name}`, details: scanResult.virusName }, { status: 400 });
+      }
+      if (scanResult.result === 'error') {
+        logger.error(`[API] /merge ClamAV unavailable — rejecting upload for safety`);
+        return Response.json({ error: 'File scanning service unavailable, please try again' }, { status: 503 });
       }
 
       await uploadToB2(r2Key, buffer, file.type || 'application/octet-stream');
