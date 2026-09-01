@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { buildR2UploadKey } from '@/backend/utils/sanitize';
 import { uploadToB2 } from '@/backend/services/storage/storage';
+import { scanBuffer } from '@/backend/services/scan/clamav';
 import { createMergeSession } from '@/backend/db/queries/mergeSessions';
 import { mergeQueue } from '@/backend/queue/queues';
 import { logger } from '@/backend/utils/logger';
@@ -35,6 +36,13 @@ export async function POST(req: NextRequest) {
       const file = files[i];
       const r2Key = buildR2UploadKey(userId, `${session.id}_${i}_${file.name}`);
       const buffer = Buffer.from(await file.arrayBuffer());
+      
+      const scanResult = await scanBuffer(buffer);
+      if (!scanResult.isClean) {
+        logger.warn(`[API] /merge rejected malware in file ${file.name}: ${scanResult.viruses.join(', ')}`);
+        return Response.json({ error: `Malware detected in file ${file.name}`, details: scanResult.viruses }, { status: 400 });
+      }
+
       await uploadToB2(r2Key, buffer, file.type || 'application/octet-stream');
       r2InputKeys.push(r2Key);
     }

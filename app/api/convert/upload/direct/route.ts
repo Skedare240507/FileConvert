@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { buildR2UploadKey } from '@/backend/utils/sanitize';
 import { uploadToB2 } from '@/backend/services/storage/storage';
+import { scanBuffer } from '@/backend/services/scan/clamav';
 import { logger } from '@/backend/utils/logger';
 
 export async function POST(req: NextRequest) {
@@ -18,6 +19,12 @@ export async function POST(req: NextRequest) {
     // Read file as buffer
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
+    
+    const scanResult = await scanBuffer(buffer);
+    if (!scanResult.isClean) {
+      logger.warn(`[API] /convert/upload/direct rejected malware: ${scanResult.viruses.join(', ')}`);
+      return Response.json({ error: 'Malware detected', details: scanResult.viruses }, { status: 400 });
+    }
     
     await uploadToB2(r2Key, buffer, file.type || 'application/octet-stream');
     

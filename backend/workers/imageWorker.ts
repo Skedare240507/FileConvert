@@ -16,7 +16,7 @@ import { JOB_STATUS } from '@/backend/config/constants';
 import type { ConversionJobPayload } from '@/backend/queue/jobs/conversionJob';
 import { logger } from '@/backend/utils/logger';
 
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { promisify } from 'util';
 import path from 'path';
 import os from 'os';
@@ -25,7 +25,7 @@ import JSZip from 'jszip';
 import { PDFDocument } from 'pdf-lib';
 import FormData from 'form-data';
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 export async function processImageJob(job: Job<ConversionJobPayload>): Promise<void> {
   const { jobId, sourceType, targetType, r2InputKey, dpi } = job.data;
@@ -49,7 +49,7 @@ export async function processImageJob(job: Job<ConversionJobPayload>): Promise<v
       try {
         // Run ImageMagick: convert -density 150 input.pdf output_page_%03d.jpg
         const dpiVal = dpi || 150;
-        await execAsync(`magick -density ${dpiVal} "${tmpPdfPath}" "${tmpJpgPrefix}%03d.jpg"`);
+        await execFileAsync('magick', ['-density', String(dpiVal), tmpPdfPath, `${tmpJpgPrefix}%03d.jpg`]);
         
         // Find all generated jpg files
         const files = await fs.readdir(os.tmpdir());

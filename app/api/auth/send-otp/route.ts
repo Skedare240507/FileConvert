@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../backend/db";
 import { withRateLimit } from "@/backend/middleware/withRateLimit";
+import { redisConnection } from "@/backend/queue/client";
 import nodemailer from "nodemailer";
 import crypto from "crypto";
 
@@ -16,10 +17,21 @@ function generateSecureToken() {
 export const POST = withRateLimit(
   async (req: NextRequest) => {
     try {
-      const { email, purpose } = await req.json();
+      const { email: rawEmail, purpose } = await req.json();
+      const email = typeof rawEmail === 'string' ? rawEmail.trim().toLowerCase() : '';
 
       if (!email || !purpose) {
         return NextResponse.json({ message: "Email and purpose are required" }, { status: 400 });
+      }
+
+      // Email-specific rate limiting (3 requests per 15 mins)
+      const emailRateKey = `rl:send-otp-email:${email}`;
+      const emailReqs = await redisConnection.incr(emailRateKey);
+      if (emailReqs === 1) {
+        await redisConnection.expire(emailRateKey, 900);
+      }
+      if (emailReqs > 3) {
+        return NextResponse.json({ message: "Too many requests for this email. Please try again later." }, { status: 429 });
       }
 
       // Validate purpose against strict allowlist
@@ -92,7 +104,7 @@ export const POST = withRateLimit(
         }
       } else {
         emailSubject = "Verify your email for FileConvert";
-        emailText = `Your verification code is: ${code}. It expires in 10 minutes.`;
+        emailText = `Your verification code is: ${code}. It expires in 3 minutes.`;
         emailHtml = `
           <div style="font-family: Arial, sans-serif; max-width: 480px; margin: auto; padding: 32px; background: #13141a; border-radius: 12px; border: 1px solid #2a2d3a;">
             <h2 style="color: #ffffff; text-align: center;">Email Verification</h2>
@@ -100,7 +112,7 @@ export const POST = withRateLimit(
             <div style="text-align: center; margin: 24px 0;">
               <span style="font-size: 36px; font-weight: 700; letter-spacing: 10px; color: #7c6ef5; background: #1e1f2a; padding: 16px 24px; border-radius: 8px; display: inline-block;">${code}</span>
             </div>
-            <p style="color: #8b8d98; font-size: 13px; text-align: center;">This code expires in <strong style="color: #ffffff;">10 minutes</strong>.</p>
+            <p style="color: #8b8d98; font-size: 13px; text-align: center;">This code expires in <strong style="color: #ffffff;">3 minutes</strong>.</p>
           </div>
         `;
         if (!process.env.SMTP_HOST) {

@@ -77,7 +77,7 @@ export const POST = withRateLimit(
 
     } catch (error: any) {
       console.error("Error in register:", error);
-      return NextResponse.json({ message: "Internal server error", error: error?.message || String(error) }, { status: 500 });
+      return NextResponse.json({ message: "Internal server error" }, { status: 500 });
     }
   },
   { limit: 5, windowSec: 900, prefix: 'rl:register' }

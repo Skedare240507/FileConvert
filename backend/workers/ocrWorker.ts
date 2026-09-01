@@ -16,14 +16,14 @@ import type { ConversionJobPayload } from '@/backend/queue/jobs/conversionJob';
 import { logger } from '@/backend/utils/logger';
 
 import { createWorker } from 'tesseract.js';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { promisify } from 'util';
 import path from 'path';
 import os from 'os';
 import { promises as fs } from 'fs';
 import crypto from 'crypto';
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 export async function processOcrJob(job: Job<ConversionJobPayload>): Promise<void> {
   const { jobId, r2InputKey, targetType, sourceType } = job.data;
@@ -42,7 +42,7 @@ export async function processOcrJob(job: Job<ConversionJobPayload>): Promise<voi
 
     if (sourceType === 'pdf') {
       const tmpImgPrefix = path.join(os.tmpdir(), `${tmpId}_page_`);
-      await execAsync(`magick -density 300 "${tmpInputPath}" "${tmpImgPrefix}%03d.png"`);
+      await execFileAsync('magick', ['-density', '300', tmpInputPath, `${tmpImgPrefix}%03d.png`]);
       
       const files = await fs.readdir(os.tmpdir());
       const generatedImgs = files.filter(f => f.startsWith(`${tmpId}_page_`) && f.endsWith('.png'));

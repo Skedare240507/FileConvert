@@ -8,7 +8,8 @@ const STRONG_PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-
 export const POST = withRateLimit(
   async (req: NextRequest) => {
     try {
-      const { email, password, token } = await req.json();
+      const { email: rawEmail, password, token } = await req.json();
+      const email = typeof rawEmail === 'string' ? rawEmail.trim().toLowerCase() : '';
 
       if (!email || !password || !token) {
         return NextResponse.json({ message: "Missing required fields" }, { status: 400 });

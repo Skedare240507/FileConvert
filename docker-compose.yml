@@ -4,7 +4,7 @@ services:
     container_name: fileconvert-redis
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     environment:
       TZ: Asia/Kolkata
     volumes:
@@ -20,7 +20,7 @@ services:
     container_name: fileconvert-gotenberg
     restart: unless-stopped
     ports:
-      - "3001:3000"
+      - "127.0.0.1:3001:3000"
     environment:
       TZ: Asia/Kolkata
     command:
@@ -38,7 +38,7 @@ services:
     container_name: fileconvert-clamav
     restart: unless-stopped
     ports:
-      - "3310:3310"
+      - "127.0.0.1:3310:3310"
     environment:
       TZ: Asia/Kolkata
       CLAMAV_NO_FRESHCLAM: "false"
@@ -60,7 +60,7 @@ services:
     container_name: fileconvert-pdf-converter
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     environment:
       TZ: Asia/Kolkata
     healthcheck:
