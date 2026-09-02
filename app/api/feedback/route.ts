@@ -2,6 +2,14 @@ import { NextResponse } from 'next/server';
 import { prisma } from '../../../backend/db';
 import nodemailer from 'nodemailer';
 
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
 export async function POST(req: Request) {
   try {
     const { name, email, category, message } = await req.json();
@@ -32,6 +40,11 @@ export async function POST(req: Request) {
         },
       });
 
+      const safeName = escapeHtml(String(name));
+      const safeEmail = escapeHtml(String(email));
+      const safeCategory = escapeHtml(String(category));
+      const safeMessage = escapeHtml(String(message));
+
       const mailOptions = {
         from: `"${name}" <${process.env.SMTP_USER}>`, // use authenticated user as sender to avoid spam filters
         replyTo: email,
@@ -49,18 +62,18 @@ export async function POST(req: Request) {
               <table style="width: 100%; border-collapse: collapse;">
                 <tr>
                   <td style="padding: 8px 0; color: #8b8d98; width: 80px; font-size: 14px;">Name</td>
-                  <td style="padding: 8px 0; color: #ffffff; font-size: 15px; font-weight: bold;">${name}</td>
+                  <td style="padding: 8px 0; color: #ffffff; font-size: 15px; font-weight: bold;">${safeName}</td>
                 </tr>
                 <tr>
                   <td style="padding: 8px 0; color: #8b8d98; font-size: 14px;">Email</td>
                   <td style="padding: 8px 0; color: #7c6ef5; font-size: 15px; font-weight: bold;">
-                    <a href="mailto:${email}" style="color: #7c6ef5; text-decoration: none;">${email}</a>
+                    <a href="mailto:${safeEmail}" style="color: #7c6ef5; text-decoration: none;">${safeEmail}</a>
                   </td>
                 </tr>
                 <tr>
                   <td style="padding: 8px 0; color: #8b8d98; font-size: 14px;">Category</td>
                   <td style="padding: 8px 0; color: #ffffff; font-size: 15px; font-weight: bold;">
-                    <span style="background: #2a2d3a; padding: 4px 10px; border-radius: 16px; font-size: 13px;">${category}</span>
+                    <span style="background: #2a2d3a; padding: 4px 10px; border-radius: 16px; font-size: 13px;">${safeCategory}</span>
                   </td>
                 </tr>
               </table>
@@ -68,7 +81,7 @@ export async function POST(req: Request) {
 
             <h3 style="color: #ffffff; font-size: 16px; margin-bottom: 12px;">Message</h3>
             <div style="background: #1e1f2a; padding: 16px; border-radius: 8px; border-left: 4px solid #7c6ef5;">
-              <p style="color: #d1d5db; margin: 0; font-size: 14px; line-height: 1.6; white-space: pre-wrap;">${message}</p>
+              <p style="color: #d1d5db; margin: 0; font-size: 14px; line-height: 1.6; white-space: pre-wrap;">${safeMessage}</p>
             </div>
             
             <hr style="border: none; border-top: 1px solid #2a2d3a; margin: 32px 0 24px 0;" />
