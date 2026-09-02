@@ -22,7 +22,7 @@ export function sanitizeFilename(filename: string): string {
   safe = safe.replace(/\.\./g, '');
 
   // 3. Allow only alphanumerics, hyphens, underscores, dots
-  safe = safe.replace(/[^a-zA-Z0-9._\-]/g, '_');
+  safe = safe.replace(/[^a-zA-Z0-9._-]/g, '_');
 
   // 4. Strip leading dots (hidden-file prevention)
   safe = safe.replace(/^\.+/, '');

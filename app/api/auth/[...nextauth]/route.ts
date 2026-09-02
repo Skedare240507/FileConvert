@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/backend/db/client";
 import bcrypt from "bcryptjs";
+import nodemailer from "nodemailer";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -56,7 +57,6 @@ export const authOptions: NextAuthOptions = {
             });
 
             if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS && user.email) {
-              const nodemailer = require('nodemailer');
               const transporter = nodemailer.createTransport({
                 host: process.env.SMTP_HOST,
                 port: Number(process.env.SMTP_PORT) || 587,
@@ -130,7 +130,6 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (session.user && token.sub) {
-        // @ts-ignore
         session.user.id = token.sub;
       }
       return session;

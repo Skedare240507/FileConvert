@@ -77,8 +77,8 @@ export default function MergePage() {
       const sessionId = data.sessionId;
 
       // Start SSE tracking
-      let es: EventSource | null = new EventSource(`/api/merge/${sessionId}/live`);
-      let sseTimeout: NodeJS.Timeout | null = null;
+      const es: EventSource | null = new EventSource(`/api/merge/${sessionId}/live`);
+      const sseTimeout: NodeJS.Timeout | null = null;
 
       es.onmessage = (e) => {
         const update = JSON.parse(e.data);

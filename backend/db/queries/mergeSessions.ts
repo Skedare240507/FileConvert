@@ -11,22 +11,24 @@ export async function createMergeSession(data: {
   fileType: 'pdf' | 'word' | 'ppt';
   fileCount: number;
 }) {
+  const createData: any = {
+    file_type: data.fileType,
+    file_count: data.fileCount,
+    status: 'queued',
+  };
+  if (data.userId) createData.user_id = data.userId;
+
   return prisma.mergeSession.create({
-    data: {
-      user_id: data.userId,
-      file_type: data.fileType,
-      file_count: data.fileCount,
-      status: 'queued',
-    },
+    data: createData,
   });
 }
 
 export async function getMergeSessionById(sessionId: string, userId?: string | null) {
+  const whereData: any = { id: sessionId };
+  if (userId) whereData.user_id = userId;
+
   return prisma.mergeSession.findFirst({
-    where: { 
-      id: sessionId,
-      ...(userId !== undefined && { user_id: userId })
-    },
+    where: whereData,
   });
 }
 

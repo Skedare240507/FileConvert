@@ -6,7 +6,7 @@
     "dev": "next dev --turbo",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint": "eslint app backend components --ext .js,.jsx,.ts,.tsx",
     "worker": "tsx --env-file=.env backend/workers/orchestrator.ts",
     "postinstall": "prisma generate"
   },
@@ -41,8 +41,12 @@
     "@types/nodemailer": "^8.0.1",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.69.0",
+    "@typescript-eslint/parser": "^8.69.0",
     "eslint": "^8.57.1",
-    "eslint-config-next": "16.2.10",
+    "eslint-config-next": "^14.2.18",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "prisma": "^5.22.0",
     "tsx": "^4.23.12",
     "typescript": "^5"
