@@ -138,6 +138,7 @@ export default function MergePage() {
       {/* Background Image */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
+        suppressHydrationWarning
         src="/merge-bg.png"
         alt="background image"
         aria-hidden="true"
