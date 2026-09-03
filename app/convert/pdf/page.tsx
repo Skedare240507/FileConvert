@@ -87,7 +87,7 @@ export default function PdfToolsPage() {
       {/* Why Professionals Choose Us */}
       <section className={styles.whySection}>
         <div className={styles.whyBg}>
-          <img 
+          <img suppressHydrationWarning 
             className={styles.whyBgImg} 
             src="https://lh3.googleusercontent.com/aida/AP1WRLsR6dQrgcoqAMXTEItvmKi1X8eZ8yf6pbtdLMVGLlELrWCqdAWPgUIOvP_uZPSU9RmlQmWWi1IlD8-hwERzuR2-Z0vaEdoXEdJCy9EjyBPhS7OR6D661iMPEYkMs0hvaaH-mBQq3kP9LYIum64N8LC4FgSDaBycrCC_OWh_tD3Ckyb9MdEdJgZ5leVHRVFqdK-WqZ5Xr_5WbAUcnqK5lsWu-j1Yv1quUMgUmG67U05f2AHoA7MFQ8tV" 
             alt="Abstract Background" 

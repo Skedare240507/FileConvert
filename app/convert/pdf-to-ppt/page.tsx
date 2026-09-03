@@ -55,7 +55,7 @@ export default function PdfToPptPage() {
       {/* ── HERO ── */}
       <section className={styles.hero}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_yCTRUb9vQ-aC_x-yA2AIBlwhhJyDYplt_4jRdlCdrXrehKW6dnyPFKvdARggE4Z1IfPA1TlsQhTERP_4DfSZd1GdGukY8OSSrx1ZgkSuVEwYUHbRLE_wwdWNbFg7jyOSpc3-ybgxqh44ggYtS5XN2yvtcsB3CJUD4VuV_9lw_v79mcft-3Fue1fkX4Sgeu-jKvb8DV5LvBO6ShaOkW9ToLFCv50nFNEbi0PTLEYnNR5JVpQru9Avpi_dhikUDXRUWbQlfgopVA" alt="" aria-hidden="true" className={styles.heroBg} />
+        <img suppressHydrationWarning src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_yCTRUb9vQ-aC_x-yA2AIBlwhhJyDYplt_4jRdlCdrXrehKW6dnyPFKvdARggE4Z1IfPA1TlsQhTERP_4DfSZd1GdGukY8OSSrx1ZgkSuVEwYUHbRLE_wwdWNbFg7jyOSpc3-ybgxqh44ggYtS5XN2yvtcsB3CJUD4VuV_9lw_v79mcft-3Fue1fkX4Sgeu-jKvb8DV5LvBO6ShaOkW9ToLFCv50nFNEbi0PTLEYnNR5JVpQru9Avpi_dhikUDXRUWbQlfgopVA" alt="" aria-hidden="true" className={styles.heroBg} />
         <div className={styles.heroOverlay} />
 
         {/* Glass Card */}

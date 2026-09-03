@@ -82,7 +82,7 @@ export default function PdfToJpgPage() {
       {/* ── HERO ── */}
       <section className={styles.hero}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/image-tools-bg.jpg?v=2" alt="" aria-hidden="true" className={styles.heroBg} />
+        <img suppressHydrationWarning src="/image-tools-bg.jpg?v=2" alt="" aria-hidden="true" className={styles.heroBg} />
         <div className={styles.heroOverlay} />
 
         {/* Glass Card */}

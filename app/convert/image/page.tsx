@@ -48,7 +48,7 @@ export default function ImageTools() {
       {/* Hero Section */}
       <section className={styles.hero}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <img suppressHydrationWarning
           src="/image-tools-bg.jpg"
           alt="Image transformation background"
           aria-hidden="true"
@@ -109,7 +109,7 @@ export default function ImageTools() {
         <div className={styles.whyContainer}>
           <div className={styles.whyImageWrapper}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/hero-bg.jpg" alt="Office tools" className={styles.whyImage} />
+            <img suppressHydrationWarning src="/hero-bg.jpg" alt="Office tools" className={styles.whyImage} />
             <div className={styles.testimonial}>
               <p className={styles.testimonialText}>
                 &quot;FileConvert has streamlined our social media workflow significantly. The batch processing is unmatched.&quot;

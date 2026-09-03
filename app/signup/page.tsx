@@ -138,14 +138,14 @@ export default function SignUp() {
   return (
     <div className={styles.container}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/login-bg.jpg" alt="background" aria-hidden="true" className={styles.bgImg} />
+      <img suppressHydrationWarning src="/login-bg.jpg" alt="background" aria-hidden="true" className={styles.bgImg} />
       <div className={styles.overlay}></div>
 
       <div className={styles.card}>
         <div className={styles.header}>
           <div className={styles.logo}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="FileConvert Logo" width={36} height={36} style={{ borderRadius: '6px', objectFit: 'contain' }} />
+            <img suppressHydrationWarning src="/logo.png" alt="FileConvert Logo" width={36} height={36} style={{ borderRadius: '6px', objectFit: 'contain' }} />
             FileConvert
           </div>
           <div className={styles.subtitle}>Premium Document Utility</div>

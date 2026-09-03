@@ -53,7 +53,7 @@ export default function WordToPpt() {
       {/* ===== HERO ===== */}
       <section className={styles.hero}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <img suppressHydrationWarning
           src="https://lh3.googleusercontent.com/aida-public/AB6AXuDaxoXDfQyoOj9oDcRKlbzaI1BTVjYOYZwloCKBFZetcGt7v5oRgvqJ0jqN466TMuTsRySdov-KnBJ5Tu7_D23yq7lU5zcPsPRsRbONkNPnw8yWWkL2xrDi7-4xPcEXKinfnsZdEod2omtDMaj7l6cTGQVQfBjViYEeqYG7VPcd4IREt2cCLwhKfB6_b9Hsw3-n3_FQaM7b9XZKiCrFNFDjyi7BXJxeP80UENBdEAtE9vblMiyWeNMlGSW7w5sgEB8vC3garfHaDQ"
           alt="Workspace background"
           className={styles.heroBgImg}

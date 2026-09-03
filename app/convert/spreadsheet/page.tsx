@@ -10,7 +10,7 @@ export default function SpreadsheetTools() {
       <section className={styles.hero}>
         <div className={styles.heroOverlay}></div>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <img suppressHydrationWarning
           src="/spreadsheet.png"
           alt="background"
           aria-hidden="true"
@@ -90,7 +90,7 @@ export default function SpreadsheetTools() {
         <div className={styles.featuresContainer}>
           <div className={styles.featuresImgWrapper}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <img suppressHydrationWarning
               src="/unnamed.png"
               className={styles.featuresImg}
               alt="Professional features"

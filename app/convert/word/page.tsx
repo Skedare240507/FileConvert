@@ -103,7 +103,7 @@ export default function WordTools() {
       {/* Hero Section */}
       <section className={styles.hero}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <img suppressHydrationWarning
           src="/word-tools-bg.jpg"
           alt="Professional desk setup"
           aria-hidden="true"

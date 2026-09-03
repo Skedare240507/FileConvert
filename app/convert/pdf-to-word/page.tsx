@@ -65,6 +65,7 @@ export default function PdfToWord() {
       <section className={styles.hero}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
+          suppressHydrationWarning
           src="/pdf-to-word-bg.jpg?v=2"
           alt=""
           aria-hidden="true"

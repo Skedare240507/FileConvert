@@ -40,7 +40,7 @@ export default function WordToJpg() {
       {/* ===== HERO ===== */}
       <section className={styles.hero}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <img suppressHydrationWarning
           src="https://lh3.googleusercontent.com/aida-public/AB6AXuBK123oIKEVnSzUw9nFR1-PVcXPFH63XVRRxl2IvSH5vniRzeQ94kenfwzlWp0FFw5Q53On6eMb_K1cd0ONWHXh3RoNOj3QTxUNwdtfyS_BNky58eqYetXFgc_fRYeYyJ2fQ9KuqqRzMk2PxC9V6Wz0dNEDS4nYysmXzcuHNgTE7mdcRvsdIqrPFANbDCEOpcURK2XwIl-Nauo8MOg25SATXy1sFtgouQKRerpVZbn6mhx1HNeajEG5uHEIgnubsYZPsdEiCj0xbw"
           alt="Workspace background"
           className={styles.heroBg}

@@ -227,7 +227,7 @@ export default function ExcelToCsv() {
             </div>
           </div>
           <div className={styles.infoImageWrapper}>
-            <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Data analysis showing spreadsheet conversion" className={styles.infoImage} />
+            <img suppressHydrationWarning src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Data analysis showing spreadsheet conversion" className={styles.infoImage} />
           </div>
         </div>
       </section>

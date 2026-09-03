@@ -11,7 +11,7 @@ export async function GET(
   { params }: { params: Promise<{ sessionId: string }> }
 ) {
   const { sessionId } = await params;
-  const userId = 'anonymous'; // Matches the creation logic
+  const userId = null; // Using null for unauthenticated
 
   const encoder = new TextEncoder();
   const startTime = Date.now();

@@ -53,7 +53,7 @@ export default function JpgToPptPage() {
     <>
       {/* Hero Section with Photo Background */}
       <section className={styles.hero}>
-        <img
+        <img suppressHydrationWarning
           src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJGGZe3ph0gaL6D6Z4bCiEYp5Ja3vSVFsd0fUQzWiVQNJD38hRCHgyFr9zQem5Qm6U5-m-YBpiJ3sKxxsXJVVTDrIPocNrBQyF9DCQekNMcLtlOx6Isj_4asIEdwCjloC00Ihmvg6FXCRVJA20xBtTTLe5iaVaFuksEDurpSATZXtV2h5SvEvahSCZBzy9m1_20g2Kmoayp2_uDou_vsZ5CmMBFusGgb6MC1WDEjg7_BM_CHZPfQWx5fl7dgQj_buwtTfG7Wo9hQ"
           alt="A sophisticated high-angle view of a clean, minimalist wooden desk..."
           className={styles.heroBg}
