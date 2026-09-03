@@ -16,6 +16,7 @@ export default function Header() {
             <Link href="/">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
+                suppressHydrationWarning
                 src="/logo.png"
                 alt="FileConvert Logo"
                 width={48}
@@ -84,7 +85,7 @@ export default function Header() {
         <div style={{ marginBottom: '24px', paddingBottom: '24px', borderBottom: '1px solid var(--surface-variant)' }}>
           <Link href="/" onClick={() => setIsSidebarOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 700, fontSize: '18px', color: 'var(--primary)', textDecoration: 'none' }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="FileConvert" width={28} height={28} style={{ borderRadius: '6px', objectFit: 'contain' }} />
+            <img suppressHydrationWarning src="/logo.png" alt="FileConvert" width={28} height={28} style={{ borderRadius: '6px', objectFit: 'contain' }} />
             FileConvert
           </Link>
         </div>

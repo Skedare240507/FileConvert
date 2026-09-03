@@ -65,6 +65,6 @@ export async function POST(req: NextRequest) {
     return Response.json({ sessionId: session.id });
   } catch (err) {
     logger.error('[API] /merge failed', err);
-    return Response.json({ error: 'Internal server error' }, { status: 500 });
+    return Response.json({ error: 'Internal server error', details: err instanceof Error ? err.message : String(err) }, { status: 500 });
   }
 }

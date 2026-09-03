@@ -20,6 +20,7 @@ export default function Home() {
         {/* Background image as real img element — always works regardless of CSS module quirks */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
+          suppressHydrationWarning
           src="/hero-bg.jpg?v=2"
           alt="background image"
           aria-hidden="true"
