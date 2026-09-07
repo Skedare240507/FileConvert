@@ -1,7 +1,6 @@
 import { NextRequest } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { getConversionJobById } from '@/backend/db/queries/conversionJobs';
+import { resolveTenantIdentity, canAccessResource } from '@/backend/utils/tenantSecurity';
 import { logger } from '@/backend/utils/logger';
 
 export async function GET(req: NextRequest) {
@@ -20,12 +19,10 @@ export async function GET(req: NextRequest) {
       return Response.json({ error: 'Job not found' }, { status: 404 });
     }
 
-    // Verify ownership if the job belongs to a specific user
-    if (jobRecord.user_id) {
-      const session = await getServerSession(authOptions);
-      if (!session?.user?.id || session.user.id !== jobRecord.user_id) {
-        return Response.json({ error: 'Forbidden' }, { status: 403 });
-      }
+    // Verify ownership (authenticated user or anonymous guest cookie)
+    const tenant = await resolveTenantIdentity(req);
+    if (!canAccessResource(jobRecord, tenant)) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     return Response.json({

@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getMergeSessionById } from '@/backend/db/queries/mergeSessions';
+import { resolveTenantIdentity, canAccessResource } from '@/backend/utils/tenantSecurity';
 
 const POLL_INTERVAL_MS = 2000;
 const MAX_STREAM_DURATION_MS = 10 * 60 * 1000; // 10 minutes max
@@ -11,7 +12,20 @@ export async function GET(
   { params }: { params: Promise<{ sessionId: string }> }
 ) {
   const { sessionId } = await params;
-  const userId = null; // Using null for unauthenticated
+
+  if (!sessionId) {
+    return Response.json({ error: 'Missing sessionId' }, { status: 400 });
+  }
+
+  const sessionRecord = await getMergeSessionById(sessionId);
+  if (!sessionRecord) {
+    return Response.json({ error: 'Session not found' }, { status: 404 });
+  }
+
+  const tenant = await resolveTenantIdentity(req);
+  if (!canAccessResource(sessionRecord, tenant)) {
+    return Response.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
   const encoder = new TextEncoder();
   const startTime = Date.now();
@@ -36,7 +50,7 @@ export async function GET(
         // Poll DB for job status
         let session;
         try {
-          session = await getMergeSessionById(sessionId, userId);
+          session = await getMergeSessionById(sessionId);
         } catch {
           send({ sessionId, status: 'error', message: 'Failed to fetch session status' });
           controller.close();

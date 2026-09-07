@@ -1,12 +1,10 @@
 import { NextResponse } from 'next/server';
 import { conversionQueue, mergeQueue, scanQueue, cleanupQueue } from '@/backend/queue/queues';
-
-// Note: Admin routes should be protected by an auth middleware or session check.
-// This is a basic implementation for the MVP.
+import { withAdminAuth } from '@/backend/middleware/withAdminAuth';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export const GET = withAdminAuth(async () => {
   try {
     const [conversion, merge, scan, cleanup] = await Promise.all([
       conversionQueue.getJobCounts(),
@@ -29,4 +27,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
+});

@@ -16,6 +16,7 @@
 
 import { NextRequest } from 'next/server';
 import { getConversionJobById } from '@/backend/db/queries/conversionJobs';
+import { resolveTenantIdentity, canAccessResource } from '@/backend/utils/tenantSecurity';
 
 const POLL_INTERVAL_MS = 2000;
 const MAX_STREAM_DURATION_MS = 10 * 60 * 1000; // 10 minutes max
@@ -27,6 +28,20 @@ export async function GET(
   { params }: { params: Promise<{ jobId: string }> }
 ) {
   const { jobId } = await params;
+
+  if (!jobId) {
+    return Response.json({ error: 'Missing jobId' }, { status: 400 });
+  }
+
+  const jobRecord = await getConversionJobById(jobId);
+  if (!jobRecord) {
+    return Response.json({ error: 'Job not found' }, { status: 404 });
+  }
+
+  const tenant = await resolveTenantIdentity(req);
+  if (!canAccessResource(jobRecord, tenant)) {
+    return Response.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
   const encoder = new TextEncoder();
   const startTime = Date.now();

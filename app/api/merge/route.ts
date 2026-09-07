@@ -1,9 +1,10 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { buildR2UploadKey } from '@/backend/utils/sanitize';
 import { uploadToB2 } from '@/backend/services/storage/storage';
 import { scanBuffer } from '@/backend/services/scan/clamav';
 import { createMergeSession } from '@/backend/db/queries/mergeSessions';
 import { mergeQueue } from '@/backend/queue/queues';
+import { resolveTenantIdentity } from '@/backend/utils/tenantSecurity';
 import { logger } from '@/backend/utils/logger';
 
 export async function POST(req: NextRequest) {
@@ -20,21 +21,30 @@ export async function POST(req: NextRequest) {
       return Response.json({ error: 'fileType is required' }, { status: 400 });
     }
 
-    const userId = null; // Using null for unauthenticated
+    const tenant = await resolveTenantIdentity(req);
+    let anonToken = tenant.anonToken;
+    let shouldSetCookie = false;
+
+    if (!tenant.userId && !anonToken) {
+      anonToken = crypto.randomUUID();
+      shouldSetCookie = true;
+    }
 
     // Create session in DB
     const session = await createMergeSession({
-      userId,
+      userId: tenant.userId,
+      anonToken: tenant.userId ? null : anonToken,
       fileType,
       fileCount: files.length,
     });
 
     const r2InputKeys: string[] = [];
+    const ownerFolder = tenant.userId ?? 'anonymous';
 
     // Upload files sequentially to maintain order
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      const r2Key = buildR2UploadKey('anonymous', `${session.id}_${i}_${file.name}`);
+      const r2Key = buildR2UploadKey(ownerFolder, `${session.id}_${i}_${file.name}`);
       const buffer = Buffer.from(await file.arrayBuffer());
       
       const scanResult = await scanBuffer(buffer);
@@ -54,15 +64,27 @@ export async function POST(req: NextRequest) {
     // Add to merge queue
     await mergeQueue.add('mergeJob', {
       sessionId: session.id,
-      userId,
+      userId: tenant.userId,
       fileType,
       r2InputKeys,
       plan: 'free',
     });
 
-    logger.info(`[API] Enqueued merge session ${session.id}`);
+    logger.info(`[API] Enqueued merge session ${session.id} (user: ${tenant.userId ?? 'anon'})`);
 
-    return Response.json({ sessionId: session.id });
+    const res = NextResponse.json({ sessionId: session.id });
+
+    if (shouldSetCookie && anonToken) {
+      res.cookies.set('fc_anon_id', anonToken, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+        maxAge: 30 * 24 * 60 * 60,
+      });
+    }
+
+    return res;
   } catch (err) {
     logger.error('[API] /merge failed', err);
     return Response.json({ error: 'Internal server error', details: err instanceof Error ? err.message : String(err) }, { status: 500 });

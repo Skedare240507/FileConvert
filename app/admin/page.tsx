@@ -1,88 +1,49 @@
-'use client';
+import { getServerSession } from 'next-auth';
+import { notFound } from 'next/navigation';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { prisma } from '@/backend/db/client';
+import AdminDashboardClient from './AdminDashboardClient';
 
-import React, { useEffect, useState } from 'react';
+export const dynamic = 'force-dynamic';
 
-interface JobCounts {
-  waiting: number;
-  active: number;
-  completed: number;
-  failed: number;
-  delayed: number;
-}
+/**
+ * Admin Panel Server Guard.
+ * Strict zero-trust authentication:
+ * 1. Session exists and has user id and email.
+ * 2. User is present in database with role === 'admin'.
+ * 3. Account is not locked.
+ * 4. User email is in ADMIN_EMAILS environment variable.
+ *
+ * If ANY condition fails, triggers notFound() (404), completely cloaking
+ * the admin dashboard from unauthorized users and automated scanners.
+ */
+export default async function AdminPage() {
+  const session = await getServerSession(authOptions);
+  const email = session?.user?.email?.toLowerCase();
+  const userId = session?.user?.id;
 
-interface QueueMetrics {
-  conversion: JobCounts;
-  merge: JobCounts;
-  scan: JobCounts;
-  cleanup: JobCounts;
-  timestamp: string;
-}
+  if (!session?.user || !email || !userId) {
+    notFound();
+  }
 
-export default function AdminPage() {
-  const [metrics, setMetrics] = useState<QueueMetrics | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const ADMIN_EMAILS = (process.env.ADMIN_EMAILS ?? '')
+    .split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
 
-  const fetchMetrics = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch('/api/admin/queue-metrics');
-      if (!res.ok) throw new Error('Failed to fetch metrics');
-      const data = await res.json();
-      setMetrics(data);
-      setError(null);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (!ADMIN_EMAILS.includes(email)) {
+    notFound();
+  }
 
-  useEffect(() => {
-    fetchMetrics();
-    const interval = setInterval(fetchMetrics, 10000); // Poll every 10s
-    return () => clearInterval(interval);
-  }, []);
+  const dbUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true, lockedUntil: true },
+  });
 
-  const renderCard = (title: string, counts?: JobCounts) => (
-    <div style={{ padding: '1rem', border: '1px solid #ccc', borderRadius: '8px', marginBottom: '1rem' }}>
-      <h3>{title}</h3>
-      {counts ? (
-        <ul style={{ listStyle: 'none', padding: 0 }}>
-          <li><strong>Active:</strong> {counts.active}</li>
-          <li><strong>Waiting:</strong> {counts.waiting}</li>
-          <li><strong>Completed:</strong> {counts.completed}</li>
-          <li><strong>Failed:</strong> {counts.failed}</li>
-        </ul>
-      ) : (
-        <p>No data</p>
-      )}
-    </div>
-  );
+  const isLocked = dbUser?.lockedUntil && new Date(dbUser.lockedUntil) > new Date();
+  if (!dbUser || dbUser.role !== 'admin' || isLocked) {
+    notFound();
+  }
 
-  return (
-    <div style={{ maxWidth: '800px', margin: '2rem auto', fontFamily: 'sans-serif' }}>
-      <h1>Admin Dashboard</h1>
-      <button onClick={fetchMetrics} disabled={loading} style={{ marginBottom: '1rem', padding: '0.5rem 1rem' }}>
-        {loading ? 'Refreshing...' : 'Refresh Metrics'}
-      </button>
-
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-
-      {metrics && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-          {renderCard('Conversion Queue', metrics.conversion)}
-          {renderCard('Merge Queue', metrics.merge)}
-          {renderCard('Scan Queue', metrics.scan)}
-          {renderCard('Cleanup Queue', metrics.cleanup)}
-        </div>
-      )}
-      
-      {metrics && (
-        <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '1rem' }}>
-          Last updated: {new Date(metrics.timestamp).toLocaleString()}
-        </p>
-      )}
-    </div>
-  );
+  return <AdminDashboardClient userEmail={email} />;
 }

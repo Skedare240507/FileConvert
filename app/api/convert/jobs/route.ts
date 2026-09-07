@@ -22,12 +22,12 @@ function getDefaultEngine(workerType: string, sourceType: string, targetType: st
   return ENGINES.GOTENBERG; // fallback
 }
 
+import { resolveTenantIdentity } from '@/backend/utils/tenantSecurity';
+import { NextResponse } from 'next/server';
+
 export const POST = withRateLimit(
   async (req: NextRequest) => {
     try {
-      // Read body as text first — avoids a Turbopack req.json() parsing quirk
-      // where URL-like strings (e.g. r2InputKey containing '/') can cause
-      // "Bad escaped character in JSON" errors with certain Turbopack versions.
       const rawBody = await req.text();
       let body: unknown;
       try {
@@ -50,9 +50,19 @@ export const POST = withRateLimit(
       }
 
       const engineUsed = getDefaultEngine(workerType, data.sourceType, data.targetType);
+
+      const tenant = await resolveTenantIdentity(req);
+      let anonToken = tenant.anonToken;
+      let shouldSetCookie = false;
+
+      if (!tenant.userId && !anonToken) {
+        anonToken = crypto.randomUUID();
+        shouldSetCookie = true;
+      }
       
       const jobRecord = await createConversionJob({
-        userId: null,
+        userId: tenant.userId,
+        anonToken: tenant.userId ? null : anonToken,
         sourceType: data.sourceType,
         targetType: data.targetType,
         workerType,
@@ -72,8 +82,21 @@ export const POST = withRateLimit(
         dpi: data.dpi ? parseInt(data.dpi, 10) as 150 | 300 : undefined,
       });
       
-      logger.info(`[API] Created conversion job ${jobRecord.id} for anonymous user`);
-      return Response.json({ jobId: jobRecord.id, status: jobRecord.status });
+      logger.info(`[API] Created conversion job ${jobRecord.id} (user: ${tenant.userId ?? 'anon'})`);
+
+      const res = NextResponse.json({ jobId: jobRecord.id, status: jobRecord.status });
+
+      if (shouldSetCookie && anonToken) {
+        res.cookies.set('fc_anon_id', anonToken, {
+          httpOnly: true,
+          sameSite: 'lax',
+          secure: process.env.NODE_ENV === 'production',
+          path: '/',
+          maxAge: 30 * 24 * 60 * 60, // 30 days
+        });
+      }
+
+      return res;
     } catch (err) {
       logger.error('[API] /convert/jobs failed', err);
       return Response.json({ error: 'Internal server error' }, { status: 500 });
