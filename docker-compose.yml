@@ -83,7 +83,6 @@ services:
       - redis
       - gotenberg
       - clamav
-      - pdf-converter
 
 volumes:
   redis_data:

@@ -2,12 +2,12 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install dependencies — pdf2docx pulls in pdfminer, python-docx etc.
-RUN pip install --no-cache-dir \
-    fastapi==0.111.0 \
-    uvicorn==0.30.1 \
-    pdf2docx==0.5.8 \
-    python-multipart==0.0.9
+# Install dependencies with retry and timeout for network stability
+RUN pip install --default-timeout=100 --retries 5 --no-cache-dir \
+    fastapi \
+    "uvicorn[standard]" \
+    pdf2docx \
+    python-multipart
 
 COPY main.py .
 

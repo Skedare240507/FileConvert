@@ -113,4 +113,6 @@ setInterval(() => {
   });
 }, 15 * 60 * 1000); // 15 minutes
 
+logger.info('[Orchestrator] All workers initialized & listening for conversion and merge jobs on Redis');
+
 export default { orchestratorWorker, mergeOrchestratorWorker, cleanupWorker };

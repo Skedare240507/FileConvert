@@ -105,6 +105,10 @@ export const CONVERSION_WORKER_MAP: Record<string, WorkerType> = {
   'csv:xlsx': WORKER_TYPES.DOCUMENT,
   'docx:pdf': WORKER_TYPES.DOCUMENT,
   'docx:pptx': WORKER_TYPES.DOCUMENT,
+  'docx:jpg': WORKER_TYPES.IMAGE,
+  'pptx:pdf': WORKER_TYPES.DOCUMENT,
+  'pptx:docx': WORKER_TYPES.DOCUMENT,
+  'pptx:jpg': WORKER_TYPES.IMAGE,
 } as const;
 
 // ── Plans ────────────────────────────────────────────────────────────────

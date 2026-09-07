@@ -27,6 +27,39 @@ import FormData from 'form-data';
 
 const execFileAsync = promisify(execFile);
 
+async function renderPdfToJpgZip(pdfBuffer: Buffer, dpiVal: number = 150): Promise<Buffer> {
+  const tmpId = crypto.randomUUID();
+  const tmpPdfPath = path.join(os.tmpdir(), `${tmpId}.pdf`);
+  const tmpJpgPrefix = path.join(os.tmpdir(), `${tmpId}_page_`);
+  
+  await fs.writeFile(tmpPdfPath, pdfBuffer);
+  
+  try {
+    // Run ImageMagick: convert -density 150 input.pdf output_page_%03d.jpg
+    await execFileAsync('magick', ['-density', String(dpiVal), tmpPdfPath, `${tmpJpgPrefix}%03d.jpg`]);
+    
+    // Find all generated jpg files
+    const files = await fs.readdir(os.tmpdir());
+    const generatedJpgs = files.filter(f => f.startsWith(`${tmpId}_page_`) && f.endsWith('.jpg'));
+    
+    if (generatedJpgs.length === 0) {
+      throw new Error('ImageMagick generated no files');
+    }
+    
+    const zip = new JSZip();
+    for (const file of generatedJpgs) {
+      const filePath = path.join(os.tmpdir(), file);
+      const fileData = await fs.readFile(filePath);
+      zip.file(file, fileData);
+      await fs.unlink(filePath).catch(() => {});
+    }
+    
+    return await zip.generateAsync({ type: 'nodebuffer' });
+  } finally {
+    await fs.unlink(tmpPdfPath).catch(() => {});
+  }
+}
+
 export async function processImageJob(job: Job<ConversionJobPayload>): Promise<void> {
   const { jobId, sourceType, targetType, r2InputKey, dpi } = job.data;
   const conversionKey = `${sourceType}:${targetType}`;
@@ -40,42 +73,31 @@ export async function processImageJob(job: Job<ConversionJobPayload>): Promise<v
   switch (conversionKey) {
     case 'pdf:jpg': {
       outputExt = 'zip';
-      const tmpId = crypto.randomUUID();
-      const tmpPdfPath = path.join(os.tmpdir(), `${tmpId}.pdf`);
-      const tmpJpgPrefix = path.join(os.tmpdir(), `${tmpId}_page_`);
-      
-      await fs.writeFile(tmpPdfPath, inputBuffer);
-      
-      try {
-        // Run ImageMagick: convert -density 150 input.pdf output_page_%03d.jpg
-        const dpiVal = dpi || 150;
-        await execFileAsync('magick', ['-density', String(dpiVal), tmpPdfPath, `${tmpJpgPrefix}%03d.jpg`]);
-        
-        // Find all generated jpg files
-        const files = await fs.readdir(os.tmpdir());
-        const generatedJpgs = files.filter(f => f.startsWith(`${tmpId}_page_`) && f.endsWith('.jpg'));
-        
-        if (generatedJpgs.length === 0) {
-          throw new Error('ImageMagick generated no files');
-        }
-        
-        const zip = new JSZip();
-        for (const file of generatedJpgs) {
-          const filePath = path.join(os.tmpdir(), file);
-          const fileData = await fs.readFile(filePath);
-          zip.file(file, fileData);
-          await fs.unlink(filePath); // clean up
-        }
-        
-        outputBuffer = await zip.generateAsync({ type: 'nodebuffer' });
-      } finally {
-        await fs.unlink(tmpPdfPath).catch(() => {});
-      }
+      outputBuffer = await renderPdfToJpgZip(inputBuffer, dpi || 150);
+      break;
+    }
+    case 'docx:jpg':
+    case 'pptx:jpg': {
+      outputExt = 'zip';
+      logger.info(`[ImageWorker] Converting ${sourceType} to intermediate PDF via Gotenberg`);
+      const { convertWithGotenberg } = await import('@/backend/services/conversion/gotenberg');
+      const intermediatePdf = await convertWithGotenberg(inputBuffer, sourceType, 'pdf');
+      outputBuffer = await renderPdfToJpgZip(intermediatePdf, dpi || 150);
       break;
     }
     case 'jpg:pdf': {
       const pdfDoc = await PDFDocument.create();
-      const image = await pdfDoc.embedJpg(inputBuffer);
+      const isPng =
+        inputBuffer.length >= 8 &&
+        inputBuffer[0] === 0x89 &&
+        inputBuffer[1] === 0x50 &&
+        inputBuffer[2] === 0x4e &&
+        inputBuffer[3] === 0x47;
+
+      const image = isPng
+        ? await pdfDoc.embedPng(inputBuffer)
+        : await pdfDoc.embedJpg(inputBuffer);
+
       const { width, height } = image.scale(1);
       const page = pdfDoc.addPage([width, height]);
       page.drawImage(image, { x: 0, y: 0, width, height });

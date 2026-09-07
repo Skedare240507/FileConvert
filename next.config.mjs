@@ -8,8 +8,9 @@ const nextConfig = {
       },
     ],
   },
+  poweredByHeader: false,
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   // bullmq and ioredis use Node.js-only CJS internals that Turbopack cannot
   // bundle. Externalising them makes Next.js load them via native require()
