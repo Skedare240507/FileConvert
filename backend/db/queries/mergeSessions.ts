@@ -8,6 +8,7 @@ import { prisma } from '../client';
 
 export async function createMergeSession(data: {
   userId: string | null;
+  anonToken?: string | null;
   fileType: 'pdf' | 'word' | 'ppt';
   fileCount: number;
 }) {
@@ -17,6 +18,7 @@ export async function createMergeSession(data: {
     status: 'queued',
   };
   if (data.userId) createData.user_id = data.userId;
+  if (data.anonToken) createData.anon_token = data.anonToken;
 
   return prisma.mergeSession.create({
     data: createData,

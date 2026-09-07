@@ -9,6 +9,7 @@ import type { JobStatus, WorkerType, Engine } from '@/backend/config/constants';
 
 export interface CreateConversionJobInput {
   userId?: string | null;
+  anonToken?: string | null;
   sourceType: string;
   targetType: string;
   workerType: WorkerType;
@@ -21,6 +22,7 @@ export async function createConversionJob(data: CreateConversionJobInput) {
   return prisma.conversionJob.create({
     data: {
       ...(data.userId ? { user_id: data.userId } : {}),
+      ...(data.anonToken ? { anon_token: data.anonToken } : {}),
       source_type: data.sourceType,
       target_type: data.targetType,
       status: 'queued',

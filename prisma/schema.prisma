@@ -9,23 +9,22 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  password      String?
-  auth_provider String    @default("google") // 'email' | 'google'
-  created_at    DateTime  @default(now()) @db.Timestamptz
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                String?
+  email               String?   @unique
+  emailVerified       DateTime?
+  image               String?
+  password            String?
+  auth_provider       String    @default("google") // 'email' | 'google'
+  role                String    @default("user")   // 'user' | 'admin'
+  plan                String    @default("free")   // 'free' | 'pro'
+  created_at          DateTime  @default(now()) @db.Timestamptz
   failedLoginAttempts Int       @default(0)
-  lockedUntil   DateTime? @db.Timestamptz
+  lockedUntil         DateTime? @db.Timestamptz
 
   conversion_jobs ConversionJob[]
   merge_sessions  MergeSession[]
-  usage_counters  UsageCounter[]
-  audit_logs      AuditLog[]
   accounts        Account[]
-  sessions        Session[]
 
   @@map("users")
 }
@@ -33,6 +32,7 @@ model User {
 model ConversionJob {
   id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id          String?   @db.Uuid
+  anon_token       String?   // Anonymous session token to prevent IDOR on guest conversions
   source_type      String
   target_type      String
   status           String // 'queued' | 'scanning' | 'processing' | 'completed' | 'failed' | 'dead_letter'
@@ -55,6 +55,7 @@ model ConversionJob {
 model MergeSession {
   id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id       String?  @db.Uuid
+  anon_token    String?  // Anonymous session token to prevent IDOR on guest merges
   file_type     String // 'pdf' | 'word' | 'ppt'
   file_count    Int
   status        String // 'queued' | 'processing' | 'completed' | 'failed'
@@ -64,19 +65,6 @@ model MergeSession {
   user User? @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("merge_sessions")
-}
-
-model UsageCounter {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id      String   @db.Uuid
-  counter_type String // 'merge_session' | 'conversion'
-  count        Int      @default(0)
-  window_date  DateTime @db.Date
-
-  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-  @@index([user_id, window_date])
-  @@map("usage_counters")
 }
 
 model Feedback {
@@ -91,19 +79,7 @@ model Feedback {
   @@map("feedback")
 }
 
-model AuditLog {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id    String?  @db.Uuid
-  action     String
-  metadata   Json?
-  created_at DateTime @default(now()) @db.Timestamptz
-
-  user User? @relation(fields: [user_id], references: [id], onDelete: SetNull)
-
-  @@map("audit_logs")
-}
-
-// NextAuth Required Models for Supabase Adapter
+// NextAuth Required Model for OAuth Account Linking
 model Account {
   id                String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId            String  @db.Uuid
@@ -122,25 +98,6 @@ model Account {
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
-}
-
-model Session {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  sessionToken String   @unique
-  userId       String   @db.Uuid
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("sessions")
-}
-
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
-
-  @@unique([identifier, token])
-  @@map("verification_tokens")
 }
 
 model Otp {
