@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "../../../../backend/db";
+import { prisma } from "@/backend/db";
+
 import { withRateLimit } from "@/backend/middleware/withRateLimit";
 import { redisConnection } from "@/backend/queue/client";
 import nodemailer from "nodemailer";

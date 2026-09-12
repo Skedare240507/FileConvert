@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '../../../backend/db';
+import { prisma } from '@/backend/db';
+
 import nodemailer from 'nodemailer';
 
 const escapeHtml = (value: string) =>

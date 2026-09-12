@@ -25,8 +25,11 @@
     ],
     "baseUrl": ".",
     "paths": {
+      "@/backend/*": [
+        "./backend/*"
+      ],
       "@/*": [
-        "./*"
+        "./src/*"
       ],
       "bullmq": [
         "./node_modules/bullmq/dist/esm/index.d.ts"
