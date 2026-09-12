@@ -1,427 +1,393 @@
-<p align="center">
-  <img src="public/logo.png" alt="FileConvert Logo" width="120" />
-</p>
+<div align="center">
 
-<h1 align="center">FileConvert</h1>
+  <img src="public/logo.png" alt="FileConvert Logo" width="160" />
 
-<p align="center">
-  <strong>Enterprise-Grade, Distributed Multi-Format File Conversion & Document Processing Platform</strong>
-</p>
+  # FileConvert
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Next.js-16.3-black?style=for-the-badge&logo=next.js" alt="Next.js" />
-  <img src="https://img.shields.io/badge/React-19.0-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" />
-  <img src="https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/Prisma-5.22-2D3748?style=for-the-badge&logo=prisma" alt="Prisma" />
-  <img src="https://img.shields.io/badge/PostgreSQL-15+-336791?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
-  <img src="https://img.shields.io/badge/Redis-7.0-DC382D?style=for-the-badge&logo=redis&logoColor=white" alt="Redis" />
-  <img src="https://img.shields.io/badge/BullMQ-6.0-FF4154?style=for-the-badge" alt="BullMQ" />
-  <img src="https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
-</p>
+  ### **The Open-Source, Distributed Document Conversion & Processing Engine**
 
----
+  *Transform, merge, rasterize, and OCR documents at scale with enterprise-grade security and sub-second queue dispatch.*
 
-## 📑 Table of Contents
+  <p align="center">
+    <a href="#-quick-start">Quick Start</a> •
+    <a href="#-system-architecture">Architecture</a> •
+    <a href="#-supported-formats">Supported Formats</a> •
+    <a href="#-api-reference">API Reference</a> •
+    <a href="#-self-hosting--docker">Self-Hosting</a> •
+    <a href="#-contributing">Contributing</a>
+  </p>
 
-- [Overview](#-overview)
-- [Architecture & System Design](#-architecture--system-design)
-- [Complete Project Structure](#-complete-project-structure)
-- [Core Engineering Rules & Standards](#-core-engineering-rules--standards)
-- [Supported Formats & Conversion Matrix](#-supported-formats--conversion-matrix)
-- [Technology Stack & Dependencies](#-technology-stack--dependencies)
-- [Environment Variables & Configuration](#-environment-variables--configuration)
-- [Getting Started & Local Setup](#-getting-started--local-setup)
-- [Worker & Background Processing](#-worker--background-processing)
-- [Docker & Containerized Services](#-docker--containerized-services)
-- [Security & Rate Limiting](#-security--rate-limiting)
+  <p align="center">
+    <a href="https://github.com/Skedare240507/FileConvert/releases"><img src="https://img.shields.io/github/v/release/Skedare240507/FileConvert?style=flat-square&color=4F46E5" alt="Release" /></a>
+    <a href="https://github.com/Skedare240507/FileConvert/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License: MIT" /></a>
+    <a href="https://nextjs.org"><img src="https://img.shields.io/badge/Next.js-16.3-black?style=flat-square&logo=next.js" alt="Next.js 16" /></a>
+    <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.0-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript 5" /></a>
+    <a href="https://www.prisma.io"><img src="https://img.shields.io/badge/Prisma-5.22-2D3748?style=flat-square&logo=prisma" alt="Prisma" /></a>
+    <a href="https://redis.io"><img src="https://img.shields.io/badge/Redis-7.0-DC382D?style=flat-square&logo=redis&logoColor=white" alt="Redis" /></a>
+    <a href="https://gotenberg.dev"><img src="https://img.shields.io/badge/Engine-Gotenberg%208-009688?style=flat-square" alt="Gotenberg" /></a>
+    <a href="https://github.com/Skedare240507/FileConvert/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square" alt="PRs Welcome" /></a>
+  </p>
+
+</div>
 
 ---
 
-## 🌟 Overview
+## ⚡ Highlights
 
-**FileConvert** is a high-performance distributed document conversion, image manipulation, and PDF merging platform. It provides instant synchronous processing for lightweight conversions and asynchronous queued jobs backed by **Redis** and **BullMQ** for heavy document rendering and OCR tasks.
-
-### Key Highlights
-- ⚡ **Strict Clean Architecture**: Complete separation of frontend presentation (`src/`) and backend services (`backend/`).
-- 🛡️ **Malware & Virus Screening**: In-flight stream screening with **ClamAV** before documents reach worker engines.
-- 🔄 **Multi-Engine Routing**: Intelligent engine selection using Gotenberg (Chromium/LibreOffice), ImageMagick, PDF-Lib, SheetJS, and automated CloudConvert fallback.
-- 📦 **Direct S3/B2 Upload Pipeline**: Signed pre-authenticated URLs for direct client-to-storage uploads to prevent memory bloat on API nodes.
-- 🔒 **IDOR-Proof Anonymous Sessions**: Anonymous cryptographic tokens bind guest conversion/merge sessions securely without requiring an upfront account.
-- 📊 **Real-time Live Progress**: Server-Sent Events (SSE) stream job processing state directly to client browsers.
+<table>
+  <tr>
+    <td width="50%">
+      <h3>🚀 Distributed Queue Architecture</h3>
+      <p>Decoupled Next.js edge API and background BullMQ workers over Redis. Process 100+ concurrent multi-page conversions with zero HTTP socket timeouts or memory leaks.</p>
+    </td>
+    <td width="50%">
+      <h3>🛡️ Zero-Trust Security & Antivirus</h3>
+      <p>Real-time in-stream malware scanning via <strong>ClamAV</strong> before files enter conversion pipelines. Strict magic-byte mime inspection and IDOR-safe guest tokens.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <h3>🔄 Multi-Engine Fallback Routing</h3>
+      <p>Automatic engine selection across <strong>Gotenberg 8</strong> (LibreOffice & Chromium), <strong>ImageMagick</strong>, <strong>PDF-Lib</strong>, <strong>SheetJS</strong>, and automated <strong>CloudConvert</strong> cloud fallback.</p>
+    </td>
+    <td width="50%">
+      <h3>📦 Direct Storage Streaming</h3>
+      <p>Pre-signed cryptographic direct uploads to Cloudflare R2 / Backblaze B2 S3 storage. Web servers never buffer 100MB+ user payloads into memory.</p>
+    </td>
+  </tr>
+</table>
 
 ---
 
-## 🏗️ Architecture & System Design
+## 🏛️ System Architecture
+
+FileConvert separates presentation from heavy computation using a distributed worker cluster:
+
+```mermaid
+flowchart TD
+    subgraph Client ["Client Presentation (src/)"]
+        UI["Next.js 16 Web Application"]
+        SSE["SSE Live Progress Stream"]
+    end
+
+    subgraph Storage ["Object Storage"]
+        S3["Cloudflare R2 / Backblaze B2 (S3-Compatible)"]
+    end
+
+    subgraph CoreAPI ["API & Domain Layer (backend/)"]
+        API["Next.js Route Handlers (/api)"]
+        Guard["Zod Validation & Sliding Rate Limiter"]
+        DB[(PostgreSQL + Prisma ORM)]
+    end
+
+    subgraph Queue ["Message Broker"]
+        Redis[(Redis 7 Cluster)]
+        BullMQ["BullMQ Job Queues"]
+    end
+
+    subgraph Workers ["Worker Cluster (backend/workers)"]
+        Orch["Worker Orchestrator"]
+        DocW["Document Worker (Gotenberg/LibreOffice)"]
+        ImgW["Image Worker (ImageMagick/PDF-Lib)"]
+        OcrW["OCR Worker (Tesseract.js)"]
+        CleanW["TTL Cleanup Worker (1h Expiration)"]
+        Clam["ClamAV Antivirus Daemon"]
+    end
+
+    UI -- 1. Direct Presigned Upload --> S3
+    UI -- 2. Create Job / Merge Session --> API
+    API --> Guard --> DB
+    API -- 3. Dispatch Job --> BullMQ --> Redis
+    BullMQ --> Orch
+    Orch -- 4. Scan Payload --> Clam
+    Clam -- Clean --> DocW & ImgW & OcrW
+    DocW & ImgW & OcrW -- 5. Write Converted Artifact --> S3
+    DocW & ImgW & OcrW -- 6. Update Status & Emit --> DB & SSE
+    SSE -- 7. Real-Time State Updates --> UI
+```
+
+---
+
+## 📁 Repository Structure
+
+The codebase is organized into isolated domains, guaranteeing that the **Frontend** presentation layer and **Backend** processing engine can be tested and developed independently without coupling.
 
 ```
-                     ┌──────────────────────────────────────────────┐
-                     │            Client (Next.js 16 UI)            │
-                     └───────┬───────────────────────────────┬──────┘
-                             │ Direct S3 Upload (Presigned)  │ API Requests
-                             ▼                               ▼
-                     ┌───────────────┐               ┌──────────────────────────────┐
-                     │ Cloudflare R2 │               │ Next.js App Router (src/app) │
-                     │ Backblaze B2  │               └──────────────┬───────────────┘
-                     └───────▲───────┘                              │ Zod Validation & Rate Limit
-                             │                                      ▼
-                             │ Payload Fetch                 ┌──────────────────────────────┐
-                             │ & Result Write                │   Backend Services & DB      │
-                             │                               │ (backend/services, db/client)│
-                             │                               └──────────────┬───────────────┘
-                             │                                              │ Dispatch Job
-                             │                                              ▼
-                             │                               ┌──────────────────────────────┐
-                             │                               │    Redis / BullMQ Queue      │
-                             │                               └──────────────┬───────────────┘
-                             │                                              │ Poll Jobs
-                             │                                              ▼
-                             │                               ┌──────────────────────────────┐
-                             │                               │ BullMQ Worker Orchestrator   │
-                             │                               │  (backend/workers/orchestr.) │
-                             │                               └──────────────┬───────────────┘
-                             │                                              │
-              ┌──────────────┴──────────────┬───────────────────────────────┼──────────────────────────────┐
-              ▼                             ▼                               ▼                              ▼
-      ┌───────────────┐             ┌───────────────┐               ┌───────────────┐              ┌───────────────┐
-      │   Gotenberg   │             │ pdf-converter │               │  ImageMagick  │              │ Tesseract.js  │
-      │ (LibreOffice) │             │ (Custom Py/Go)│               │   / PDF-Lib   │              │     (OCR)     │
-      └───────────────┘             └───────────────┘               └───────────────┘              └───────────────┘
-              │                             │                               │                              │
-              └─────────────────────────────┴───────────────────────────────┴──────────────────────────────┘
-                                            │ Emergency Fallback (on error)
-                                            ▼
-                                    ┌───────────────┐
-                                    │  CloudConvert │
-                                    └───────────────┘
-```
-
----
-
-## 📁 Complete Project Structure
-
-The project strictly follows domain isolation. The presentation layer lives in `src/`, while core business domain logic, database operations, queues, workers, and external service clients live in `backend/`.
-
-```
-FileConvert/
-├── src/                                  # ── ALL FRONTEND & NEXT.JS CODE ──
-│   ├── app/                              # Next.js App Router (Pages, Layouts & API routes)
-│   │   ├── (auth)/                       # Auth routes (login, signup, forgot-password, reset-password)
-│   │   ├── admin/                        # Admin dashboards and metrics
-│   │   ├── api/                          # REST API Endpoints & SSE handlers
-│   │   │   ├── admin/                    # Queue metrics & administration
-│   │   │   ├── auth/                     # NextAuth, registration, OTP verification
-│   │   │   ├── convert/                  # Conversion job creation, direct upload init, SSE live stream
-│   │   │   ├── feedback/                 # User feedback endpoints
-│   │   │   └── merge/                    # PDF merge session initiation, SSE live stream, download
-│   │   ├── convert/                      # Conversion category & tool pages
-│   │   │   ├── csv-to-excel/             # CSV to Excel converter
-│   │   │   ├── excel-to-csv/             # Excel to CSV converter
-│   │   │   ├── image/                    # Image format converters
-│   │   │   ├── jpg-to-pdf/               # JPG/PNG to PDF converter
-│   │   │   ├── jpg-to-ppt/               # JPG to PowerPoint converter
-│   │   │   ├── merge/                    # PDF Merge Studio UI
-│   │   │   ├── pdf-to-jpg/               # PDF to JPG rasterizer
-│   │   │   ├── pdf-to-ppt/               # PDF to PPT converter
-│   │   │   ├── pdf-to-word/              # PDF to DOCX converter
-│   │   │   ├── ppt-to-pdf/               # PPT to PDF converter
-│   │   │   ├── word-to-pdf/              # DOCX to PDF converter
-│   │   │   └── ...                       # Additional tool combinations
-│   │   ├── dashboard/                    # User dashboard & conversion history
-│   │   ├── help/                         # Help, FAQ & documentation UI
-│   │   ├── privacy/                      # Privacy policy and TOS
-│   │   ├── profile/                      # User profile management
-│   │   ├── globals.css                   # Global CSS theme & CSS variables
-│   │   ├── layout.tsx                    # Root application layout
-│   │   └── page.tsx                      # Landing & Hero Homepage
-│   ├── components/                       # Shared React Components (Header, Modals, Uploaders)
-│   ├── hooks/                            # Custom React hooks (useConverter, useSSE, etc.)
-│   └── types/                            # Frontend TypeScript definitions & NextAuth augmentations
+fileconvert/
+├── src/                                  # ── PRESENTATION LAYER (Next.js 16) ──
+│   ├── app/                              # Next.js App Router
+│   │   ├── (auth)/                       # Auth views (login, signup, reset-password)
+│   │   ├── admin/                        # Administrative analytics & queue metrics
+│   │   ├── api/                          # REST & Server-Sent Events (SSE) endpoints
+│   │   │   ├── admin/                    # Queue inspection & worker stats
+│   │   │   ├── auth/                     # NextAuth authentication & OTP handling
+│   │   │   ├── convert/                  # Conversion job lifecycle & direct upload
+│   │   │   ├── feedback/                 # User feedback ingestion
+│   │   │   └── merge/                    # PDF Merge Studio streaming endpoints
+│   │   ├── convert/                      # Dedicated tool landing pages (30+ routes)
+│   │   ├── dashboard/                    # User conversion history & active downloads
+│   │   ├── layout.tsx                    # Master HTML shell & CSS token providers
+│   │   └── page.tsx                      # Landing & Hero presentation
+│   ├── components/                       # Reusable React 19 UI widgets (Header, Modals, Dropzones)
+│   ├── hooks/                            # Custom state & SSE live streaming hooks (useConverter)
+│   └── types/                            # Frontend interface definitions & NextAuth type extensions
 │
-├── backend/                              # ── ALL BACKEND LOGIC (Domain Isolated) ──
-│   ├── config/                           # Environment variables & constants validation
-│   │   ├── env.ts                        # Strongly-typed fail-fast environment schema
-│   │   └── constants.ts                  # File limits, MIME allowances, rate limits, tier limits
-│   ├── db/                               # Database access layer
-│   │   ├── client.ts                     # Prisma singleton instance
-│   │   └── queries/                      # Strongly-typed DB query helpers
-│   │       ├── auditLogs.ts              # Security & administrative audit logs
-│   │       ├── conversionJobs.ts         # Conversion job lifecycle queries
-│   │       ├── feedback.ts               # Feedback persistence
-│   │       ├── mergeSessions.ts          # Merge session persistence & live status
-│   │       ├── usageCounters.ts          # Daily & monthly user quota tracking
-│   │       └── users.ts                  # User authentication & profile records
-│   ├── middleware/                       # Route guards & security middleware
-│   │   ├── withAdminAuth.ts              # Role-based admin access control
-│   │   ├── withAuth.ts                   # NextAuth session verification
+├── backend/                              # ── CORE DOMAIN & ENGINE (Isolated) ──
+│   ├── config/                           # Fail-fast typed configuration
+│   │   ├── env.ts                        # Zod-backed environment validator
+│   │   └── constants.ts                  # MIME registries, tier quotas, TTL durations
+│   ├── db/                               # Database persistence layer
+│   │   ├── client.ts                     # Prisma client singleton
+│   │   └── queries/                      # Strongly-typed queries (users, jobs, auditLogs, feedback)
+│   ├── middleware/                       # Edge & API security guards
+│   │   ├── withAuth.ts                   # Session extraction & tenant verification
+│   │   ├── withAdminAuth.ts              # RBAC guard with audit trail logging
 │   │   └── withRateLimit.ts              # Redis sliding-window rate limiter
-│   ├── queue/                            # BullMQ job queue management
-│   │   ├── client.ts                     # Redis connection singleton
-│   │   ├── queues.ts                     # Queue definitions (conversion, merge, cleanup)
-│   │   └── jobs/                         # Job payload TypeScript definitions
-│   ├── services/                         # Pure business logic services (No HTTP knowledge)
-│   │   ├── conversion/                   # Conversion engine drivers (Gotenberg, LibreOffice, SheetJS, CloudConvert)
-│   │   ├── email/                        # Nodemailer transactional email delivery (OTP, receipts)
-│   │   ├── payment/                      # Razorpay order creation & webhook verification
-│   │   ├── scan/                         # ClamAV virus & malware stream scanner
-│   │   └── storage/                      # Cloudflare R2 / Backblaze B2 S3 SDK wrapper
-│   ├── utils/                            # Shared backend utilities
-│   │   ├── fileType.ts                   # Magic bytes file-type detection (anti-spoofing)
-│   │   ├── logger.ts                     # Structured JSON logger & Sentry integration
-│   │   ├── planLimits.ts                 # Quota calculation per user tier (Free vs Pro)
-│   │   ├── sanitize.ts                   # Filename & path traversal sanitizers
-│   │   └── tenantSecurity.ts             # IDOR protection & anonymous session assertion
-│   ├── validation/                       # Zod schemas for input validation
-│   │   ├── conversion.ts                 # Conversion API schema
-│   │   ├── merge.ts                      # Merge API schema
-│   │   ├── payment.ts                    # Payment schema
-│   │   └── upload.ts                     # File size, extension & MIME validation
-│   └── workers/                          # BullMQ standalone queue worker processors
-│       ├── cleanupWorker.ts              # Purges expired S3 files (TTL cleanup)
-│       ├── documentWorker.ts             # Office & PDF processing via Gotenberg
-│       ├── imageWorker.ts                # Image resizing & rasterization
-│       ├── ocrWorker.ts                  # Tesseract OCR pipeline
-│       └── orchestrator.ts               # Multi-queue consumer entry point
+│   ├── queue/                            # BullMQ job management
+│   │   ├── client.ts                     # Redis connection provider
+│   │   ├── queues.ts                     # Queue registries (conversion, merge, cleanup)
+│   │   └── jobs/                         # Job payload contracts
+│   ├── services/                         # Pure business logic (No HTTP knowledge)
+│   │   ├── conversion/                   # Drivers (Gotenberg, LibreOffice, SheetJS, CloudConvert)
+│   │   ├── email/                        # Nodemailer 10 transactional mailer (OTP, receipts)
+│   │   ├── payment/                      # Razorpay integration & webhook verifier
+│   │   ├── scan/                         # ClamAV daemon antivirus stream scanner
+│   │   └── storage/                      # Cloudflare R2 / Backblaze B2 S3 client
+│   ├── utils/                            # Shared domain utilities
+│   │   ├── fileType.ts                   # Magic-byte file identification (Anti-spoofing)
+│   │   ├── logger.ts                     # Structured JSON logger & Sentry reporter
+│   │   ├── sanitize.ts                   # Path-traversal & shell sanitizers
+│   │   └── tenantSecurity.ts             # IDOR protection & guest session validation
+│   └── workers/                          # BullMQ background worker processors
+│       ├── cleanupWorker.ts              # Scheduled 1-hour TTL file purger
+│       ├── documentWorker.ts             # Gotenberg / LibreOffice document conversion
+│       ├── imageWorker.ts                # Multi-page image rasterization & PDF packing
+│       ├── ocrWorker.ts                  # Tesseract OCR text layer generator
+│       └── orchestrator.ts               # Master worker daemon entry point
 │
-├── pdf-converter/                        # Standalone Python/LibreOffice microservice
-│   ├── app.py                            # Microservice HTTP server
-│   ├── Dockerfile                        # Container definition with LibreOffice & Poppler
-│   └── requirements.txt                  # Python dependencies
+├── pdf-converter/                        # Standalone Python/LibreOffice Microservice
+│   ├── app.py                            # High-speed document rendering server
+│   └── Dockerfile                        # Container recipe with LibreOffice & Poppler
 │
 ├── prisma/                               # Database Schema & Migrations
-│   ├── schema.prisma                     # PostgreSQL schema definition
-│   └── migrations/                       # SQL schema migration history
+│   └── schema.prisma                     # PostgreSQL schema specification
 │
-├── public/                               # Static public assets (Favicon, Logo, Images)
-├── nginx/                                # Nginx reverse proxy configuration
-├── docker-compose.yml                    # Multi-container orchestration (Redis, Gotenberg, ClamAV, etc.)
-├── package.json                          # Node dependencies & npm scripts
-├── tsconfig.json                         # TypeScript path alias configuration
-└── next.config.mjs                       # Next.js bundler, Turbopack & external package configuration
+├── public/                               # Static web assets & branded illustrations
+├── nginx/                                # Production reverse proxy configuration
+├── docker-compose.yml                    # Local multi-service development stack
+└── tsconfig.json                         # Path mapping configuration (@/backend/* & @/*)
 ```
 
 ---
 
-## 📜 Core Engineering Rules & Standards
+## 🔄 Supported Formats
 
-For developers and contributors maintaining this repository:
-
-### 1. Architectural Boundaries
-- **No HTTP in `backend/`**: Files in `backend/services/`, `backend/db/`, and `backend/workers/` must remain pure functions. They must never import `NextRequest` or return `NextResponse`.
-- **No Raw Prisma in API routes**: Always use domain helpers in `backend/db/queries/*.ts` to guarantee uniform indexing, error handling, and auditing.
-- **Fail-Fast Configuration**: Never use `process.env.VARIABLE_NAME` directly across the codebase. Always import from `@/backend/config/env`, which validates environment variables at startup.
-
-### 2. TypeScript Path Aliases
-To avoid brittle relative paths (`../../../../`), the TypeScript compiler uses clean path resolution:
-- `@/backend/*` $\rightarrow$ Points directly to `./backend/*`
-- `@/*` $\rightarrow$ Points directly to `./src/*`
-
-### 3. File Security & Anti-Spoofing
-- **Magic-Byte Inspection**: Never trust user-provided extensions or `Content-Type` headers. Files are inspected via `backend/utils/fileType.ts` before processing.
-- **Sanitized Filenames**: All filenames undergo ASCII sanitization in `backend/utils/sanitize.ts` to prevent path traversal (`../`) and shell injection.
-- **IDOR Prevention**: Guest conversions are bound to a cryptographically secure `anon_token`. Access to downloads or SSE streams requires verifying ownership.
+| Category | Input Format | Output Format | Engine | Mode |
+|:---|:---|:---|:---|:---|
+| **Office Documents** | `.docx`, `.doc` | `.pdf` | Gotenberg (LibreOffice) | Queued |
+| **Presentations** | `.pptx`, `.ppt` | `.pdf`, `.jpg` | Gotenberg / Poppler | Queued |
+| **Spreadsheets** | `.xlsx`, `.xls` | `.csv` | SheetJS (`xlsx`) | Instant |
+| **Data Interchange** | `.csv` | `.xlsx` | SheetJS (`xlsx`) | Instant |
+| **PDF Processing** | `.pdf` | `.docx`, `.pptx` | Gotenberg / pdf-converter | Queued |
+| **PDF Rasterization** | `.pdf` | `.jpg`, `.png` | ImageMagick / pdf-lib | Queued |
+| **PDF Merging** | Multiple `.pdf` | Single `.pdf` | PDF-Lib | Instant / Queued |
+| **Images** | `.jpg`, `.png`, `.webp` | `.pdf` | PDF-Lib | Instant |
+| **Scanned Docs** | Scanned `.pdf`, `.jpg` | Searchable `.pdf`, `.txt` | Tesseract.js (OCR) | Queued |
 
 ---
 
-## 🔄 Supported Formats & Conversion Matrix
+## 💻 Tech Stack
 
-| Source Format | Target Format | Engine | Processing Mode |
-|:---|:---|:---|:---|
-| **PDF** | Word (`.docx`) | Gotenberg / pdf-converter | Async / Queued |
-| **PDF** | PowerPoint (`.pptx`) | Gotenberg / pdf-converter | Async / Queued |
-| **PDF** | Images (`.jpg`, `.png`) | ImageMagick / pdf-lib | Async / Queued |
-| **Word** (`.docx`) | PDF (`.pdf`) | Gotenberg (LibreOffice) | Async / Queued |
-| **PowerPoint** (`.pptx`)| PDF (`.pdf`) | Gotenberg (LibreOffice) | Async / Queued |
-| **Excel** (`.xlsx`, `.xls`)| CSV (`.csv`) | SheetJS | Instant / Synchronous |
-| **CSV** (`.csv`) | Excel (`.xlsx`) | SheetJS | Instant / Synchronous |
-| **Images** (`.jpg`, `.png`)| PDF (`.pdf`) | PDF-Lib / ImageMagick | Instant / Synchronous |
-| **Multiple PDFs** | Single PDF (Merge) | PDF-Lib | Instant / Queued |
-| **Scanned Images/PDF** | Searchable PDF / Text | Tesseract OCR | Async / Queued |
+<div align="center">
 
-*Note: If local Gotenberg or LibreOffice instances experience an unrecoverable failure, jobs seamlessly route to the CloudConvert API fallback.*
+| Layer | Technologies |
+|:---|:---|
+| **Frontend UI** | Next.js 16 (App Router), React 19, Vanilla CSS Modules, NextAuth.js |
+| **API & Middleware** | Node.js 20+ LTS, TypeScript 5, Zod 4, Sentry 10 |
+| **Job Queue & Cache** | BullMQ 6, Redis 7 (Alpine) |
+| **Database & ORM** | PostgreSQL 15+, Prisma ORM 5.22 |
+| **File Storage** | S3 API Compliant (Cloudflare R2, Backblaze B2, AWS S3) |
+| **Rendering Engines** | Gotenberg 8, LibreOffice 24, ImageMagick, PDF-Lib, Tesseract.js |
+| **Security & Auditing** | ClamAV Anti-Malware Daemon, Sliding-Window Token Bucket, Magic-Byte Parser |
+| **DevOps & Proxy** | Docker, Docker Compose, Nginx, Turbopack |
 
----
-
-## 🛠️ Technology Stack & Dependencies
-
-### Frontend (`src/`)
-- **Framework**: [Next.js 16 (App Router)](https://nextjs.org/) + React 19
-- **Styling**: Vanilla CSS Modules (Theme token variables, responsive design, zero runtime CSS-in-JS overhead)
-- **State & Real-time**: Custom React hooks with native SSE (`EventSource`)
-- **Authentication**: [NextAuth.js v4](https://next-auth.js.org/) (OAuth 2.0 with Google & Credentials-based OTP)
-
-### Backend & Core Services (`backend/`)
-- **Database ORM**: [Prisma ORM 5.22](https://www.prisma.io/)
-- **Database Engine**: PostgreSQL (Supabase / Self-hosted)
-- **Queue & Event Bus**: [BullMQ 6](https://docs.bullmq.io/) over **Redis 7**
-- **Object Storage**: S3-compatible storage ([Cloudflare R2](https://www.cloudflare.com/products/r2/) or [Backblaze B2](https://www.backblaze.com/b2/cloud-storage.html)) via `@aws-sdk/client-s3`
-- **Validation**: [Zod](https://zod.dev/)
-- **Email Service**: [Nodemailer 10](https://nodemailer.com/) (Security patched)
-- **Telemetry & Monitoring**: [Sentry Next.js SDK 10](https://sentry.io/)
-
-### Conversion & Microservice Engines
-- **Gotenberg 8**: Dockerized stateless API for Chromium and LibreOffice document conversion
-- **ClamAV**: Real-time antivirus screening daemon
-- **pdf-lib**: Pure JavaScript PDF manipulation and merging
-- **SheetJS (`xlsx`)**: Spreadsheet parsing and generation
-- **Tesseract.js**: OCR extraction for images and scanned documents
+</div>
 
 ---
 
-## ⚙️ Environment Variables & Configuration
+## 🚀 Quick Start
 
-Create a `.env` file in the root directory:
+### 1. Prerequisites
+- **Node.js**: `v20.x` or `v22.x` (LTS)
+- **Docker & Docker Compose** (for Redis, Gotenberg & ClamAV)
+- **PostgreSQL Database** (Local or Supabase)
+
+### 2. Installation
+```bash
+# Clone the repository
+git clone https://github.com/Skedare240507/FileConvert.git
+cd FileConvert
+
+# Install dependencies
+npm install
+```
+
+### 3. Environment Configuration
+Copy the sample environment file and adjust your credentials:
+```bash
+cp .env.example .env
+```
+
+<details>
+<summary><strong>🔑 Click to inspect required environment variables</strong></summary>
 
 ```env
-# ── Database (PostgreSQL / Supabase) ──────────────────────────────────────────
+# Database (PostgreSQL / Supabase)
 DATABASE_URL="postgresql://postgres:password@localhost:5432/fileconvert?schema=public"
 DIRECT_URL="postgresql://postgres:password@localhost:5432/fileconvert?schema=public"
 
-# ── NextAuth Configuration ───────────────────────────────────────────────────
+# NextAuth Secret & Host
 NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="your-super-secret-random-key"
+NEXTAUTH_SECRET="generate-a-secure-32-byte-hex-secret"
 
-# ── Google OAuth Provider ────────────────────────────────────────────────────
-GOOGLE_CLIENT_ID="your-google-client-id.apps.googleusercontent.com"
-GOOGLE_CLIENT_SECRET="your-google-client-secret"
+# OAuth (Google)
+GOOGLE_CLIENT_ID="your-id.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET="your-secret"
 
-# ── Object Storage (Cloudflare R2 / Backblaze B2) ─────────────────────────────
+# Object Storage (S3 / Backblaze B2 / Cloudflare R2)
 B2_ENDPOINT="https://s3.us-east-005.backblazeb2.com"
 B2_REGION="us-east-005"
-B2_ACCESS_KEY_ID="your-access-key-id"
-B2_SECRET_ACCESS_KEY="your-secret-access-key"
+B2_ACCESS_KEY_ID="your-key-id"
+B2_SECRET_ACCESS_KEY="your-secret-key"
 B2_BUCKET="fileconvert-storage"
 
-# ── Redis (Queue & Sliding-Window Rate Limiting) ─────────────────────────────
+# Redis Connection
 REDIS_URL="redis://127.0.0.1:6379"
 
-# ── Microservices & Engines ──────────────────────────────────────────────────
+# Microservices
 GOTENBERG_URL="http://127.0.0.1:3001"
 PDF_CONVERTER_URL="http://127.0.0.1:8080"
 CLAMAV_HOST="127.0.0.1"
 CLAMAV_PORT="3310"
 
-# ── Emergency Fallback (Optional) ────────────────────────────────────────────
-CLOUDCONVERT_API_KEY="your-optional-cloudconvert-api-key"
-
-# ── Email Service (SMTP / Nodemailer) ─────────────────────────────────────────
+# Optional Cloud Fallback & Email
+CLOUDCONVERT_API_KEY=""
 SMTP_HOST="smtp.gmail.com"
 SMTP_PORT="587"
 SMTP_USER="notifications@fileconvert.app"
 SMTP_PASS="your-app-password"
 SMTP_FROM="FileConvert <noreply@fileconvert.app>"
-
-# ── Payment Gateway (Razorpay - Optional) ────────────────────────────────────
-RAZORPAY_KEY_ID="rzp_test_xxxx"
-RAZORPAY_KEY_SECRET="your-razorpay-secret"
-RAZORPAY_WEBHOOK_SECRET="your-webhook-secret"
-
-# ── Error Monitoring (Sentry - Optional) ─────────────────────────────────────
-SENTRY_DSN=""
 ```
+</details>
 
----
-
-## 🚀 Getting Started & Local Setup
-
-### Prerequisites
-- **Node.js**: `v20.x` or `v22.x` (LTS)
-- **npm** or **pnpm**
-- **Docker & Docker Compose** (for Redis, Gotenberg, and ClamAV)
-
-### Step 1: Clone & Install Dependencies
+### 4. Database Setup
 ```bash
-git clone https://github.com/Skedare240507/FileConvert.git
-cd FileConvert
-npm install
-```
-
-### Step 2: Database Migration & Prisma Setup
-```bash
-# Push schema changes to your PostgreSQL database
+# Push schema to database
 npx prisma db push
 
-# Generate the typed Prisma Client
+# Generate typed Prisma client
 npx prisma generate
 ```
 
-### Step 3: Launch Supporting Docker Services
-Start Redis, Gotenberg, and ClamAV in the background:
+### 5. Launch Support Containers
 ```bash
 docker compose up -d redis gotenberg clamav pdf-converter
 ```
 
-Check health:
-```bash
-docker compose ps
-```
+### 6. Start Development Servers
 
-### Step 4: Run the Development Server
+Run the frontend web application:
 ```bash
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000) in your browser.
 
----
-
-## ⚙️ Worker & Background Processing
-
-For heavy document conversions, jobs are pushed to BullMQ queues. In production, worker processes run independently from the web app.
-
-To start the conversion and cleanup orchestrator locally:
+In a separate terminal, start the background worker orchestrator:
 ```bash
 npm run worker
 ```
 
-### Worker Responsibilities:
-- **`documentWorker.ts`**: Communicates with Gotenberg to convert Word/PPT/PDF.
-- **`imageWorker.ts`**: Handles multi-page image rasterization and compression.
-- **`ocrWorker.ts`**: Extracts text layers using Tesseract.js.
-- **`cleanupWorker.ts`**: Periodically sweeps and deletes temporary files in S3/B2 after their 1-hour expiration.
+Navigate to **[http://localhost:3000](http://localhost:3000)** in your browser.
 
 ---
 
-## 🐳 Docker & Containerized Services
+## 📡 API Reference
 
-The repository includes a production-ready `docker-compose.yml` with the following service stack:
+FileConvert exposes a clean RESTful API for programmatically dispatching conversions.
 
-| Container Name | Service | Local Port | Health Check |
-|:---|:---|:---|:---|
-| `fileconvert-redis` | Redis 7 Alpine | `6379` | `redis-cli ping` |
-| `fileconvert-gotenberg`| Gotenberg 8 | `3001` $\rightarrow$ `3000` | HTTP `/health` |
-| `fileconvert-clamav` | ClamAV Anti-Malware | `3310` | `clamdcheck.sh` |
-| `fileconvert-pdf-converter` | Custom Python/LibreOffice | `8080` | Python urllib `/health` |
-| `fileconvert-nginx` | Nginx Alpine Gateway | `80` | Native HTTP |
+### 1. Initialize Direct Upload
+```http
+POST /api/convert/upload/init
+Content-Type: application/json
+
+{
+  "filename": "quarterly-report.docx",
+  "sourceType": "docx",
+  "targetType": "pdf",
+  "fileSize": 2048576
+}
+```
+
+**Response (`200 OK`)**:
+```json
+{
+  "success": true,
+  "jobId": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+  "uploadUrl": "https://s3.us-east-005.backblazeb2.com/fileconvert-storage/raw/...",
+  "anonToken": "c4ca4238a0b923820dcc509a6f75849b"
+}
+```
+
+### 2. Stream Real-Time Job Progress (SSE)
+```http
+GET /api/convert/jobs/9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d/live?token=c4ca4238a0b923820dcc509a6f75849b
+Accept: text/event-stream
+```
+
+**Event Stream Output**:
+```text
+event: status
+data: {"status": "scanning", "progress": 25}
+
+event: status
+data: {"status": "processing", "progress": 70, "engine": "gotenberg"}
+
+event: status
+data: {"status": "completed", "progress": 100, "downloadUrl": "/api/convert/jobs/.../download"}
+```
 
 ---
 
-## 🛡️ Security & Rate Limiting
+## 🛡️ Security & Privacy
 
-- **Sliding-Window Redis Limiter**: Built into `backend/middleware/withRateLimit.ts`. Protects API endpoints against brute force, OTP flooding, and DDoS.
-- **Content Security & Antivirus**: Uploaded documents are streamed through ClamAV in memory before processing. Any flagged virus immediately terminates the job and quarantines the file.
-- **Automatic TTL Deletion**: Files uploaded to storage buckets are assigned a strict 1-hour lifecycle TTL and automatically purged by `cleanupWorker.ts`.
-- **Admin Audit Trail**: Every sensitive administrative query (queue purges, quota adjustments) is logged to the `AuditLog` table with timestamp and IP origin.
-
----
-
-## 📄 Available Scripts
-
-| Command | Description |
-|:---|:---|
-| `npm run dev` | Launches Next.js in Turbopack development mode |
-| `npm run build` | Compiles an optimized production build |
-| `npm run start` | Runs the Next.js production server |
-| `npm run worker` | Starts the BullMQ background worker orchestrator |
-| `npm run lint` | Runs ESLint 9 checks |
-| `npx prisma studio` | Opens Prisma's graphical database browser |
+- **In-Memory Antivirus Screening**: All documents are streamed directly through ClamAV before hitting workers. Infected files are destroyed immediately.
+- **Strict 1-Hour TTL Policy**: Processed files are permanently purged from object storage after 60 minutes by `cleanupWorker.ts`.
+- **Sliding-Window Rate Limiting**: Redis-backed token bucket limits prevent API scraping and denial-of-service attempts.
+- **IDOR Protection**: Non-authenticated guest conversions use cryptographically generated session tokens (`anon_token`) to prevent unauthorized file access.
 
 ---
 
-## 👥 Authors & Maintainers
+## 🤝 Contributing
 
-- **Sahil** ([@Skedare240507](https://github.com/Skedare240507))
+We welcome contributions from the open-source community!
+
+1. Fork the Project (`https://github.com/Skedare240507/FileConvert/fork`)
+2. Create your Feature Branch (`git checkout -b feat/amazing-feature`)
+3. Follow the commit standard:
+   - `feat: add support for EPUB to PDF conversion`
+   - `fix: resolve memory leak in imageWorker`
+   - `docs: update self-hosting guide`
+4. Commit your Changes (`git commit -m 'feat: add amazing feature'`)
+5. Push to the Branch (`git push origin feat/amazing-feature`)
+6. Open a Pull Request
 
 ---
 
-<p align="center">
-  <sub>Built with ❤️ for high-throughput, secure document processing.</sub>
-</p>
+## 📜 License
+
+Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for more information.
+
+---
+
+<div align="center">
+  <sub>Maintained with precision by <strong>Sahil</strong> (<a href="https://github.com/Skedare240507">@Skedare240507</a>) and contributors.</sub>
+</div>
