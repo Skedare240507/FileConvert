@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { buildR2UploadKey } from '@/backend/utils/sanitize';
 import { uploadToB2 } from '@/backend/services/storage/storage';
 import { scanBuffer } from '@/backend/services/scan/clamav';

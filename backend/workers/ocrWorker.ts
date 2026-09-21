@@ -9,6 +9,7 @@
  */
 
 import type { Job } from 'bullmq';
+import crypto from 'crypto';
 import { downloadFromB2, uploadToB2 } from '@/backend/services/storage/storage';
 import { updateConversionJobStatus } from '@/backend/db/queries/conversionJobs';
 import { JOB_STATUS } from '@/backend/config/constants';
@@ -21,7 +22,6 @@ import { promisify } from 'util';
 import path from 'path';
 import os from 'os';
 import { promises as fs } from 'fs';
-import crypto from 'crypto';
 
 const execFileAsync = promisify(execFile);
 

@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import crypto from 'crypto';
 import { withRateLimit } from '@/backend/middleware/withRateLimit';
 import { createConversionJobSchema } from '@/backend/validation/conversion';
 import { createConversionJob } from '@/backend/db/queries/conversionJobs';

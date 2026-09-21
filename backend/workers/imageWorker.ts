@@ -10,6 +10,7 @@
  */
 
 import type { Job } from 'bullmq';
+import crypto from 'crypto';
 import { downloadFromB2, uploadToB2 } from '@/backend/services/storage/storage';
 import { updateConversionJobStatus } from '@/backend/db/queries/conversionJobs';
 import { JOB_STATUS } from '@/backend/config/constants';

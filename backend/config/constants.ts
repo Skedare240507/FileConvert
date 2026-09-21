@@ -97,6 +97,7 @@ export const ALLOWED_MIME_TYPES = new Set([
 /** Maps "sourceType:targetType" → WorkerType */
 export const CONVERSION_WORKER_MAP: Record<string, WorkerType> = {
   'pdf:docx': WORKER_TYPES.DOCUMENT,
+  'pdf:doc': WORKER_TYPES.DOCUMENT,
   'pdf:pptx': WORKER_TYPES.DOCUMENT,
   'pdf:jpg': WORKER_TYPES.IMAGE,
   'jpg:pdf': WORKER_TYPES.IMAGE,
