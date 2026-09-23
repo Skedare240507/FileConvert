@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends openssl && rm -
 # Copy package manifests and install production + dev deps
 COPY package.json package-lock.json ./
 COPY prisma ./prisma/
-RUN npm ci --ignore-scripts && npx prisma generate
+RUN npm ci --ignore-scripts --legacy-peer-deps && npx prisma generate
 
 # ── Stage 2: worker runtime ───────────────────────────────────────────────────
 FROM node:20-slim AS worker

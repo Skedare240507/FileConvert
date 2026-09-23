@@ -44,7 +44,7 @@ function getMagickBin(): string {
   return process.platform === 'win32' ? 'magick' : 'convert';
 }
 
-async function renderPdfToJpgZip(pdfBuffer: Buffer, dpiVal: number = 150): Promise<Buffer> {
+export async function renderPdfToJpgPages(pdfBuffer: Buffer, dpiVal: number = 150): Promise<{ name: string, data: Buffer }[]> {
   const tmpId = crypto.randomUUID();
   const tmpPdfPath = path.join(os.tmpdir(), `${tmpId}.pdf`);
   const tmpJpgPrefix = path.join(os.tmpdir(), `${tmpId}_page_`);
@@ -57,24 +57,33 @@ async function renderPdfToJpgZip(pdfBuffer: Buffer, dpiVal: number = 150): Promi
     
     // Find all generated jpg files
     const files = await fs.readdir(os.tmpdir());
-    const generatedJpgs = files.filter(f => f.startsWith(`${tmpId}_page_`) && f.endsWith('.jpg'));
+    const generatedJpgs = files.filter(f => f.startsWith(`${tmpId}_page_`) && f.endsWith('.jpg')).sort();
     
     if (generatedJpgs.length === 0) {
       throw new Error('ImageMagick generated no files');
     }
     
-    const zip = new JSZip();
+    const pages = [];
     for (const file of generatedJpgs) {
       const filePath = path.join(os.tmpdir(), file);
-      const fileData = await fs.readFile(filePath);
-      zip.file(file, fileData);
+      const data = await fs.readFile(filePath);
+      pages.push({ name: file, data });
       await fs.unlink(filePath).catch(() => {});
     }
     
-    return await zip.generateAsync({ type: 'nodebuffer' });
+    return pages;
   } finally {
     await fs.unlink(tmpPdfPath).catch(() => {});
   }
+}
+
+export async function renderPdfToJpgZip(pdfBuffer: Buffer, dpiVal: number = 150): Promise<Buffer> {
+  const pages = await renderPdfToJpgPages(pdfBuffer, dpiVal);
+  const zip = new JSZip();
+  for (const page of pages) {
+    zip.file(page.name, page.data);
+  }
+  return await zip.generateAsync({ type: 'nodebuffer' });
 }
 
 export async function processImageJob(job: Job<ConversionJobPayload>): Promise<void> {

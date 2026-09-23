@@ -13,65 +13,16 @@
 import JSZip from 'jszip';
 import PptxGenJS from 'pptxgenjs';
 import { logger } from '@/backend/utils/logger';
-import { env } from '@/backend/config/env';
+import { renderPdfToJpgPages } from '@/backend/workers/imageWorker';
 
 /**
  * Render a PDF buffer to an array of JPEG buffers (one per page)
- * using Gotenberg's Chromium screenshot endpoint.
+ * using ImageMagick (from imageWorker).
  */
 async function pdfToJpegPages(pdfBuffer: Buffer): Promise<Buffer[]> {
-  const gotenbergUrl = env.GOTENBERG_URL;
-
-  const form = new FormData();
-  form.append(
-    'files',
-    new Blob([new Uint8Array(pdfBuffer)], { type: 'application/pdf' }),
-    'input.pdf'
-  );
-  // Ask LibreOffice to convert each PDF page to a PNG image
-  form.append('outputFilename', 'output.png');
-
-  logger.info('[pdf2pptx] Sending PDF to Gotenberg LibreOffice for PNG rendering');
-
-  const res = await fetch(`${gotenbergUrl}/forms/libreoffice/convert`, {
-    method: 'POST',
-    body: form as unknown as BodyInit,
-    signal: AbortSignal.timeout(120_000),
-  });
-
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`Gotenberg PDF→PNG conversion failed (${res.status}): ${errText}`);
-  }
-
-  const contentType = res.headers.get('content-type') ?? '';
-  const responseBuffer = Buffer.from(await res.arrayBuffer());
-
-  logger.info(`[pdf2pptx] Gotenberg response content-type: ${contentType}`);
-
-  // Single-page PDF → Gotenberg returns a raw PNG
-  if (!contentType.includes('zip') && !contentType.includes('octet-stream')) {
-    logger.info('[pdf2pptx] Single page returned');
-    return [responseBuffer];
-  }
-
-  // Multi-page PDF → Gotenberg returns a ZIP of PNGs
-  logger.info('[pdf2pptx] Multi-page ZIP returned, extracting pages');
-  const zip = await JSZip.loadAsync(responseBuffer);
-  const fileNames = Object.keys(zip.files).sort(); // sort keeps page order
-  const pages: Buffer[] = [];
-
-  for (const name of fileNames) {
-    if (zip.files[name].dir) continue;
-    const data = await zip.files[name].async('nodebuffer');
-    pages.push(data);
-  }
-
-  if (pages.length === 0) {
-    throw new Error('[pdf2pptx] No pages extracted from Gotenberg ZIP');
-  }
-
-  return pages;
+  logger.info('[pdf2pptx] Sending PDF to ImageMagick for JPG rendering');
+  const pages = await renderPdfToJpgPages(pdfBuffer, 150);
+  return pages.map(p => p.data);
 }
 
 /**
