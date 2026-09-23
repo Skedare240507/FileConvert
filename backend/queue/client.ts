@@ -15,8 +15,8 @@ export const redisConnection = new Redis(env.REDIS_URL, {
   lazyConnect: true,
   connectTimeout: 2000,
   retryStrategy: (times: number) => {
-    if (times > 3) return null; // stop retrying quickly if Redis is down
-    return Math.min(times * 300, 1500);
+    if (times > 20) return null; // give up after ~30 seconds if Redis is down
+    return Math.min(times * 500, 2000);
   },
 });
 

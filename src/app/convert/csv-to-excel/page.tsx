@@ -3,6 +3,8 @@
 import React, { useState, useRef, useCallback } from 'react';
 import styles from './page.module.css';
 
+import { useConverter } from '@/hooks/useConverter';
+
 interface SelectedFile {
   file: File;
   id: string;
@@ -12,6 +14,8 @@ export default function CsvToExcel() {
   const [files, setFiles] = useState<SelectedFile[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const { converting, done, progress, errorMsg, startConversion, reset } = useConverter();
 
   const addFiles = useCallback((newFiles: FileList | null) => {
     if (!newFiles) return;
@@ -95,40 +99,72 @@ export default function CsvToExcel() {
             </div>
           </div>
 
-          {files.length > 0 && (
-            <div className={styles.selectedFiles}>
-              <h4 className={styles.selectedHeader}>Selected Files</h4>
-              <div className={styles.fileList}>
-                {files.map(({ file, id }) => (
-                  <div key={id} className={styles.fileItem}>
-                    <div className={styles.fileItemLeft}>
-                      <div className={styles.fileIcon}>
-                        <span className="material-symbols-outlined">table_chart</span>
+            {files.length > 0 && (
+              <div className={styles.selectedFiles}>
+                <h4 className={styles.selectedHeader}>Selected Files</h4>
+                <div className={styles.fileList}>
+                  {files.map(({ file, id }) => (
+                    <div key={id} className={styles.fileItem}>
+                      <div className={styles.fileItemLeft}>
+                        <div className={styles.fileIcon}>
+                          <span className="material-symbols-outlined">table_chart</span>
+                        </div>
+                        <div>
+                          <p className={styles.fileName}>{file.name}</p>
+                          <p className={styles.fileSize}>{formatBytes(file.size)}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className={styles.fileName}>{file.name}</p>
-                        <p className={styles.fileSize}>{formatBytes(file.size)} • Ready to convert</p>
+                      <div className={styles.fileItemRight}>
+                        {converting && (
+                          <div className={styles.progressBarContainer} style={{ width: '100px', height: '6px', background: '#e2e8f0', borderRadius: '3px', overflow: 'hidden', marginRight: '12px' }}>
+                            <div className={styles.progressBar} style={{ width: `${progress.percent}%`, height: '100%', background: '#3b82f6', transition: 'width 0.3s' }}></div>
+                          </div>
+                        )}
+                        <button 
+                          className={styles.removeBtn} 
+                          onClick={() => removeFile(id)}
+                          aria-label="Remove file"
+                        >
+                          <span className="material-symbols-outlined">delete</span>
+                        </button>
                       </div>
                     </div>
-                    <button 
-                      className={styles.removeBtn} 
-                      onClick={() => removeFile(id)}
-                      aria-label="Remove file"
-                    >
-                      <span className="material-symbols-outlined">delete</span>
-                    </button>
+                  ))}
+                </div>
+
+                {errorMsg && (
+                  <div style={{ color: '#ef4444', background: '#fee2e2', padding: '12px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px', border: '1px solid #fca5a5' }}>
+                    <strong>Error: </strong> {errorMsg}
                   </div>
-                ))}
+                )}
+
+                <div className={styles.actionRow}>
+                  <button className={styles.clearBtn} onClick={clearAll} disabled={converting}>Clear All</button>
+                  <button 
+                    className={`${styles.convertBtn} ${done ? styles.convertBtnSuccess : ''}`}
+                    onClick={done ? () => { clearAll(); reset(); } : () => startConversion(files[0].file, 'csv', 'xlsx', 1)}
+                    disabled={converting && !done}
+                  >
+                    {converting ? (
+                      <>
+                        <span className="material-symbols-outlined" style={{ animation: 'spin 1s linear infinite' }}>sync</span>
+                        {progress.status} ({progress.percent}%)
+                      </>
+                    ) : done ? (
+                      <>
+                        <span className="material-symbols-outlined">download</span>
+                        Download Excel
+                      </>
+                    ) : (
+                      <>
+                        Convert to Excel
+                        <span className="material-symbols-outlined">arrow_forward</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
-              <div className={styles.actionRow}>
-                <button className={styles.clearBtn} onClick={clearAll}>Clear All</button>
-                <button className={styles.convertBtn}>
-                  Convert to Excel
-                  <span className="material-symbols-outlined">arrow_forward</span>
-                </button>
-              </div>
-            </div>
-          )}
+            )}
         </div>
       </section>
 

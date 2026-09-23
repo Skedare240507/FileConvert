@@ -27,6 +27,9 @@ export async function convertPdfToDocx(inputBuffer: Buffer): Promise<Buffer> {
 
   if (!response.ok) {
     const text = await response.text();
+    if (text.includes('No parsed pages')) {
+      throw new Error('This PDF appears to be a scanned document or contains no extractable text. Please use the OCR feature to convert it to a Word document.');
+    }
     throw new Error(`pdf2docx error ${response.status}: ${text}`);
   }
 

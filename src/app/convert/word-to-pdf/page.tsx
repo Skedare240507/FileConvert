@@ -33,8 +33,13 @@ export default function WordToPdf() {
 
   const handleConvert = async () => {
     if (files.length === 0) return;
+    
+    // Determine extension from filename
+    const ext = files[0].file.name.split('.').pop()?.toLowerCase() || 'docx';
+    const sourceType = ext === 'doc' ? 'doc' : 'docx';
+
     // For now we process the first file, you can map multiple files if desired
-    await startConversion(files[0].file, 'word', 'pdf', 1);
+    await startConversion(files[0].file, sourceType, 'pdf', 1);
   };
 
   const formatBytes = (bytes: number) => {

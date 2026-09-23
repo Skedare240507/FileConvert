@@ -88,6 +88,7 @@ export async function GET(
           r2OutputKey: job.r2_output_key ?? null,
           createdAt: job.created_at,
           completedAt: job.completed_at ?? null,
+          error: job.error_message ?? undefined,
         });
 
         // Close stream on terminal status

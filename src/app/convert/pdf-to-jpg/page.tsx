@@ -3,6 +3,8 @@
 import React, { useState, useRef, useCallback } from 'react';
 import styles from './page.module.css';
 
+import { useConverter } from '@/hooks/useConverter';
+
 type Quality = 'screen' | 'print' | 'high';
 
 interface SelectedFile {
@@ -38,13 +40,12 @@ export default function PdfToJpgPage() {
   const [quality, setQuality]       = useState<Quality>('print');
   const [files, setFiles]           = useState<SelectedFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
-  const [converting, setConverting] = useState(false);
-  const [done, setDone]             = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  
+  const { converting, done, progress, errorMsg, startConversion, reset } = useConverter();
 
   const addFiles = (incoming: FileList | null) => {
     if (!incoming) return;
-    setDone(false);
     const next = Array.from(incoming).map((f) => ({
       file: f,
       id: `${f.name}-${Date.now()}-${Math.random()}`,
@@ -54,7 +55,6 @@ export default function PdfToJpgPage() {
 
   const removeFile = (id: string) => {
     setFiles((prev) => prev.filter((f) => f.id !== id));
-    setDone(false);
   };
 
   const onDragOver  = useCallback((e: React.DragEvent) => { e.preventDefault(); setIsDragging(true); }, []);
@@ -65,10 +65,9 @@ export default function PdfToJpgPage() {
     addFiles(e.dataTransfer.files);
   }, []);
 
-  const handleConvert = () => {
-    setConverting(true);
-    setDone(false);
-    setTimeout(() => { setConverting(false); setDone(true); }, 2800);
+  const handleConvert = async () => {
+    if (files.length === 0) return;
+    await startConversion(files[0].file, 'pdf', 'jpg', 1);
   };
 
   const formatSize = (bytes: number) =>
@@ -155,7 +154,7 @@ export default function PdfToJpgPage() {
             <div className={styles.fileSection}>
               <div className={styles.fileSectionHead}>
                 <span className={styles.fileSectionTitle}>SELECTED FILES ({files.length})</span>
-                <button className={styles.clearAllBtn} onClick={() => { setFiles([]); setDone(false); }}>Clear all</button>
+                <button className={styles.clearAllBtn} onClick={() => { setFiles([]); reset(); }}>Clear all</button>
               </div>
               <div className={styles.fileItems}>
                 {files.map(({ file, id }) => (
@@ -172,17 +171,30 @@ export default function PdfToJpgPage() {
                         <div className={styles.fileRowSize}>{formatSize(file.size)}</div>
                       </div>
                     </div>
-                    <button className={styles.fileRemoveBtn} onClick={() => removeFile(id)} aria-label="Remove file">
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                      </svg>
-                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      {converting && (
+                        <div className={styles.progressBarContainer} style={{ width: '100px', height: '6px', background: '#e2e8f0', borderRadius: '3px', overflow: 'hidden', marginRight: '12px' }}>
+                          <div className={styles.progressBar} style={{ width: `${progress.percent}%`, height: '100%', background: '#3b82f6', transition: 'width 0.3s' }}></div>
+                        </div>
+                      )}
+                      <button className={styles.fileRemoveBtn} onClick={() => removeFile(id)} aria-label="Remove file">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
 
+              {errorMsg && (
+                <div style={{ color: '#ef4444', background: '#fee2e2', padding: '12px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px', border: '1px solid #fca5a5', marginTop: '12px' }}>
+                  <strong>Error: </strong> {errorMsg}
+                </div>
+              )}
+
               {done ? (
-                <button className={`${styles.convertBtn} ${styles.convertBtnDone}`} onClick={() => { setFiles([]); setDone(false); }}>
+                <button className={`${styles.convertBtn} ${styles.convertBtnDone}`} onClick={() => { setFiles([]); reset(); }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="20 6 9 17 4 12"/>
                   </svg>
@@ -195,7 +207,7 @@ export default function PdfToJpgPage() {
                   disabled={converting}
                 >
                   {converting ? (
-                    <><span className={styles.spinner} />Converting…</>
+                    <><span className={styles.spinner} style={{ animation: 'spin 1s linear infinite' }} />{progress.status} ({progress.percent}%)</>
                   ) : (
                     <>
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">

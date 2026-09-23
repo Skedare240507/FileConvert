@@ -3,6 +3,8 @@
 import React, { useState, useRef, useCallback } from 'react';
 import styles from './page.module.css';
 
+import { useConverter } from '@/hooks/useConverter';
+
 interface SelectedFile {
   file: File;
   id: string;
@@ -12,6 +14,7 @@ export default function WordToJpg() {
   const [files, setFiles] = useState<SelectedFile[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { converting, done, progress, errorMsg, startConversion, reset } = useConverter();
 
   const addFiles = useCallback((newFiles: FileList | null) => {
     if (!newFiles) return;
@@ -30,6 +33,14 @@ export default function WordToJpg() {
   const clearAll = () => {
     setFiles([]);
     if (fileInputRef.current) fileInputRef.current.value = '';
+    reset();
+  };
+
+  const handleConvert = async () => {
+    if (files.length === 0) return;
+    const ext = files[0].file.name.split('.').pop()?.toLowerCase() || 'docx';
+    const sourceType = ext === 'doc' ? 'doc' : 'docx';
+    await startConversion(files[0].file, sourceType, 'jpg', 1);
   };
 
   const formatMB = (bytes: number) =>
@@ -114,12 +125,37 @@ export default function WordToJpg() {
                 ))}
               </div>
 
+              {errorMsg && (
+                <div style={{ color: '#ef4444', background: '#fee2e2', padding: '12px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px', border: '1px solid #fca5a5' }}>
+                  <strong>Error: </strong> {errorMsg}
+                </div>
+              )}
+
               <div className={styles.actionBtns}>
-                <button className={styles.addMoreBtn} onClick={() => fileInputRef.current?.click()}>Add More</button>
-                <button className={styles.convertBtn}>
-                  <span>Convert to JPG</span>
-                  <span className="material-symbols-outlined">arrow_forward</span>
-                </button>
+                {!done && <button className={styles.addMoreBtn} onClick={() => fileInputRef.current?.click()} disabled={converting}>Add More</button>}
+                {done ? (
+                  <button className={`${styles.convertBtn} ${styles.convertBtnDone}`} onClick={clearAll}>
+                    <span>Download JPG(s)</span>
+                    <span className="material-symbols-outlined">download</span>
+                  </button>
+                ) : (
+                  <button className={styles.convertBtn} onClick={handleConvert} disabled={converting}>
+                    {converting ? (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <svg style={{ animation: 'spin 1s linear infinite', height: '20px', width: '20px' }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        {progress.status} ({progress.percent}%)
+                      </span>
+                    ) : (
+                      <>
+                        <span>Convert to JPG</span>
+                        <span className="material-symbols-outlined">arrow_forward</span>
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
             </div>
           )}

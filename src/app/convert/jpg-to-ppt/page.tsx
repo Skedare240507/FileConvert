@@ -3,6 +3,8 @@
 import React, { useState, useRef, useCallback } from 'react';
 import styles from './page.module.css';
 
+import { useConverter } from '@/hooks/useConverter';
+
 interface SelectedFile {
   file: File;
   id: string;
@@ -11,13 +13,11 @@ interface SelectedFile {
 export default function JpgToPptPage() {
   const [files, setFiles] = useState<SelectedFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
-  const [converting, setConverting] = useState(false);
-  const [done, setDone] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { converting, done, progress, errorMsg, startConversion, reset } = useConverter();
 
   const addFiles = (incoming: FileList | null) => {
     if (!incoming) return;
-    setDone(false);
     const next = Array.from(incoming).map((f) => ({
       file: f,
       id: `${f.name}-${Date.now()}-${Math.random()}`,
@@ -27,7 +27,6 @@ export default function JpgToPptPage() {
 
   const removeFile = (id: string) => {
     setFiles((prev) => prev.filter((f) => f.id !== id));
-    setDone(false);
   };
 
   const onDragOver = useCallback((e: React.DragEvent) => { e.preventDefault(); setIsDragging(true); }, []);
@@ -38,10 +37,9 @@ export default function JpgToPptPage() {
     addFiles(e.dataTransfer.files);
   }, []);
 
-  const handleConvert = () => {
-    setConverting(true);
-    setDone(false);
-    setTimeout(() => { setConverting(false); setDone(true); }, 2500);
+  const handleConvert = async () => {
+    if (files.length === 0) return;
+    await startConversion(files[0].file, 'jpg', 'pptx', 1);
   };
 
   const formatSize = (bytes: number) =>
@@ -128,19 +126,32 @@ export default function JpgToPptPage() {
                       <p className={styles.fileItemSize}>{formatSize(file.size)}</p>
                     </div>
                   </div>
-                  <button className={styles.fileRemoveBtn} onClick={() => removeFile(id)}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="3 6 5 6 21 6"></polyline>
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    </svg>
-                  </button>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    {converting && (
+                      <div className={styles.progressBarContainer} style={{ width: '100px', height: '6px', background: '#e2e8f0', borderRadius: '3px', overflow: 'hidden', marginRight: '12px' }}>
+                        <div className={styles.progressBar} style={{ width: `${progress.percent}%`, height: '100%', background: '#3b82f6', transition: 'width 0.3s' }}></div>
+                      </div>
+                    )}
+                    <button className={styles.fileRemoveBtn} onClick={() => removeFile(id)}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
             
+            {errorMsg && (
+              <div style={{ color: '#ef4444', background: '#fee2e2', padding: '12px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px', border: '1px solid #fca5a5', marginTop: '12px' }}>
+                <strong>Error: </strong> {errorMsg}
+              </div>
+            )}
+
             <div className={styles.convertWrap}>
               {done ? (
-                <button className={`${styles.convertBtn} ${styles.convertBtnDone}`} onClick={() => { setFiles([]); setDone(false); }}>
+                <button className={`${styles.convertBtn} ${styles.convertBtnDone}`} onClick={() => { setFiles([]); reset(); }}>
                   Download PPT
                 </button>
               ) : (
@@ -155,7 +166,7 @@ export default function JpgToPptPage() {
                         <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      Converting...
+                      {progress.status} ({progress.percent}%)
                     </span>
                   ) : (
                     'Convert to PPT'

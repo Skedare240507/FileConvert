@@ -3,6 +3,8 @@
 import React, { useState, useRef, useCallback } from 'react';
 import styles from './page.module.css';
 
+import { useConverter } from '@/hooks/useConverter';
+
 interface SelectedFile {
   file: File;
   id: string;
@@ -11,13 +13,11 @@ interface SelectedFile {
 export default function ExcelToCsv() {
   const [files, setFiles]         = useState<SelectedFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
-  const [converting, setConverting] = useState(false);
-  const [done, setDone]           = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { converting, done, progress, errorMsg, startConversion, reset } = useConverter();
 
   const addFiles = (incoming: FileList | null) => {
     if (!incoming) return;
-    setDone(false);
     const next = Array.from(incoming).map((f) => ({
       file: f,
       id: `${f.name}-${Date.now()}-${Math.random()}`,
@@ -27,7 +27,6 @@ export default function ExcelToCsv() {
 
   const removeFile = (id: string) => {
     setFiles((prev) => prev.filter((f) => f.id !== id));
-    setDone(false);
   };
 
   const onDragOver  = useCallback((e: React.DragEvent) => { e.preventDefault(); setIsDragging(true); }, []);
@@ -38,10 +37,10 @@ export default function ExcelToCsv() {
     addFiles(e.dataTransfer.files);
   }, []);
 
-  const handleConvert = () => {
-    setConverting(true);
-    setDone(false);
-    setTimeout(() => { setConverting(false); setDone(true); }, 2800);
+  const handleConvert = async () => {
+    if (files.length === 0) return;
+    const ext = files[0].file.name.split('.').pop()?.toLowerCase() || 'xlsx';
+    await startConversion(files[0].file, ext, 'csv', 1);
   };
 
   const formatSize = (bytes: number) =>
@@ -127,8 +126,13 @@ export default function ExcelToCsv() {
                 </div>
 
                 <div className={styles.convertAction}>
+                  {errorMsg && (
+                    <div style={{ color: '#ef4444', background: '#fee2e2', padding: '12px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px', border: '1px solid #fca5a5' }}>
+                      <strong>Error: </strong> {errorMsg}
+                    </div>
+                  )}
                   {done ? (
-                    <button className={`${styles.convertBtn} ${styles.convertBtnDone}`} onClick={(e) => { e.stopPropagation(); setFiles([]); setDone(false); }}>
+                    <button className={`${styles.convertBtn} ${styles.convertBtnDone}`} onClick={(e) => { e.stopPropagation(); setFiles([]); reset(); }}>
                       Download CSV(s) — Convert another
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="20 6 9 17 4 12"/>
@@ -142,8 +146,8 @@ export default function ExcelToCsv() {
                     >
                       {converting ? (
                         <>
-                          <span className={styles.spinner} />
-                          Converting...
+                          <span className={styles.spinner} style={{ animation: 'spin 1s linear infinite' }} />
+                          {progress.status} ({progress.percent}%)
                         </>
                       ) : (
                         <>
