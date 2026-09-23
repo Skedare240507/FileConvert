@@ -27,14 +27,21 @@ import { PDFDocument } from 'pdf-lib';
 
 const execFileAsync = promisify(execFile);
 
-// Resolve the ImageMagick binary. The worker process may not have picked up the
-// newly-added user PATH entry yet, so we probe a known install location as fallback.
+// Resolve the ImageMagick binary.
+// - Inside Docker (Debian apt): ImageMagick 6 installs as 'convert'
+// - Windows with IM7 portable:  magick.exe at %USERPROFILE%\ImageMagick\
 function getMagickBin(): string {
-  const knownPath = `${process.env.USERPROFILE ?? process.env.HOME ?? ''}\\ImageMagick\\magick.exe`;
+  // Check Windows portable install first
+  const winPath = `${process.env.USERPROFILE ?? ''}\\ImageMagick\\magick.exe`;
   try {
-    if (require('fs').existsSync(knownPath)) return knownPath;
+    if (process.platform === 'win32' && require('fs').existsSync(winPath)) {
+      return winPath;
+    }
   } catch { /* ignore */ }
-  return 'magick'; // assume it's on PATH
+
+  // On Linux/Docker, ImageMagick 6 uses 'convert'; IM7 uses 'magick'
+  // Prefer 'magick' if it exists on PATH, else fall back to 'convert'
+  return process.platform === 'win32' ? 'magick' : 'convert';
 }
 
 async function renderPdfToJpgZip(pdfBuffer: Buffer, dpiVal: number = 150): Promise<Buffer> {
