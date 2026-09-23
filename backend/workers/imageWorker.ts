@@ -24,9 +24,18 @@ import os from 'os';
 import { promises as fs } from 'fs';
 import JSZip from 'jszip';
 import { PDFDocument } from 'pdf-lib';
-import FormData from 'form-data';
 
 const execFileAsync = promisify(execFile);
+
+// Resolve the ImageMagick binary. The worker process may not have picked up the
+// newly-added user PATH entry yet, so we probe a known install location as fallback.
+function getMagickBin(): string {
+  const knownPath = `${process.env.USERPROFILE ?? process.env.HOME ?? ''}\\ImageMagick\\magick.exe`;
+  try {
+    if (require('fs').existsSync(knownPath)) return knownPath;
+  } catch { /* ignore */ }
+  return 'magick'; // assume it's on PATH
+}
 
 async function renderPdfToJpgZip(pdfBuffer: Buffer, dpiVal: number = 150): Promise<Buffer> {
   const tmpId = crypto.randomUUID();
@@ -36,8 +45,8 @@ async function renderPdfToJpgZip(pdfBuffer: Buffer, dpiVal: number = 150): Promi
   await fs.writeFile(tmpPdfPath, pdfBuffer);
   
   try {
-    // Run ImageMagick: convert -density 150 input.pdf output_page_%03d.jpg
-    await execFileAsync('magick', ['-density', String(dpiVal), tmpPdfPath, `${tmpJpgPrefix}%03d.jpg`]);
+    // Run ImageMagick: magick -density 150 input.pdf output_page_%03d.jpg
+    await execFileAsync(getMagickBin(), ['-density', String(dpiVal), tmpPdfPath, `${tmpJpgPrefix}%03d.jpg`]);
     
     // Find all generated jpg files
     const files = await fs.readdir(os.tmpdir());
@@ -78,6 +87,7 @@ export async function processImageJob(job: Job<ConversionJobPayload>): Promise<v
       break;
     }
     case 'docx:jpg':
+    case 'doc:jpg':
     case 'pptx:jpg': {
       outputExt = 'zip';
       logger.info(`[ImageWorker] Converting ${sourceType} to intermediate PDF via Gotenberg`);
@@ -109,22 +119,23 @@ export async function processImageJob(job: Job<ConversionJobPayload>): Promise<v
     }
     case 'jpg:pptx': {
       outputExt = 'pptx';
-      // Build a minimal HTML slide and convert via Gotenberg → LibreOffice
+      // Build a valid PPTX directly with pptxgenjs — embed the image as a full-slide background.
+      // This avoids the broken Gotenberg/LibreOffice HTML→PPTX path.
+      const PptxGenJS = (await import('pptxgenjs')).default;
+      const pptx = new PptxGenJS();
+      pptx.layout = 'LAYOUT_16x9';
+      const slide = pptx.addSlide();
+      const isPng =
+        inputBuffer.length >= 8 &&
+        inputBuffer[0] === 0x89 &&
+        inputBuffer[1] === 0x50 &&
+        inputBuffer[2] === 0x4e &&
+        inputBuffer[3] === 0x47;
+      const mimeType = isPng ? 'image/png' : 'image/jpeg';
       const base64Img = inputBuffer.toString('base64');
-      const htmlSlide = `<!DOCTYPE html><html><head><style>
-        body { margin: 0; padding: 0; width: 25.4cm; height: 19.05cm; }
-        img { width: 100%; height: 100%; object-fit: contain; }
-      </style></head><body><img src="data:image/jpeg;base64,${base64Img}" /></body></html>`;
-      const formData = new FormData();
-      formData.append('files', Buffer.from(htmlSlide), { filename: 'index.html', contentType: 'text/html' });
-      const gotenbergUrl = process.env.GOTENBERG_URL ?? 'http://localhost:3001';
-      const res = await fetch(`${gotenbergUrl}/forms/libreoffice/convert`, {
-        method: 'POST',
-        body: formData as unknown as BodyInit,
-        headers: formData.getHeaders(),
-      });
-      if (!res.ok) throw new Error(`Gotenberg pptx conversion failed: ${res.status}`);
-      outputBuffer = Buffer.from(await res.arrayBuffer());
+      slide.addImage({ data: `data:${mimeType};base64,${base64Img}`, x: 0, y: 0, w: '100%', h: '100%' });
+      const base64Output = await pptx.write({ outputType: 'base64' }) as string;
+      outputBuffer = Buffer.from(base64Output, 'base64');
       break;
     }
     default:
