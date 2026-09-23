@@ -1,6 +1,6 @@
 <div align="center">
 
-  <img src="/logo.png" alt="FileConvert Logo" width="160" />
+  <img src="/public/logo.png" alt="FileConvert Logo" width="160" />
 
   # FileConvert
 
