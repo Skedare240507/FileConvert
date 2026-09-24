@@ -44,7 +44,7 @@ export async function convertPdfToPptx(pdfBuffer: Buffer): Promise<Buffer> {
     const base64 = pages[i].toString('base64');
 
     slide.addImage({
-      data: `data:image/jpeg;base64,${base64}`,
+      data: `image/jpeg;base64,${base64}`,
       x: 0,
       y: 0,
       w: '100%',
