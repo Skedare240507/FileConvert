@@ -12,7 +12,6 @@ import { env } from '@/backend/config/env';
 export const redisConnection = new Redis(env.REDIS_URL, {
   maxRetriesPerRequest: null,
   enableReadyCheck: false,
-  lazyConnect: true,
   connectTimeout: 2000,
   retryStrategy: (times: number) => {
     if (times > 20) return null; // give up after ~30 seconds if Redis is down
