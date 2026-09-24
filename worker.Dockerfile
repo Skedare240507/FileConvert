@@ -25,8 +25,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # ImageMagick's security policy blocks PDF reading by default — allow it
-RUN sed -i 's|<policy domain="coder" rights="none" pattern="PDF" />|<policy domain="coder" rights="read|write" pattern="PDF" />|g' \
-      /etc/ImageMagick-6/policy.xml || true
+RUN sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/g' /etc/ImageMagick-6/policy.xml || true
+RUN sed -i '/disable ghostscript format types/d' /etc/ImageMagick-6/policy.xml || true
 
 # Copy installed node_modules from deps stage
 COPY --from=deps /app/node_modules ./node_modules
