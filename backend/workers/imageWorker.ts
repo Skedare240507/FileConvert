@@ -149,7 +149,7 @@ export async function processImageJob(job: Job<ConversionJobPayload>): Promise<v
         inputBuffer[3] === 0x47;
       const mimeType = isPng ? 'image/png' : 'image/jpeg';
       const base64Img = inputBuffer.toString('base64');
-      slide.addImage({ data: `data:${mimeType};base64,${base64Img}`, x: 0, y: 0, w: '100%', h: '100%' });
+      slide.addImage({ data: `${mimeType};base64,${base64Img}`, x: 0, y: 0, w: '100%', h: '100%' });
       const base64Output = await pptx.write({ outputType: 'base64' }) as string;
       outputBuffer = Buffer.from(base64Output, 'base64');
       break;
