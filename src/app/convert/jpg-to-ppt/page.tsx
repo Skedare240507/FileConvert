@@ -14,7 +14,7 @@ export default function JpgToPptPage() {
   const [files, setFiles] = useState<SelectedFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { converting, done, progress, errorMsg, startConversion, reset } = useConverter();
+  const { converting, done, progress, errorMsg, startMultiFileConversion, reset } = useConverter();
 
   const addFiles = (incoming: FileList | null) => {
     if (!incoming) return;
@@ -39,7 +39,7 @@ export default function JpgToPptPage() {
 
   const handleConvert = async () => {
     if (files.length === 0) return;
-    await startConversion(files[0].file, 'jpg', 'pptx', 1);
+    await startMultiFileConversion(files.map(f => f.file), 'jpg', 'pptx');
   };
 
   const formatSize = (bytes: number) =>
