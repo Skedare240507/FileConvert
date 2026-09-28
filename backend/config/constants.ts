@@ -90,6 +90,8 @@ export const ALLOWED_MIME_TYPES = new Set([
   'image/jpeg',
   'image/png',
   'image/webp',
+  'application/zip',
+  'application/x-zip-compressed',
 ]);
 
 // ── Conversion routing map ────────────────────────────────────────────────
@@ -102,6 +104,8 @@ export const CONVERSION_WORKER_MAP: Record<string, WorkerType> = {
   'pdf:jpg': WORKER_TYPES.IMAGE,
   'jpg:pdf': WORKER_TYPES.IMAGE,
   'jpg:pptx': WORKER_TYPES.IMAGE,
+  'zip:pdf': WORKER_TYPES.IMAGE,   // multi-image batch → PDF (one page per image)
+  'zip:pptx': WORKER_TYPES.IMAGE,  // multi-image batch → PPTX (one slide per image)
   'xlsx:csv': WORKER_TYPES.DOCUMENT,
   'xls:csv': WORKER_TYPES.DOCUMENT,
   'csv:xlsx': WORKER_TYPES.DOCUMENT,
