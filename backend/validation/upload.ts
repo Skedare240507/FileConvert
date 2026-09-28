@@ -15,6 +15,7 @@ const MAGIC_BYTES: Record<string, Buffer[]> = {
   docx: [Buffer.from([0x50, 0x4b, 0x03, 0x04])], // PK (ZIP/Office Open XML)
   xlsx: [Buffer.from([0x50, 0x4b, 0x03, 0x04])], // PK
   pptx: [Buffer.from([0x50, 0x4b, 0x03, 0x04])], // PK
+  zip:  [Buffer.from([0x50, 0x4b, 0x03, 0x04])], // PK — multi-image batch uploads
   jpg: [Buffer.from([0xff, 0xd8, 0xff])],          // JPEG SOI
   png: [Buffer.from([0x89, 0x50, 0x4e, 0x47])],   // PNG
 };

@@ -17,12 +17,12 @@ export default function JpgToPdf() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const idRef = useRef(0);
 
-  const { converting, done, progress, errorMsg, startConversion, reset } = useConverter();
+  const { converting, done, progress, errorMsg, startMultiFileConversion, reset } = useConverter();
 
   const addFiles = useCallback((incoming: FileList | null) => {
     if (!incoming) return;
     const jpgs = Array.from(incoming).filter(f =>
-      f.type === 'image/jpeg' || f.type === 'image/jpg'
+      f.type === 'image/jpeg' || f.type === 'image/jpg' || f.type === 'image/png' || f.type === 'image/webp'
     );
     if (!jpgs.length) return;
     setFiles(prev => [
@@ -45,7 +45,7 @@ export default function JpgToPdf() {
 
   const handleConvert = async () => {
     if (!files.length) return;
-    await startConversion(files[0].file, 'jpg', 'pdf', 1);
+    await startMultiFileConversion(files.map(f => f.file), 'jpg', 'pdf');
   };
 
   const formatSize = (bytes: number) =>
