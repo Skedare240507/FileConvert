@@ -1,21 +1,31 @@
-# Security Policy
+﻿# Security Policy
 
 ## Supported Versions
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+Currently, only the latest version of the `main` branch is actively supported with security updates.
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+| Main    | :white_check_mark: |
+| < 1.0.0 | :x:                |
 
 ## Reporting a Vulnerability
 
-Use this section to tell people how to report a vulnerability.
+We take the security of **FileConvert** very seriously. If you discover a security vulnerability in this project or on the website, please report it to us immediately.
 
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted 
-declined, etc.
+**Please do not file a public issue for security vulnerabilities.**
+
+Instead, please send an email directly to `sahilkedare05@gmail.com` with the subject **"Security Vulnerability - FileConvert"**.
+
+In your email, please include:
+* A detailed description of the vulnerability.
+* Clear, step-by-step instructions to reproduce the issue.
+* Any relevant logs, screenshots, or code snippets.
+* (Optional) How the vulnerability might be exploited and any potential mitigations you suggest.
+
+### Response Timeline
+* We will acknowledge receipt of your vulnerability report within **48 hours**.
+* We will investigate and strive to provide a regular update on our progress.
+* Once the vulnerability is confirmed, we will work to patch it and deploy the fix as quickly as possible.
+
+Thank you for helping keep FileConvert safe and secure for everyone!
