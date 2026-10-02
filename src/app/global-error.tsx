@@ -33,19 +33,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
             position: relative;
             padding: 2rem;
           }
-          .blob {
-            position: absolute;
-            border-radius: 50%;
-            pointer-events: none;
-          }
-          .blob1 {
-            top: -15%; right: -10%; width: 550px; height: 550px;
-            background: radial-gradient(circle, rgba(180,0,100,0.15) 0%, transparent 70%);
-          }
-          .blob2 {
-            bottom: -15%; left: -10%; width: 650px; height: 650px;
-            background: radial-gradient(circle, rgba(80,0,180,0.1) 0%, transparent 70%);
-          }
+
           .content {
             position: relative; z-index: 10; text-align: center;
             max-width: 560px; display: flex; flex-direction: column;
@@ -102,8 +90,6 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
         `}</style>
       </head>
       <body>
-        <div className="blob blob1" />
-        <div className="blob blob2" />
         <div className="content">
           <div className="logo">⚡ FileConvert</div>
 

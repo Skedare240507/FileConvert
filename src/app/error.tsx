@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect } from "react";
 import Link from "next/link";
@@ -16,9 +16,6 @@ export default function ErrorPage({ error, reset }: ErrorPageProps) {
 
   return (
     <div className={styles.page}>
-      <div className={styles.blob1} />
-      <div className={styles.blob2} />
-
       <div className={styles.content}>
         <div className={styles.iconWrapper}>
           <span className={`material-symbols-outlined ${styles.errorIcon}`}>

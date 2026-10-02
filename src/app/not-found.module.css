@@ -1,4 +1,4 @@
-﻿.page {
+.page {
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -9,75 +9,7 @@
   padding: 2rem;
 }
 
-/* Ambient glow blobs */
-.blob1 {
-  position: absolute;
-  top: -10%;
-  right: -5%;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(0, 168, 150, 0.15) 0%, transparent 70%);
-  border-radius: 50%;
-  animation: blobPulse 8s ease-in-out infinite alternate;
-  pointer-events: none;
-}
 
-.blob2 {
-  position: absolute;
-  bottom: -10%;
-  left: -5%;
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(0, 104, 95, 0.12) 0%, transparent 70%);
-  border-radius: 50%;
-  animation: blobPulse 10s ease-in-out infinite alternate-reverse;
-  pointer-events: none;
-}
-
-@keyframes blobPulse {
-  from { transform: scale(1) translate(0, 0); }
-  to   { transform: scale(1.15) translate(2%, -2%); }
-}
-
-/* Floating document icons */
-.floatingIcons {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.docIcon {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  color: rgba(107, 216, 203, 0.25);
-  animation: floatDoc 12s ease-in-out infinite;
-}
-
-.docIcon span.material-symbols-outlined {
-  font-size: 2.5rem;
-}
-
-.docLabel {
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  font-family: 'Inter', sans-serif;
-}
-
-.docIconPdf  { top: 8%;  right: 8%;  animation-delay: 0s;    animation-duration: 14s; font-size: 1rem; }
-.docIconDocx { top: 15%; right: 18%; animation-delay: 2s;    animation-duration: 11s; color: rgba(107,216,203,0.2); }
-.docIconJpg  { bottom: 20%; left: 6%; animation-delay: 1s;   animation-duration: 13s; }
-.docIconPpt  { bottom: 10%; left: 18%; animation-delay: 3s;  animation-duration: 10s; color: rgba(107,216,203,0.15);}
-.docIconXls  { top: 40%; right: 4%; animation-delay: 1.5s;   animation-duration: 15s; color: rgba(107,216,203,0.18);}
-
-@keyframes floatDoc {
-  0%, 100% { transform: translateY(0px) rotate(-4deg); }
-  50%       { transform: translateY(-18px) rotate(4deg); }
-}
 
 /* Main content */
 .content {
@@ -241,7 +173,6 @@
 }
 
 @media (max-width: 480px) {
-  .docIconDocx, .docIconXls { display: none; }
   .actions { flex-direction: column; align-items: center; }
   .btnPrimary, .btnOutline { width: 100%; justify-content: center; }
 }
