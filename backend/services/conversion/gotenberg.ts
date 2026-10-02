@@ -19,15 +19,18 @@ type LibreOfficeRoute = '/forms/libreoffice/convert';
 /**
  * Converts a document buffer using Gotenberg's LibreOffice route.
  *
- * @param inputBuffer - The file to convert
- * @param sourceType  - e.g. 'pdf', 'docx'
- * @param targetType  - e.g. 'docx', 'pdf', 'pptx'
+ * @param inputBuffer    - The file to convert
+ * @param sourceType     - e.g. 'pdf', 'docx'
+ * @param targetType     - e.g. 'docx', 'pdf', 'pptx'
+ * @param pdfCompliance  - When true, enforces PDF/A-2b compliance (slower, ~20-40s extra).
+ *                         Only use for final archival PDFs. Default: false.
  * @returns The converted file as a Buffer
  */
 export async function convertWithGotenberg(
   inputBuffer: Buffer,
   sourceType: string,
-  targetType: string
+  targetType: string,
+  pdfCompliance = false,
 ): Promise<Buffer> {
   const route: LibreOfficeRoute = '/forms/libreoffice/convert';
   const url = `${GOTENBERG_BASE}${route}`;
@@ -38,8 +41,9 @@ export async function convertWithGotenberg(
   // Tell Gotenberg (LibreOffice) the desired output format via file extension
   form.append('outputFilename', `output.${targetType}`);
 
-  // Gotenberg accepts a nativePdfFormat option for better fidelity when converting TO pdf
-  if (targetType === 'pdf') {
+  // PDF/A-2b compliance adds ~20-40s of LibreOffice overhead.
+  // Only enable when the caller explicitly requests archival compliance.
+  if (targetType === 'pdf' && pdfCompliance) {
     form.append('nativePdfFormat', 'PDF/A-2b');
   }
 

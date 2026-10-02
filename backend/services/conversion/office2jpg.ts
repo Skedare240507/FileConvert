@@ -25,7 +25,7 @@ import { logger } from '@/backend/utils/logger';
 export async function convertOfficeToJpg(
   inputBuffer: Buffer,
   sourceType: string,
-  dpi: number = 150,
+  dpi: number = 100,
 ): Promise<Buffer> {
   logger.info(`[office2jpg] Step 1: Converting ${sourceType} to PDF via Gotenberg (LibreOffice)`);
   const pdfBuffer = await convertWithGotenberg(inputBuffer, sourceType, 'pdf');

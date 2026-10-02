@@ -26,6 +26,10 @@ services:
     command:
       - "gotenberg"
       - "--api-timeout=120s"
+      # Keep LibreOffice process alive between conversions (avoids 8-15s cold-start penalty)
+      - "--libreoffice-start-timeout=30s"
+      # Restart LibreOffice every 20 conversions to prevent memory bloat while staying warm
+      - "--libreoffice-restart-after=20"
       - "--chromium-disable-javascript=true"
       - "--chromium-allow-list=file:///tmp/.*"
     healthcheck:
