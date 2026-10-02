@@ -31,6 +31,8 @@ export default function MergePage() {
   const [activeTab, setActiveTab] = useState<FileTab>('pdf');
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [pageState, setPageState] = useState<PageState>('idle');
+  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+  const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFiles = (rawFiles: FileList | null) => {
@@ -45,6 +47,27 @@ export default function MergePage() {
   };
 
   const removeFile = (id: string) => setFiles((prev) => prev.filter((f) => f.id !== id));
+
+  const handleDragStart = (idx: number) => {
+    setDraggedIdx(idx);
+  };
+
+  const handleDragOver = (e: React.DragEvent, idx: number) => {
+    e.preventDefault();
+    if (draggedIdx === null || draggedIdx === idx) return;
+
+    const newFiles = [...files];
+    const item = newFiles[draggedIdx];
+    newFiles.splice(draggedIdx, 1);
+    newFiles.splice(idx, 0, item);
+    
+    setDraggedIdx(idx);
+    setFiles(newFiles);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIdx(null);
+  };
 
   const handleMerge = async () => {
     if (files.length < 2) return;
@@ -89,8 +112,7 @@ export default function MergePage() {
             .then(r => r.json())
             .then(data => {
               if (data.downloadUrl) {
-                // Attach download URL to state or window
-                (window as any).__mergeDownloadUrl = data.downloadUrl;
+                setDownloadUrl(data.downloadUrl);
               }
             });
           es?.close();
@@ -121,16 +143,15 @@ export default function MergePage() {
   };
 
   const handleDownload = () => {
-    const url = (window as any).__mergeDownloadUrl;
-    if (url) {
-      window.location.href = url;
+    if (downloadUrl) {
+      window.location.href = downloadUrl;
     }
   };
 
   const handleReset = () => {
     setFiles([]);
     setPageState('idle');
-    (window as any).__mergeDownloadUrl = undefined;
+    setDownloadUrl(null);
   };
 
   return (
@@ -205,8 +226,16 @@ export default function MergePage() {
           {files.length > 0 && (
             <div className={styles.fileListArea}>
               <p className={styles.fileListLabel}>Files to merge — drag to reorder</p>
-              {files.map((f) => (
-                <div key={f.id} className={styles.fileItem}>
+              {files.map((f, idx) => (
+                <div 
+                  key={f.id} 
+                  className={styles.fileItem}
+                  draggable
+                  onDragStart={() => handleDragStart(idx)}
+                  onDragOver={(e) => handleDragOver(e, idx)}
+                  onDragEnd={handleDragEnd}
+                  style={{ opacity: draggedIdx === idx ? 0.5 : 1, cursor: 'grab' }}
+                >
                   <span className={styles.dragHandle} aria-hidden="true">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" />
@@ -275,9 +304,14 @@ export default function MergePage() {
                 <span style={{ fontSize: 12, opacity: 0.7 }}>Ready for download</span>
               </p>
               <div className={styles.successActions}>
-                <button className={styles.downloadBtn} onClick={handleDownload}>
+                <button 
+                  className={styles.downloadBtn} 
+                  onClick={handleDownload}
+                  disabled={!downloadUrl}
+                  style={{ opacity: downloadUrl ? 1 : 0.6 }}
+                >
                   <span className="material-symbols-outlined" style={{ fontSize: 18 }}>download</span>
-                  Download Now
+                  {downloadUrl ? 'Download Now' : 'Generating Link...'}
                 </button>
                 <button className={styles.newMergeBtn} onClick={handleReset}>New Merge</button>
               </div>
