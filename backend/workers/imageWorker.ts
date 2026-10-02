@@ -124,16 +124,14 @@ export async function processImageJob(job: Job<ConversionJobPayload>): Promise<v
       break;
     }
 
-    // ── Office → JPG (convert to PDF first, then render pages) ───────────
+    // ── Office → JPG (dedicated office2jpg service handles PPT/PPTX/DOC/DOCX) ─
     case 'docx:jpg':
     case 'doc:jpg':
     case 'ppt:jpg':
     case 'pptx:jpg': {
       outputExt = 'zip';
-      logger.info(`[ImageWorker] Converting ${sourceType} to intermediate PDF via Gotenberg`);
-      const { convertWithGotenberg } = await import('@/backend/services/conversion/gotenberg');
-      const intermediatePdf = await convertWithGotenberg(inputBuffer, sourceType, 'pdf');
-      outputBuffer = await renderPdfToJpgZip(intermediatePdf, dpi || 150);
+      const { convertOfficeToJpg } = await import('@/backend/services/conversion/office2jpg');
+      outputBuffer = await convertOfficeToJpg(inputBuffer, sourceType, dpi || 150);
       break;
     }
 
