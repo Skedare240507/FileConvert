@@ -10,10 +10,10 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
 
   return (
     <>
-      <style>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         header, footer { display: none !important; }
         main { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; background: #fff; }
-      `}</style>
+      `}} />
       <div style={{ fontFamily: 'sans-serif', padding: '2rem', textAlign: 'center', marginTop: '-10vh' }}>
         <h1 style={{ fontSize: '2rem', marginBottom: '1rem', color: '#111' }}>500 - Internal Server Error</h1>
         <p style={{ color: '#333', marginBottom: '2rem' }}>Sorry, something went wrong on our end.</p>
