@@ -127,6 +127,7 @@ export async function processImageJob(job: Job<ConversionJobPayload>): Promise<v
     // ── Office → JPG (convert to PDF first, then render pages) ───────────
     case 'docx:jpg':
     case 'doc:jpg':
+    case 'ppt:jpg':
     case 'pptx:jpg': {
       outputExt = 'zip';
       logger.info(`[ImageWorker] Converting ${sourceType} to intermediate PDF via Gotenberg`);

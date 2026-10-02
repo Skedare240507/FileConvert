@@ -23,6 +23,10 @@ import { logger } from '@/backend/utils/logger';
 
 const SHEETJS_TYPES = new Set(['xlsx:csv', 'xls:csv', 'csv:xlsx', 'csv:xls']);
 
+// ppt/pptx → Word conversions fall through to Gotenberg (LibreOffice handles these)
+// Explicitly listing them here for clarity — they are NOT pdf2docx candidates
+const GOTENBERG_PPT_TO_WORD = new Set(['pptx:docx', 'ppt:docx', 'pptx:doc', 'ppt:doc']);
+
 // Gotenberg/LibreOffice cannot reliably convert FROM pdf to editable formats.
 // It uses a Draw/Impress extension that produces structurally broken DOCX/PPTX
 // files which Word/PowerPoint refuse to open.
