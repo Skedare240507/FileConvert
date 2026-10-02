@@ -117,8 +117,11 @@ export const CONVERSION_WORKER_MAP: Record<string, WorkerType> = {
   'docx:jpg': WORKER_TYPES.IMAGE,
   'doc:jpg': WORKER_TYPES.IMAGE,
   'pptx:pdf': WORKER_TYPES.DOCUMENT,
+  'ppt:pdf': WORKER_TYPES.DOCUMENT,
   'pptx:docx': WORKER_TYPES.DOCUMENT,
+  'ppt:docx': WORKER_TYPES.DOCUMENT,
   'pptx:jpg': WORKER_TYPES.IMAGE,
+  'ppt:jpg': WORKER_TYPES.IMAGE,
 } as const;
 
 // ── Plans ────────────────────────────────────────────────────────────────
