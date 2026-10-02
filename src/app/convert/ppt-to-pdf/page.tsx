@@ -111,7 +111,7 @@ export default function PptToPdf() {
                   {files.map(({ file, id }) => (
                     <div key={id} className={styles.fileItem}>
                       <div className={styles.fileItemLeft}>
-                        <span className={`material-symbols-outlined ${styles.fileIcon}`}>presentation_play</span>
+                        <span className={`material-symbols-outlined ${styles.fileIcon}`}>slideshow</span>
                         <div>
                           <p className={styles.fileName}>{file.name}</p>
                           <p className={styles.fileSize}>{formatMB(file.size)}</p>
