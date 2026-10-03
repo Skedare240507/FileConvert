@@ -9,7 +9,7 @@ import { Redis } from 'ioredis';
 import { env } from '@/backend/config/env';
 
 // BullMQ requires maxRetriesPerRequest: null for blocking commands
-export const redisConnection = new Redis(env.REDIS_URL, {
+export const redisConnection = new Redis(env.REDIS_URL || 'redis://localhost:6379', {
   maxRetriesPerRequest: null,
   enableReadyCheck: false,
   connectTimeout: 2000,

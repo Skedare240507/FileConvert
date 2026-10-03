@@ -27,11 +27,11 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { env } from '@/backend/config/env';
 
 const b2 = new S3Client({
-  region: env.B2_REGION,
-  endpoint: env.B2_ENDPOINT,
+  region: env.B2_REGION || 'us-east-005',
+  endpoint: env.B2_ENDPOINT || 'https://s3.us-east-005.backblazeb2.com',
   credentials: {
-    accessKeyId: env.B2_ACCESS_KEY_ID,
-    secretAccessKey: env.B2_SECRET_ACCESS_KEY,
+    accessKeyId: env.B2_ACCESS_KEY_ID || 'dummy',
+    secretAccessKey: env.B2_SECRET_ACCESS_KEY || 'dummy',
   },
 });
 
