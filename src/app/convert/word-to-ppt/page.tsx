@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useCallback } from 'react';
 import styles from './page.module.css';
+import { useConverter } from '@/hooks/useConverter';
 
 interface SelectedFile {
   file: File;
@@ -15,6 +16,8 @@ export default function WordToPpt() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  const { converting, done, progress, errorMsg, startConversion, reset } = useConverter();
+
   const addFiles = useCallback((newFiles: FileList | null) => {
     if (!newFiles) return;
     setFiles(prev => [
@@ -24,7 +27,8 @@ export default function WordToPpt() {
         id: Math.random().toString(36).substring(7),
       })),
     ]);
-  }, []);
+    reset();
+  }, [reset]);
 
   const togglePlay = () => {
     const video = videoRef.current;
@@ -36,12 +40,22 @@ export default function WordToPpt() {
     }
   };
 
-  const removeFile = (id: string) =>
+  const removeFile = (id: string) => {
     setFiles(prev => prev.filter(f => f.id !== id));
+    reset();
+  };
 
   const clearAll = () => {
     setFiles([]);
+    reset();
     if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleConvert = async () => {
+    if (files.length === 0 || converting) return;
+    const ext = files[0].file.name.split('.').pop()?.toLowerCase() || 'docx';
+    const sourceType = ext === 'doc' ? 'doc' : 'docx';
+    await startConversion(files[0].file, sourceType, 'pptx', 1);
   };
 
   const formatMB = (bytes: number) =>
@@ -71,6 +85,7 @@ export default function WordToPpt() {
           {/* Drop Zone Card */}
           <div
             className={`${styles.dropzoneCard} ${isDragOver ? styles.dropzoneActive : ''}`}
+            onClick={() => fileInputRef.current?.click()}
             onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
             onDragLeave={() => setIsDragOver(false)}
             onDrop={(e) => {
@@ -92,17 +107,28 @@ export default function WordToPpt() {
             </div>
             <p className={styles.dropHeading}>Click or drag &amp; drop Word file</p>
             <p className={styles.dropSub}>Maximum file size: 50MB (.docx, .doc)</p>
-            <button type="button" className={styles.selectBtn} tabIndex={-1}>
+            <button
+              type="button"
+              className={styles.selectBtn}
+              onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+            >
               Select Files
             </button>
           </div>
+
+          {/* Error message */}
+          {errorMsg && (
+            <p style={{ color: '#ff6b6b', marginTop: '1rem', textAlign: 'center', fontSize: '0.9rem' }}>
+              ⚠ {errorMsg}
+            </p>
+          )}
 
           {/* Selected File List */}
           {files.length > 0 && (
             <div className={styles.fileListWrap}>
               <div className={styles.listHeader}>
                 <h3 className={styles.listLabel}>Selected Files</h3>
-                <button className={styles.clearBtn} onClick={clearAll}>Remove All</button>
+                <button className={styles.clearBtn} onClick={clearAll} disabled={converting}>Remove All</button>
               </div>
 
               <div className={styles.fileList}>
@@ -117,16 +143,39 @@ export default function WordToPpt() {
                         <p className={styles.fileSize}>{formatMB(file.size)}</p>
                       </div>
                     </div>
-                    <button className={styles.removeBtn} onClick={() => removeFile(id)} aria-label="Remove file">
+                    <button
+                      className={styles.removeBtn}
+                      onClick={() => removeFile(id)}
+                      disabled={converting}
+                      aria-label="Remove file"
+                    >
                       <span className="material-symbols-outlined" style={{ fontSize: 18 }}>close</span>
                     </button>
                   </div>
                 ))}
               </div>
 
-              <button className={styles.convertBtn}>
-                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
-                Convert to PowerPoint
+              <button
+                className={`${styles.convertBtn} ${done ? styles.convertBtnSuccess : ''}`}
+                onClick={done ? clearAll : handleConvert}
+                disabled={converting && !done}
+              >
+                {converting ? (
+                  <>
+                    <span className="material-symbols-outlined" style={{ animation: 'spin 1s linear infinite' }}>sync</span>
+                    {progress.status} ({progress.percent}%)
+                  </>
+                ) : done ? (
+                  <>
+                    <span className="material-symbols-outlined">download</span>
+                    Download PPTX
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
+                    Convert to PowerPoint
+                  </>
+                )}
               </button>
             </div>
           )}
