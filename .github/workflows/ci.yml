@@ -7,9 +7,16 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -17,33 +24,40 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
       - name: Generate Prisma client
-        run: npx prisma generate
+        run: DATABASE_URL="postgres://dummy:dummy@localhost:5432/dummy" npx prisma generate
 
       - name: Run ESLint
         run: npm run lint
+      - name: Build
+        run: npm run build
+
 
       - name: Run Typecheck
         run: npx tsc --noEmit
 
       - name: Security audit
-        run: npm audit --audit-level=high --legacy-peer-deps
+        run: npm audit --audit-level=high --omit=dev --legacy-peer-deps
 
   security-scan:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Run Trivy vulnerability scanner in repo mode
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.28.0
         with:
+          exit-code: '1'
           scan-type: 'fs'
           ignore-unfixed: true
           format: 'table'

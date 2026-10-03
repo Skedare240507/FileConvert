@@ -1,5 +1,5 @@
 # ── Stage 1: deps ────────────────────────────────────────────────────────────
-FROM node:20-slim AS deps
+FROM node:22-slim AS deps
 
 WORKDIR /app
 
@@ -12,28 +12,32 @@ COPY prisma ./prisma/
 RUN npm ci --ignore-scripts --legacy-peer-deps && npx prisma generate
 
 # ── Stage 2: worker runtime ───────────────────────────────────────────────────
-FROM node:20-slim AS worker
+FROM node:22-slim AS worker
 
 WORKDIR /app
 
-# Install ImageMagick + Ghostscript (for PDF → JPG via `magick`) and curl (healthcheck)
+# Install ImageMagick + Ghostscript (for PDF → JPG via `convert`), pdftoppm (poppler-utils)
 RUN apt-get update && apt-get install -y --no-install-recommends \
       imagemagick \
       ghostscript \
-      curl \
+      poppler-utils \
       openssl \
     && rm -rf /var/lib/apt/lists/*
 
-# ImageMagick's security policy blocks PDF reading by default — allow it
-RUN sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/g' /etc/ImageMagick-6/policy.xml || true
-RUN sed -i '/disable ghostscript format types/d' /etc/ImageMagick-6/policy.xml || true
+# ImageMagick's security policy blocks PDF reading by default — allow it, but add basic resource limits
+RUN sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/g' /etc/ImageMagick-6/policy.xml || true && \
+    sed -i 's/name="memory" value="256MiB"/name="memory" value="1GiB"/g' /etc/ImageMagick-6/policy.xml || true
 
 # Copy installed node_modules from deps stage
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/node_modules/.prisma ./node_modules/.prisma
+COPY --chown=node:node --from=deps /app/node_modules ./node_modules
+# Prisma 7 no longer outputs to .prisma by default but leaving it just in case
+COPY --chown=node:node --from=deps /app/node_modules/.prisma ./node_modules/.prisma || true
 
 # Copy source code
-COPY . .
+COPY --chown=node:node . .
+
+# Run as non-root user
+USER node
 
 # tsx is already in devDependencies — run via node_modules/.bin
 ENV NODE_ENV=production
