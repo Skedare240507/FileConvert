@@ -38,6 +38,10 @@ const PDF2DOCX_TYPES = new Set(['pdf:docx', 'pdf:doc']);
 // PPTX built with pptxgenjs. Produces an openable file PowerPoint can read.
 const PDF2PPTX_TYPES = new Set(['pdf:pptx']);
 
+// LibreOffice cannot directly convert Word→PPTX — it silently returns a PDF.
+// Two-step pipeline: Word→PDF (Gotenberg), then PDF→PPTX (pdf2pptx engine).
+const WORD_TO_PPTX_TYPES = new Set(['docx:pptx', 'doc:pptx']);
+
 export async function processDocumentJob(job: Job<ConversionJobPayload>): Promise<void> {
   const { jobId, sourceType, targetType, r2InputKey, engineUsed } = job.data;
   const conversionKey = `${sourceType}:${targetType}`;
@@ -60,6 +64,12 @@ export async function processDocumentJob(job: Job<ConversionJobPayload>): Promis
     // PDF → PPTX: render pages as images via Gotenberg, build PPTX with pptxgenjs
     logger.info(`[DocumentWorker] Routing ${conversionKey} to pdf2pptx`);
     outputBuffer = await convertPdfToPptx(inputBuffer);
+  } else if (WORD_TO_PPTX_TYPES.has(conversionKey)) {
+    // Word → PPTX: LibreOffice silently returns PDF for this pair.
+    // Two-step: Word→PDF via Gotenberg, then PDF→PPTX via our pdf2pptx engine.
+    logger.info(`[DocumentWorker] Routing ${conversionKey} via two-step: Word→PDF→PPTX`);
+    const pdfBuffer = await convertWithGotenberg(inputBuffer, sourceType, 'pdf');
+    outputBuffer = await convertPdfToPptx(pdfBuffer);
   } else {
     // Word/PPT/Excel → PDF, inter-format conversions via Gotenberg (LibreOffice)
     outputBuffer = await convertWithGotenberg(inputBuffer, sourceType, targetType);
