@@ -55,51 +55,88 @@ export async function GET(
       // Keep connection open comment
       controller.enqueue(encoder.encode(': ping\n\n'));
 
-      while (true) {
-        // Check for timeout
-        if (Date.now() - startTime > MAX_STREAM_DURATION_MS) {
-          send({ jobId, status: 'timeout', message: 'Stream timed out' });
-          controller.close();
-          break;
-        }
-
-        // Poll DB for job status
-        let job;
+      let isAborted = false;
+      const abortListener = () => {
+        isAborted = true;
         try {
-          job = await getConversionJobById(jobId);
+          controller.close();
         } catch {
-          send({ jobId, status: 'error', message: 'Failed to fetch job status' });
-          controller.close();
-          break;
+          // ignore if already closed
         }
+      };
 
-        if (!job) {
-          send({ jobId, status: 'error', message: 'Job not found' });
-          controller.close();
-          break;
+      req.signal.addEventListener('abort', abortListener, { once: true });
+
+      try {
+        while (!isAborted && !req.signal.aborted) {
+          // Check for timeout
+          if (Date.now() - startTime > MAX_STREAM_DURATION_MS) {
+            send({ jobId, status: 'timeout', message: 'Stream timed out' });
+            try { controller.close(); } catch { /* ignore */ }
+            break;
+          }
+
+          // Poll DB for job status
+          let job;
+          try {
+            job = await getConversionJobById(jobId);
+          } catch {
+            send({ jobId, status: 'error', message: 'Failed to fetch job status' });
+            try { controller.close(); } catch { /* ignore */ }
+            break;
+          }
+
+          if (!job) {
+            send({ jobId, status: 'error', message: 'Job not found' });
+            try { controller.close(); } catch { /* ignore */ }
+            break;
+          }
+
+          // Send current status
+          send({
+            jobId,
+            status: job.status,
+            sourceType: job.source_type,
+            targetType: job.target_type,
+            r2OutputKey: job.r2_output_key ?? null,
+            createdAt: job.created_at,
+            completedAt: job.completed_at ?? null,
+            error: job.error_message ?? undefined,
+          });
+
+          // Close stream on terminal status
+          if (job.status === 'completed' || job.status === 'failed') {
+            try { controller.close(); } catch { /* ignore */ }
+            break;
+          }
+
+          // Wait before next poll or abort
+          await new Promise<void>((resolve) => {
+            if (req.signal.aborted) {
+              resolve();
+              return;
+            }
+
+            const onAbort = () => {
+              clearTimeout(timeout);
+              resolve();
+            };
+
+            const timeout = setTimeout(() => {
+              req.signal.removeEventListener('abort', onAbort);
+              resolve();
+            }, POLL_INTERVAL_MS);
+
+            // Automatically removes itself if abort fires first
+            req.signal.addEventListener('abort', onAbort, { once: true });
+          });
         }
-
-        // Send current status
-        send({
-          jobId,
-          status: job.status,
-          sourceType: job.source_type,
-          targetType: job.target_type,
-          r2OutputKey: job.r2_output_key ?? null,
-          createdAt: job.created_at,
-          completedAt: job.completed_at ?? null,
-          error: job.error_message ?? undefined,
-        });
-
-        // Close stream on terminal status
-        if (job.status === 'completed' || job.status === 'failed') {
-          controller.close();
-          break;
-        }
-
-        // Wait before next poll
-        await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
+      } finally {
+        req.signal.removeEventListener('abort', abortListener);
       }
+    },
+    cancel() {
+      // Stream cancelled by consumer
     },
   });
 

@@ -28,11 +28,14 @@ export const logger = {
     if (!isDev) {
       try {
         // Dynamic import to avoid loading Sentry in dev
-        import('@sentry/nextjs').then(({ captureException, captureMessage }) => {
+        import('@sentry/nextjs').then((Sentry) => {
+          const captureException = Sentry.captureException || Sentry.default?.captureException;
+          const captureMessage = Sentry.captureMessage || Sentry.default?.captureMessage;
+          
           const errArg = args.find((a) => a instanceof Error);
-          if (errArg) {
+          if (errArg && typeof captureException === 'function') {
             captureException(errArg);
-          } else {
+          } else if (typeof captureMessage === 'function') {
             captureMessage(`${message} ${args.join(' ')}`, 'error');
           }
         });

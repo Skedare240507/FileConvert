@@ -41,14 +41,22 @@ export default function WordToPpt() {
   };
 
   const removeFile = (id: string) => {
-    setFiles(prev => prev.filter(f => f.id !== id));
+    setFiles(prev => {
+      const updated = prev.filter(f => f.id !== id);
+      if (updated.length === 0 && fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      return updated;
+    });
     reset();
   };
 
   const clearAll = () => {
     setFiles([]);
     reset();
-    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleConvert = async () => {
@@ -128,7 +136,18 @@ export default function WordToPpt() {
             <div className={styles.fileListWrap}>
               <div className={styles.listHeader}>
                 <h3 className={styles.listLabel}>Selected Files</h3>
-                <button className={styles.clearBtn} onClick={clearAll} disabled={converting}>Remove All</button>
+                <button
+                  type="button"
+                  className={styles.clearBtn}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    clearAll();
+                  }}
+                  disabled={converting}
+                >
+                  Remove All
+                </button>
               </div>
 
               <div className={styles.fileList}>
@@ -144,12 +163,17 @@ export default function WordToPpt() {
                       </div>
                     </div>
                     <button
+                      type="button"
                       className={styles.removeBtn}
-                      onClick={() => removeFile(id)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        removeFile(id);
+                      }}
                       disabled={converting}
                       aria-label="Remove file"
                     >
-                      <span className="material-symbols-outlined" style={{ fontSize: 18 }}>close</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: 18, pointerEvents: 'none' }}>close</span>
                     </button>
                   </div>
                 ))}

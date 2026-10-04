@@ -31,7 +31,7 @@ RUN sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/g' /
 # Copy installed node_modules from deps stage
 COPY --chown=node:node --from=deps /app/node_modules ./node_modules
 # Prisma 7 no longer outputs to .prisma by default but leaving it just in case
-COPY --chown=node:node --from=deps /app/node_modules/.prisma ./node_modules/.prisma || true
+
 
 # Copy source code
 COPY --chown=node:node . .
