@@ -98,7 +98,6 @@ services:
       CLAMAV_HOST: clamav
       GOTENBERG_URL: http://gotenberg:3000
       PDF_CONVERTER_URL: http://pdf-converter:8080
-      DATABASE_URL: postgresql://postgres:postgres@host.docker.internal:5432/fileconvert
     depends_on:
       redis:
         condition: service_healthy
