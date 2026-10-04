@@ -2,6 +2,8 @@ import * as Sentry from "@sentry/nextjs";
 
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
+    const { EventEmitter } = await import("events");
+    EventEmitter.defaultMaxListeners = 30;
     await import("../backend/config/sentry.server.config");
   }
 
