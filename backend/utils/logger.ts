@@ -26,22 +26,31 @@ export const logger = {
 
     // Forward to Sentry in production
     if (!isDev) {
-      try {
-        // Dynamic import to avoid loading Sentry in dev
-        import('@sentry/nextjs').then((Sentry) => {
-          const captureException = Sentry.captureException || Sentry.default?.captureException;
-          const captureMessage = Sentry.captureMessage || Sentry.default?.captureMessage;
-          
+      // Use @sentry/node in worker/server contexts; @sentry/nextjs re-exports it
+      // but may not be available in a plain Node.js environment.
+      Promise.resolve()
+        .then(() => import('@sentry/node'))
+        .catch(() => import('@sentry/nextjs'))
+        .then((Sentry) => {
+          const captureException =
+            (Sentry as Record<string, unknown>).captureException as
+              | ((e: unknown) => void)
+              | undefined;
+          const captureMessage =
+            (Sentry as Record<string, unknown>).captureMessage as
+              | ((m: string, l: string) => void)
+              | undefined;
+
           const errArg = args.find((a) => a instanceof Error);
           if (errArg && typeof captureException === 'function') {
             captureException(errArg);
           } else if (typeof captureMessage === 'function') {
             captureMessage(`${message} ${args.join(' ')}`, 'error');
           }
+        })
+        .catch(() => {
+          // Sentry not available — swallow silently
         });
-      } catch {
-        // Sentry not available — swallow silently
-      }
     }
   },
 
