@@ -3,11 +3,22 @@
  *
  * BullMQ Queue instances — one per job type.
  * API routes add jobs to these queues; worker files consume them.
+ *
+ * Queues are stored on `globalThis` so that Next.js hot reloads do NOT
+ * create duplicate Queue instances (each of which opens its own Redis
+ * connection), which caused "Connection is closed." errors in dev.
  */
 
 import { Queue } from 'bullmq';
 import { redisConnection } from './client';
 import { QUEUE_NAMES, JOB_MAX_RETRIES, JOB_BACKOFF_DELAYS } from '@/backend/config/constants';
+
+const globalForQueues = globalThis as typeof globalThis & {
+  _fcConversionQueue?: Queue;
+  _fcMergeQueue?: Queue;
+  _fcScanQueue?: Queue;
+  _fcCleanupQueue?: Queue;
+};
 
 const defaultJobOptions = {
   attempts: JOB_MAX_RETRIES,
@@ -18,28 +29,44 @@ const defaultJobOptions = {
   removeOnFail: false, // keep failed jobs visible in the dead-letter queue
 };
 
+function getOrCreateQueue(
+  key: keyof typeof globalForQueues,
+  name: string,
+  opts: object = defaultJobOptions,
+): Queue {
+  if (!globalForQueues[key]) {
+    (globalForQueues[key] as Queue) = new Queue(name, {
+      connection: redisConnection,
+      defaultJobOptions: opts,
+    });
+  }
+  return globalForQueues[key] as Queue;
+}
+
 /** Conversion job queue — consumed by the Orchestrator, then routed to workers */
-export const conversionQueue = new Queue(QUEUE_NAMES.CONVERSION, {
-  connection: redisConnection,
-  defaultJobOptions,
-});
+export const conversionQueue = getOrCreateQueue(
+  '_fcConversionQueue',
+  QUEUE_NAMES.CONVERSION,
+);
 
 /** Merge session queue — consumed by the Document worker */
-export const mergeQueue = new Queue(QUEUE_NAMES.MERGE, {
-  connection: redisConnection,
-  defaultJobOptions,
-});
+export const mergeQueue = getOrCreateQueue(
+  '_fcMergeQueue',
+  QUEUE_NAMES.MERGE,
+);
 
 /** ClamAV scan queue — runs before any conversion or merge job */
-export const scanQueue = new Queue(QUEUE_NAMES.SCAN, {
-  connection: redisConnection,
-  defaultJobOptions: { attempts: 1, removeOnComplete: true, removeOnFail: false },
+export const scanQueue = getOrCreateQueue('_fcScanQueue', QUEUE_NAMES.SCAN, {
+  attempts: 1,
+  removeOnComplete: true,
+  removeOnFail: false,
 });
 
 /** Scheduled R2 cleanup job — triggered every minute by the cleanup worker */
-export const cleanupQueue = new Queue(QUEUE_NAMES.CLEANUP, {
-  connection: redisConnection,
-  defaultJobOptions: { attempts: 1, removeOnComplete: true, removeOnFail: false },
+export const cleanupQueue = getOrCreateQueue('_fcCleanupQueue', QUEUE_NAMES.CLEANUP, {
+  attempts: 1,
+  removeOnComplete: true,
+  removeOnFail: false,
 });
 
 /** Helper: get queue length metrics for the admin dashboard */
