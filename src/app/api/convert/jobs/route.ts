@@ -100,7 +100,13 @@ export const POST = withRateLimit(
       return res;
     } catch (err) {
       logger.error('[API] /convert/jobs failed', err);
-      return Response.json({ error: 'Internal server error' }, { status: 500 });
+      const errMsg = err instanceof Error ? err.message : String(err);
+      // Surface Redis/queue errors clearly
+      if (errMsg.includes('ECONNREFUSED') || errMsg.includes('connect') || errMsg.includes('Redis')) {
+        return Response.json({ error: 'Queue service unavailable — ensure Redis is running (docker compose up)' }, { status: 503 });
+      }
+      const detail = process.env.NODE_ENV !== 'production' ? errMsg : undefined;
+      return Response.json({ error: 'Internal server error', ...(detail && { detail }) }, { status: 500 });
     }
   },
   { limit: 10, windowSec: 60, prefix: 'rl:jobs' }

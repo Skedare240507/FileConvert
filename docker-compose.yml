@@ -110,7 +110,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
-      test: ["CMD", "pgrep", "-f", "orchestrator"]
+      test: ["CMD", "node", "-e", "const fs=require('fs');const procs=fs.readdirSync('/proc').filter(f=>/^\\d+$/.test(f));const alive=procs.some(p=>{try{return fs.readFileSync('/proc/'+p+'/cmdline','utf8').includes('orchestrator')}catch{return false}});process.exit(alive?0:1)"]
       interval: 30s
       timeout: 5s
       retries: 3
