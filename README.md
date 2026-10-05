@@ -1149,13 +1149,6 @@ We welcome contributions from the open-source community!
 - All file operations go through the `storage.ts` service (never direct S3 calls)
 - Environment variables accessed only through `config/env.ts`
 
----
-
-## 📜 License
-
-Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for more information.
-
----
 
 <div align="center">
   <sub>Maintained with precision by <strong>Sahil</strong> (<a href="https://github.com/Skedare240507">@Skedare240507</a>) and contributors.</sub>
