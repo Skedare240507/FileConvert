@@ -4,32 +4,38 @@
  * Generates a cryptographically random nonce for every HTML page request and
  * injects it into a strict Content-Security-Policy header.
  *
- * This replaces the permissive 'unsafe-inline' / 'unsafe-eval' directives for
- * scripts with a per-request nonce so that only scripts Next.js itself emits
- * (which automatically receive the nonce) are allowed to execute inline.
- * Injected attacker scripts — which have no nonce — are blocked by the browser.
+ * - PRODUCTION: nonce-based strict CSP (no 'unsafe-inline'/'unsafe-eval' for scripts)
+ * - DEVELOPMENT: relaxed CSP that allows 'unsafe-eval' (required by React/Turbopack
+ *   for callstack reconstruction, HMR, and dev-mode debugging)
  *
- * The nonce is also forwarded to the root layout via the custom request header
- * `x-nonce` so it can be applied to <body nonce={nonce}>, which Next.js uses
- * to stamp all generated <script> tags.
+ * The nonce is forwarded to the root layout via the `x-nonce` request header so
+ * it can be placed on <body nonce={nonce}>, which Next.js uses to stamp all
+ * generated <script> tags automatically.
  *
- * Static assets (_next/static, public folder) are excluded from this middleware
- * and fall back to the permissive-but-still-safe CSP set in next.config.mjs.
+ * Static assets (_next/static, public folder) bypass this middleware and fall back
+ * to the permissive-but-still-safe CSP set in next.config.mjs.
  */
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+const isDev = process.env.NODE_ENV === 'development';
+
 export function middleware(request: NextRequest) {
   // Generate a fresh 128-bit nonce for every request (16 bytes → ~24-char base64)
   const nonce = Buffer.from(crypto.getRandomValues(new Uint8Array(16))).toString('base64');
 
-  // Strict nonce-based CSP — no 'unsafe-inline' or 'unsafe-eval' for scripts.
-  // 'strict-dynamic' lets scripts loaded by trusted (nonce'd) scripts also run —
-  // required for Next.js dynamic chunk imports.
+  // Build the script-src directive:
+  // - Production: nonce + strict-dynamic (no unsafe-eval / unsafe-inline)
+  // - Development: also allow unsafe-eval (React/Turbopack requires it for
+  //   callstack reconstruction, HMR eval(), and other dev-mode features)
+  const scriptSrc = isDev
+    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-eval' https://o4509295826624512.ingest.sentry.io`
+    : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://o4509295826624512.ingest.sentry.io`;
+
   const csp = [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://o4509295826624512.ingest.sentry.io`,
+    scriptSrc,
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: blob: https://lh3.googleusercontent.com",
@@ -54,14 +60,13 @@ export function middleware(request: NextRequest) {
   });
 
   // Set all security headers on the response
-  // (these override the next.config.mjs defaults for HTML pages)
-  response.headers.set('Content-Security-Policy',      csp);
-  response.headers.set('X-Content-Type-Options',       'nosniff');
-  response.headers.set('X-Frame-Options',              'SAMEORIGIN');
-  response.headers.set('X-XSS-Protection',             '1; mode=block');
-  response.headers.set('Referrer-Policy',              'strict-origin-when-cross-origin');
-  response.headers.set('Strict-Transport-Security',    'max-age=31536000; includeSubDomains; preload');
-  response.headers.set('X-DNS-Prefetch-Control',       'on');
+  response.headers.set('Content-Security-Policy',   csp);
+  response.headers.set('X-Content-Type-Options',    'nosniff');
+  response.headers.set('X-Frame-Options',           'SAMEORIGIN');
+  response.headers.set('X-XSS-Protection',          '1; mode=block');
+  response.headers.set('Referrer-Policy',           'strict-origin-when-cross-origin');
+  response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+  response.headers.set('X-DNS-Prefetch-Control',    'on');
   response.headers.set(
     'Permissions-Policy',
     'camera=(), microphone=(), geolocation=(), interest-cohort=()',
@@ -79,8 +84,7 @@ export const config = {
      * - favicon.ico   (browser icon)
      * - Public folder static files (images, fonts, videos, etc.)
      *
-     * The `missing` array also excludes Next.js internal prefetch requests
-     * so they are not counted as real page hits.
+     * The `missing` array also excludes Next.js prefetch requests.
      */
     {
       source:
