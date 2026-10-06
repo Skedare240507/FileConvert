@@ -3,6 +3,7 @@ import styles from './layout.module.css';
 import dynamic from 'next/dynamic';
 import type { Metadata } from 'next';
 import NextTopLoader from 'nextjs-toploader';
+import { headers } from 'next/headers';
 
 const Header = dynamic(() => import('../components/Header'), { ssr: true });
 import { Providers } from './providers';
@@ -47,17 +48,26 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Read the nonce injected by middleware — used to allow only Next.js-generated
+  // inline scripts while blocking all other inline scripts (strict CSP).
+  const nonce = (await headers()).get('x-nonce') ?? '';
+
   return (
     <html lang="en">
       <head>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
       </head>
-      <body>
+      {/*
+        Passing `nonce` to <body> propagates it to all Next.js-generated
+        <script> tags automatically (Next.js 14+ reads it from the nearest
+        parent element with a nonce attribute).
+      */}
+      <body nonce={nonce}>
         <Providers>
           <NextTopLoader
             color="#00685f"
@@ -119,13 +129,15 @@ export default function RootLayout({
                 <a href="/convert/ppt-to-jpg">Ppt to Jpg</a>
                 <a href="/convert/ppt-to-word">Ppt to Word</a>
               </div>
+
               {/* Word Tools */}
-<div className={styles.footerCol}>
+              <div className={styles.footerCol}>
                 <h4 className={styles.footerColTitle}>Word Tools</h4>
                 <a href="/convert/word-to-pdf">Word to Pdf</a>
                 <a href="/convert/word-to-jpg">Word to Jpg</a>
                 <a href="/convert/word-to-ppt">Word to Ppt</a>
               </div>
+
               {/* Company */}
               <div className={styles.footerCol}>
                 <h4 className={styles.footerColTitle}>Company</h4>
