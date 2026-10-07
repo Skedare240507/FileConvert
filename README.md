@@ -38,21 +38,24 @@
 
 ## Demo Screenshots
 
-<p align="center">
-  <img src="public/Screenshots/Screenshot_4-10-2026_10223_localhost.jpeg" alt="FileConvert home page" width="440" height="248" />
-  <img src="public/Screenshots/Screenshot_4-10-2026_102215_localhost.jpeg" alt="FileConvert conversion interface" width="440" height="248" />
-</p>
-<p align="center">
-  <img src="public/Screenshots/Screenshot_4-10-2026_102226_localhost.jpeg" alt="FileConvert file upload workflow" width="440" height="248" />
-  <img src="public/Screenshots/Screenshot_4-10-2026_102240_localhost.jpeg" alt="FileConvert conversion options" width="440" height="248" />
-</p>
-<p align="center">
-  <img src="public/Screenshots/Screenshot_4-10-2026_102257_localhost.jpeg" alt="FileConvert conversion progress" width="440" height="248" />
-  <img src="public/Screenshots/Screenshot_4-10-2026_102316_localhost.jpeg" alt="FileConvert completed conversion" width="440" height="248" />
-</p>
-<p align="center">
-  <img src="public/Screenshots/Screenshot_4-10-2026_102334_localhost.jpeg" alt="FileConvert dashboard" width="440" height="248" />
-</p>
+<table>
+  <tr>
+    <td width="50%"><img src="public/Screenshots/Screenshot_4-10-2026_10223_localhost.jpeg" alt="FileConvert home page" width="100%" /></td>
+    <td width="50%"><img src="public/Screenshots/Screenshot_4-10-2026_102215_localhost.jpeg" alt="FileConvert conversion interface" width="100%" /></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="public/Screenshots/Screenshot_4-10-2026_102226_localhost.jpeg" alt="FileConvert file upload workflow" width="100%" /></td>
+    <td width="50%"><img src="public/Screenshots/Screenshot_4-10-2026_102240_localhost.jpeg" alt="FileConvert conversion options" width="100%" /></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="public/Screenshots/Screenshot_4-10-2026_102257_localhost.jpeg" alt="FileConvert conversion progress" width="100%" /></td>
+    <td width="50%"><img src="public/Screenshots/Screenshot_4-10-2026_102316_localhost.jpeg" alt="FileConvert completed conversion" width="100%" /></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="public/Screenshots/Screenshot_4-10-2026_102334_localhost.jpeg" alt="FileConvert dashboard" width="100%" /></td>
+    <td width="50%"></td>
+  </tr>
+</table>
 
 
 ---
