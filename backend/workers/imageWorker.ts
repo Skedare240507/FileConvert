@@ -40,6 +40,37 @@ function getMagickBin(): string {
   return process.platform === 'win32' ? 'magick' : 'convert';
 }
 
+/**
+ * ImageMagick delegates PDF rendering to Ghostscript. The Windows installer
+ * does not consistently add its `bin` folder to PATH, so locate a standard
+ * installation and pass it to the ImageMagick child process explicitly.
+ * `GHOSTSCRIPT_BIN` is provided for non-standard installations.
+ */
+function getGhostscriptBinDir(): string | undefined {
+  if (process.platform !== 'win32') return undefined;
+
+  const configuredPath = process.env.GHOSTSCRIPT_BIN;
+  if (configuredPath) {
+    return configuredPath.toLowerCase().endsWith('.exe')
+      ? path.dirname(configuredPath)
+      : configuredPath;
+  }
+
+  const fsSync = require('fs') as typeof import('fs');
+  for (const root of ['C:\\Program Files\\gs', 'C:\\Program Files (x86)\\gs']) {
+    try {
+      const versionDirectories = fsSync.readdirSync(root).sort().reverse();
+      for (const version of versionDirectories) {
+        const binDir = path.join(root, version, 'bin');
+        if (fsSync.existsSync(path.join(binDir, 'gswin64c.exe'))) return binDir;
+      }
+    } catch {
+      // Ghostscript is not installed in this standard location.
+    }
+  }
+  return undefined;
+}
+
 export async function renderPdfToJpgPages(pdfBuffer: Buffer, dpiVal: number = 150): Promise<{ name: string, data: Buffer }[]> {
   const tmpId = crypto.randomUUID();
   const tmpPdfPath = path.join(os.tmpdir(), `${tmpId}.pdf`);
@@ -48,7 +79,26 @@ export async function renderPdfToJpgPages(pdfBuffer: Buffer, dpiVal: number = 15
   await fs.writeFile(tmpPdfPath, pdfBuffer);
 
   try {
-    await execFileAsync(getMagickBin(), ['-density', String(dpiVal), tmpPdfPath, `${tmpJpgPrefix}%03d.jpg`]);
+    const ghostscriptBinDir = getGhostscriptBinDir();
+    if (process.platform === 'win32' && !ghostscriptBinDir) {
+      throw new Error(
+        'PDF conversion requires Ghostscript on Windows. Install Ghostscript or set GHOSTSCRIPT_BIN to its bin directory.',
+      );
+    }
+
+    const childEnv = ghostscriptBinDir
+      ? {
+          ...process.env,
+          MAGICK_GHOSTSCRIPT_PATH: ghostscriptBinDir,
+          PATH: `${ghostscriptBinDir}${path.delimiter}${process.env.PATH ?? ''}`,
+        }
+      : process.env;
+
+    await execFileAsync(
+      getMagickBin(),
+      ['-density', String(dpiVal), tmpPdfPath, `${tmpJpgPrefix}%03d.jpg`],
+      { env: childEnv },
+    );
 
     const files = await fs.readdir(os.tmpdir());
     const generatedJpgs = files
