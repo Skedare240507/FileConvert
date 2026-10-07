@@ -36,8 +36,29 @@
 
 ---
 
+## Demo Screenshots
+
+<p align="center">
+  <img src="public/screenshots/Screenshot_4-10-2026_10223_localhost.jpeg" alt="FileConvert home page" width="48%" />
+  <img src="public/screenshots/Screenshot_4-10-2026_102215_localhost.jpeg" alt="FileConvert conversion interface" width="48%" />
+</p>
+<p align="center">
+  <img src="public/screenshots/Screenshot_4-10-2026_102226_localhost.jpeg" alt="FileConvert file upload workflow" width="48%" />
+  <img src="public/screenshots/Screenshot_4-10-2026_102240_localhost.jpeg" alt="FileConvert conversion options" width="48%" />
+</p>
+<p align="center">
+  <img src="public/screenshots/Screenshot_4-10-2026_102257_localhost.jpeg" alt="FileConvert conversion progress" width="48%" />
+  <img src="public/screenshots/Screenshot_4-10-2026_102316_localhost.jpeg" alt="FileConvert completed conversion" width="48%" />
+</p>
+<p align="center">
+  <img src="public/screenshots/Screenshot_4-10-2026_102334_localhost.jpeg" alt="FileConvert dashboard" width="48%" />
+</p>
+
+---
+
 ## 📋 Table of Contents
 
+- [Demo Screenshots](#demo-screenshots)
 - [Highlights](#-highlights)
 - [System Architecture](#%EF%B8%8F-system-architecture)
 - [Complete Tech Stack](#-complete-tech-stack)
