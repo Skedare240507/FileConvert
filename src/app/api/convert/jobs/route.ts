@@ -34,7 +34,7 @@ export const POST = withRateLimit(
       try {
         body = JSON.parse(rawBody);
       } catch (parseErr) {
-        logger.error('[API] /convert/jobs body parse failed — raw body:', rawBody);
+        logger.error('[API] /convert/jobs body parse failed', parseErr instanceof Error ? parseErr.message : String(parseErr));
         return Response.json({ error: 'Invalid JSON body' }, { status: 400 });
       }
       const parsed = createConversionJobSchema.safeParse(body);
