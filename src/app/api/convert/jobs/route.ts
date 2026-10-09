@@ -61,6 +61,12 @@ export const POST = withRateLimit(
         shouldSetCookie = true;
       }
       
+      const ownerFolder = tenant.userId ?? `anon-${anonToken}`;
+      
+      if (data.r2InputKey && !data.r2InputKey.startsWith(`uploads/${ownerFolder}/`)) {
+        return Response.json({ error: 'Unauthorized file access' }, { status: 403 });
+      }
+      
       const jobRecord = await createConversionJob({
         userId: tenant.userId,
         anonToken: tenant.userId ? null : anonToken,
