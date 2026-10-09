@@ -16,6 +16,10 @@ export const POST = withRateLimit(
         return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
       }
 
+      if (typeof token !== 'string') {
+        return NextResponse.json({ message: "Invalid token format" }, { status: 400 });
+      }
+
       if (!STRONG_PASSWORD_REGEX.test(password)) {
         return NextResponse.json({ message: "Password is not strong enough." }, { status: 400 });
       }
