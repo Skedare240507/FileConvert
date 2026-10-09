@@ -11,8 +11,8 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
     
-    if (!file) {
-      return Response.json({ error: 'No file provided' }, { status: 400 });
+    if (!file || typeof file === 'string' || !('arrayBuffer' in file)) {
+      return Response.json({ error: 'Invalid file provided' }, { status: 400 });
     }
 
     const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
