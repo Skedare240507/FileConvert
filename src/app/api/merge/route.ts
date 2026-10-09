@@ -8,7 +8,9 @@ import { mergeQueue } from '@/backend/queue/queues';
 import { resolveTenantIdentity } from '@/backend/utils/tenantSecurity';
 import { logger } from '@/backend/utils/logger';
 
-export async function POST(req: NextRequest) {
+import { withRateLimit } from '@/backend/middleware/withRateLimit';
+
+export const POST = withRateLimit(async (req: NextRequest) => {
   try {
     const formData = await req.formData();
     const files = formData.getAll('file') as File[];
@@ -40,7 +42,7 @@ export async function POST(req: NextRequest) {
     });
 
     const r2InputKeys: string[] = [];
-    const ownerFolder = tenant.userId ?? 'anonymous';
+    const ownerFolder = tenant.userId ?? `anon-${anonToken}`;
 
     // Upload files sequentially to maintain order
     for (let i = 0; i < files.length; i++) {
@@ -90,4 +92,4 @@ export async function POST(req: NextRequest) {
     logger.error('[API] /merge failed', err);
     return Response.json({ error: 'Internal server error', details: err instanceof Error ? err.message : String(err) }, { status: 500 });
   }
-}
+}, { limit: 20, windowSec: 600, prefix: 'rl:merge' });
