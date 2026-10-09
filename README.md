@@ -57,7 +57,6 @@
   </tr>
 </table>
 
-
 ---
 
 ## 📋 Table of Contents
@@ -78,12 +77,10 @@
 - [CI/CD Pipeline](#-cicd-pipeline)
 - [API Reference](#-api-reference)
 - [Background Workers & Job Queue](#-background-workers--job-queue)
-- [Payment Integration](#-payment-integration)
 - [Monitoring & Observability](#-monitoring--observability)
 - [Environment Variable Safety](#-environment-variable-safety)
 - [Database Schema](#%EF%B8%8F-database-schema)
 - [Contributing](#-contributing)
-- [License](#-license)
 
 ---
 
@@ -118,16 +115,6 @@
     <td width="50%">
       <h3>🔒 Automated Security Scanning</h3>
       <p>GitHub Actions CI/CD with <strong>Trivy</strong> vulnerability scanner, <strong>CodeQL</strong> SAST analysis, <strong>ESLint</strong> static analysis, TypeScript strict mode, and <strong>npm audit</strong> on every push and pull request.</p>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%">
-      <h3>🌐 Full SEO Coverage</h3>
-      <p>All 19 converter pages have server-side metadata (title, description, OpenGraph, Twitter card, canonical URL). Auto-generated <code>sitemap.xml</code> and a comprehensive <code>robots.txt</code> that blocks AI training crawlers and bad bots.</p>
-    </td>
-    <td width="50%">
-      <h3>⚙️ Enterprise Payment & Plans</h3>
-      <p><strong>Razorpay</strong> payment gateway with HMAC-SHA256 signature verification, webhook-driven plan upgrades, and enforced per-plan file/session quotas (Free, Pro, Business tiers).</p>
     </td>
   </tr>
 </table>
@@ -222,7 +209,7 @@ flowchart TD
 | **Object Storage** | Backblaze B2 / Cloudflare R2 (S3-Compatible API), AWS SDK v3 | ![AWS S3](https://img.shields.io/badge/S3_API-569A31?style=flat-square&logo=amazons3&logoColor=white) |
 | **Conversion Engines** | Gotenberg 8 (LibreOffice 24), pdf2docx (Python), ImageMagick, Tesseract.js 7, PDF-Lib, SheetJS, CloudConvert | ![LibreOffice](https://img.shields.io/badge/LibreOffice-18A303?style=flat-square&logo=libreoffice&logoColor=white) ![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white) |
 | **Security** | Nonce-CSP Middleware, ClamAV Antivirus, bcryptjs, HMAC-SHA256, Zod 4, Magic-Byte Verification, HSTS | ![ClamAV](https://img.shields.io/badge/ClamAV-D22128?style=flat-square) ![Zod](https://img.shields.io/badge/Zod_4-3E67B1?style=flat-square) |
-| **Email & Payments** | Nodemailer 10 (SMTP), Razorpay Payment Gateway | ![Nodemailer](https://img.shields.io/badge/Nodemailer-339933?style=flat-square) ![Razorpay](https://img.shields.io/badge/Razorpay-0C2451?style=flat-square) |
+| **Email** | Nodemailer 10 (SMTP) | ![Nodemailer](https://img.shields.io/badge/Nodemailer-339933?style=flat-square) |
 | **Reverse Proxy** | Nginx Alpine (Rate Limiting, Security Headers, WebSocket) | ![Nginx](https://img.shields.io/badge/Nginx-009639?style=flat-square&logo=nginx&logoColor=white) |
 | **Containerization** | Docker, Docker Compose (5 services) | ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white) |
 | **CI/CD** | GitHub Actions (3 workflows) | ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=flat-square&logo=githubactions&logoColor=white) |
@@ -325,119 +312,29 @@ fileconvert/
 │   ├── middleware.ts                     # 🔐 Edge CSP middleware (nonce-based, all security headers)
 │   ├── app/                              # Next.js App Router
 │   │   ├── login/                        # Email/password + Google OAuth sign-in
-│   │   ├── signup/                       # New account registration with OTP
-│   │   ├── forgot-password/              # Password recovery flow
-│   │   ├── reset-password/               # Secure password reset page
 │   │   ├── admin/                        # Admin dashboard (analytics, queue metrics)
-│   │   ├── dashboard/                    # User conversion history & active downloads
-│   │   ├── profile/                      # Account settings & plan management
 │   │   ├── convert/                      # 19 dedicated conversion tool pages
-│   │   │   ├── pdf-to-word/              # PDF → DOCX/DOC  [layout.tsx = SEO metadata]
-│   │   │   ├── word-to-pdf/              # DOCX → PDF       [layout.tsx = SEO metadata]
-│   │   │   ├── pdf-to-jpg/               # PDF → JPG (ZIP)  [layout.tsx = SEO metadata]
-│   │   │   ├── jpg-to-pdf/               # JPG → PDF        [layout.tsx = SEO metadata]
-│   │   │   ├── pdf-to-ppt/               # PDF → PPTX       [layout.tsx = SEO metadata]
-│   │   │   ├── ppt-to-pdf/               # PPTX → PDF       [layout.tsx = SEO metadata]
-│   │   │   ├── word-to-ppt/              # DOCX → PPTX      [layout.tsx = SEO metadata]
-│   │   │   ├── ppt-to-word/              # PPTX → DOCX      [layout.tsx = SEO metadata]
-│   │   │   ├── excel-to-csv/             # XLSX → CSV       [layout.tsx = SEO metadata]
-│   │   │   ├── csv-to-excel/             # CSV → XLSX       [layout.tsx = SEO metadata]
-│   │   │   ├── word-to-jpg/              # DOCX → JPG (ZIP) [layout.tsx = SEO metadata]
-│   │   │   ├── ppt-to-jpg/               # PPTX → JPG (ZIP) [layout.tsx = SEO metadata]
-│   │   │   ├── jpg-to-ppt/               # JPG → PPTX       [layout.tsx = SEO metadata]
-│   │   │   ├── merge/                    # PDF/Word/PPT merge studio [layout.tsx = SEO]
-│   │   │   ├── pdf/                      # PDF tools landing [layout.tsx = SEO metadata]
-│   │   │   ├── word/                     # Word tools landing [layout.tsx = SEO metadata]
-│   │   │   ├── ppt/                      # PPT tools landing [layout.tsx = SEO metadata]
-│   │   │   ├── image/                    # Image tools landing [layout.tsx = SEO metadata]
-│   │   │   └── spreadsheet/              # Spreadsheet tools [layout.tsx = SEO metadata]
 │   │   ├── api/                          # REST API & SSE endpoints
-│   │   │   ├── auth/[...nextauth]/       # NextAuth handler (Google + Credentials)
-│   │   │   ├── auth/signup/              # Registration with OTP verification
-│   │   │   ├── auth/otp/                 # OTP generation & verification
-│   │   │   ├── auth/reset-password/      # Password reset with OTP
-│   │   │   ├── convert/upload/init       # Pre-signed upload URL generation
-│   │   │   ├── convert/jobs/             # Job creation & status
-│   │   │   ├── convert/jobs/[id]/live    # SSE real-time progress stream
-│   │   │   ├── convert/jobs/[id]/download # Signed download URL
-│   │   │   ├── merge/                    # Merge session management
-│   │   │   ├── feedback/                 # User feedback submission
-│   │   │   └── admin/                    # Queue inspection (admin only)
-│   │   ├── help/                         # Help & FAQ pages
-│   │   ├── privacy/                      # Privacy policy
-│   │   ├── about/                        # About page
 │   │   ├── layout.tsx                    # Root layout (HTML shell, nonce injection, fonts)
-│   │   ├── page.tsx                      # Landing page & hero
-│   │   ├── robots.ts                     # SEO robots.txt (blocks AI & scraper bots)
-│   │   └── sitemap.ts                    # SEO XML sitemap
+│   │   └── page.tsx                      # Landing page & hero
 │   ├── components/                       # Reusable React 19 UI (Header, Modals)
 │   ├── hooks/                            # Custom hooks (useConverter — SSE streaming)
 │   └── types/                            # Frontend TypeScript types & NextAuth extensions
 │
 ├── backend/                              # ── CORE DOMAIN & ENGINE (Isolated) ──
-│   ├── config/
-│   │   ├── env.ts                        # Fail-fast env validation (throws on missing vars)
-│   │   └── constants.ts                  # MIME registries, plan quotas, TTLs, queue names
-│   ├── db/
-│   │   ├── client.ts                     # Prisma client singleton
-│   │   └── queries/                      # Typed queries (users, jobs, sessions, feedback)
-│   ├── middleware/
-│   │   ├── withAuth.ts                   # Session + plan resolution guard
-│   │   ├── withAdminAuth.ts              # Zero-trust admin guard (returns 404 to non-admins)
-│   │   └── withRateLimit.ts              # Redis sliding-window rate limiter
-│   ├── queue/
-│   │   ├── client.ts                     # Redis connection provider (ioredis)
-│   │   ├── queues.ts                     # Queue registries (conversion, merge, cleanup)
-│   │   └── jobs/                         # Job payload type definitions
-│   ├── services/
-│   │   ├── conversion/
-│   │   │   ├── gotenberg.ts              # Gotenberg HTTP client (convert + merge)
-│   │   │   ├── pdf2docx.ts               # Python microservice client (PDF → DOCX)
-│   │   │   ├── sheetjs.ts                # SheetJS Excel ↔ CSV (in-process)
-│   │   │   ├── imagemagick.ts            # ImageMagick wrapper
-│   │   │   └── fallback.ts               # CloudConvert emergency fallback
-│   │   ├── email/mailer.ts               # Nodemailer SMTP (OTP, security alerts)
-│   │   ├── payment/razorpay.ts           # Razorpay orders, HMAC verification, webhooks
-│   │   ├── scan/clamav.ts                # ClamAV TCP INSTREAM antivirus scanner
-│   │   └── storage/storage.ts            # B2/R2 S3 client (upload, download, signed URLs)
-│   ├── utils/
-│   │   ├── fileType.ts                   # Magic-byte file identification
-│   │   ├── logger.ts                     # Structured logger + Sentry reporter
-│   │   ├── sanitize.ts                   # Path-traversal filename sanitizer
-│   │   ├── planLimits.ts                 # Plan tier enforcement helpers
-│   │   └── tenantSecurity.ts             # IDOR protection & guest session validation
-│   ├── validation/
-│   │   ├── upload.ts                     # Zod upload schema + magic-byte verifier
-│   │   ├── conversion.ts                 # Zod conversion job schema
-│   │   ├── merge.ts                      # Zod merge session schema
-│   │   └── payment.ts                    # Zod payment & webhook schemas
-│   └── workers/
-│       ├── orchestrator.ts               # Master daemon: routes jobs to workers
-│       ├── documentWorker.ts             # Gotenberg/pdf2docx/SheetJS processor
-│       ├── imageWorker.ts                # ImageMagick/PDF-Lib/JSZip processor
-│       ├── ocrWorker.ts                  # Tesseract.js OCR processor
-│       ├── mergeWorker.ts                # File merge processor
-│       └── cleanupWorker.ts              # Scheduled 1-hour TTL file purger
+│   ├── config/                           # Env validation & constants
+│   ├── db/                               # Prisma client & typed queries
+│   ├── middleware/                       # Auth & rate-limiting guards
+│   ├── queue/                            # Redis BullMQ connection & jobs
+│   ├── services/                         # Conversion clients, S3 storage, ClamAV
+│   ├── utils/                            # File type magic-byte checkers, sanitization
+│   └── workers/                          # Background processing orchestrator
 │
 ├── pdf-converter/                        # Python Microservice (PDF → DOCX)
-│   ├── main.py                           # FastAPI server (pdf2docx)
-│   └── Dockerfile                        # Python 3.11-slim + pdf2docx + Uvicorn
-│
-├── prisma/
-│   └── schema.prisma                     # PostgreSQL schema (Users, Jobs, OTPs, Accounts)
-│
-├── nginx/
-│   └── nginx.conf                        # Production reverse proxy (rate limits, headers)
-│
-├── .github/workflows/
-│   ├── ci.yml                            # Build + Lint + Typecheck + Audit + Trivy
-│   └── codeql.yml                        # GitHub CodeQL SAST analysis
-│
-├── docker-compose.yml                    # 5-service local development stack
-├── eslint.config.mjs                     # ESLint 9 flat config
-├── next.config.mjs                       # Next.js + security headers + Turbopack config
-├── tsconfig.json                         # TypeScript strict mode + path aliases
-└── package.json                          # Dependencies, scripts & npm overrides (CVE patches)
+├── prisma/                               # PostgreSQL schema
+├── nginx/                                # Production reverse proxy config
+├── docker-compose.yml                    # Local development stack
+└── package.json                          # Dependencies
 ```
 
 ---
@@ -460,10 +357,8 @@ fileconvert/
 git clone https://github.com/Skedare240507/FileConvert.git
 cd FileConvert
 
-# Install dependencies (skip postinstall if Prisma DLL is locked by a running process)
+# Install dependencies
 npm install
-# or if dev server is running:
-npm install --ignore-scripts
 ```
 
 ### 3. Environment Setup
@@ -505,95 +400,54 @@ npm run dev        # Next.js 16 + Turbopack on port 3000
 npm run worker     # BullMQ orchestrator + all workers
 ```
 
-> **Note**: If both `npm run dev` and `npm run worker` are running, they will share the same Redis instance. To avoid the Docker worker container competing for jobs during local development, stop it with `docker compose stop worker`.
-
 Navigate to **[http://localhost:3000](http://localhost:3000)**.
 
 ---
 
 ## 🔑 Environment Configuration
 
-All environment variables are **validated at startup** via `backend/config/env.ts`. Missing required variables cause an immediate crash with a clear error message — misconfigurations are caught before the first request, not during runtime.
+All environment variables are **validated at startup** via `backend/config/env.ts`. Missing required variables cause an immediate crash with a clear error message.
 
 <details>
 <summary><strong>📋 Complete Environment Variables Reference</strong></summary>
 
 ```env
-# ═══════════════════════════════════════════════════════════════════
-# DATABASE (Required)
-# ═══════════════════════════════════════════════════════════════════
+# DATABASE
 DATABASE_URL="postgresql://postgres:password@localhost:5432/fileconvert?schema=public"
-DIRECT_URL="postgresql://postgres:password@localhost:5432/fileconvert?schema=public"
 
-# ═══════════════════════════════════════════════════════════════════
-# NEXTAUTH (Required)
-# ═══════════════════════════════════════════════════════════════════
+# NEXTAUTH
 NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="generate-a-secure-32-byte-hex-secret"   # openssl rand -hex 32
+NEXTAUTH_SECRET="generate-a-secure-32-byte-hex-secret"
 
-# ═══════════════════════════════════════════════════════════════════
-# GOOGLE OAUTH (Required)
-# ═══════════════════════════════════════════════════════════════════
+# GOOGLE OAUTH
 GOOGLE_CLIENT_ID="your-id.apps.googleusercontent.com"
 GOOGLE_CLIENT_SECRET="your-secret"
 
-# ═══════════════════════════════════════════════════════════════════
-# OBJECT STORAGE — Backblaze B2 / S3-Compatible (Required)
-# ═══════════════════════════════════════════════════════════════════
+# OBJECT STORAGE
 B2_ENDPOINT="https://s3.us-east-005.backblazeb2.com"
 B2_REGION="us-east-005"
 B2_ACCESS_KEY_ID="your-key-id"
 B2_SECRET_ACCESS_KEY="your-secret-key"
 B2_BUCKET="fileconvert-storage"
 
-# ═══════════════════════════════════════════════════════════════════
-# REDIS (Required)
-# ═══════════════════════════════════════════════════════════════════
+# REDIS
 REDIS_URL="redis://127.0.0.1:6379"
 
-# ═══════════════════════════════════════════════════════════════════
-# DOCKER SERVICES (Optional — defaults provided)
-# ═══════════════════════════════════════════════════════════════════
+# DOCKER SERVICES
 GOTENBERG_URL="http://127.0.0.1:3001"
 PDF_CONVERTER_URL="http://127.0.0.1:8080"
 CLAMAV_HOST="127.0.0.1"
 CLAMAV_PORT="3310"
 
-# ═══════════════════════════════════════════════════════════════════
-# ADMIN ACCESS (Optional — comma-separated email whitelist)
-# ═══════════════════════════════════════════════════════════════════
-ADMIN_EMAILS="admin@example.com"
-
-# ═══════════════════════════════════════════════════════════════════
-# EMAIL — SMTP (Optional)
-# ═══════════════════════════════════════════════════════════════════
+# EMAIL — SMTP
 SMTP_HOST="smtp.gmail.com"
 SMTP_PORT="587"
 SMTP_USER="notifications@fileconvert.app"
 SMTP_PASS="your-app-password"
 SMTP_FROM="FileConvert <noreply@fileconvert.app>"
-
-# ═══════════════════════════════════════════════════════════════════
-# PAYMENTS — Razorpay (Optional)
-# ═══════════════════════════════════════════════════════════════════
-RAZORPAY_KEY_ID=""
-RAZORPAY_KEY_SECRET=""
-RAZORPAY_WEBHOOK_SECRET=""
-
-# ═══════════════════════════════════════════════════════════════════
-# MONITORING (Optional)
-# ═══════════════════════════════════════════════════════════════════
-SENTRY_DSN=""
-
-# ═══════════════════════════════════════════════════════════════════
-# CLOUD FALLBACK (Optional — emergency only)
-# ═══════════════════════════════════════════════════════════════════
-CLOUDCONVERT_API_KEY=""
 ```
 
 </details>
-
-> **⚠️ Security**: The `.env` file is listed in `.gitignore` and is **never committed** to version control. All secrets are server-side only — see [Environment Variable Safety](#-environment-variable-safety).
 
 ---
 
@@ -608,22 +462,6 @@ FileConvert runs **5 containerized services** via Docker Compose:
 | **ClamAV** | `clamav/clamav:stable` | `127.0.0.1:3310` | Real-time antivirus scanning daemon | `clamdcheck.sh` |
 | **PDF Converter** | Custom (Python 3.11) | `127.0.0.1:8080` | pdf2docx microservice (PDF → Word) | `urllib /health` |
 | **Nginx** | `nginx:alpine` | `80` | Reverse proxy + rate limiting + security headers | — |
-
-All ports are bound to `127.0.0.1` to prevent external network exposure. Each service has a health check configured with automatic restart (`unless-stopped` policy).
-
-```bash
-# Start all services
-docker compose up -d
-
-# View service logs
-docker compose logs -f gotenberg
-
-# Stop only the worker container (to use local npm run worker instead)
-docker compose stop worker
-
-# Stop all services
-docker compose down
-```
 
 ---
 
@@ -659,34 +497,6 @@ flowchart LR
     JWT --> DB
 ```
 
-#### Google OAuth 2.0
-- Provider: Google Cloud Console OAuth application.
-- `allowDangerousEmailAccountLinking: false` — prevents account takeover via email linking.
-- `prompt: 'select_account'` — always shows the account picker.
-- `access_type: 'offline'` — provides refresh tokens for persistent sessions.
-
-#### Email + Password (Credentials)
-- Passwords are hashed with **bcryptjs** before storage.
-- New accounts require **OTP verification** (6-digit code sent via SMTP, expires in 10 minutes).
-- OTPs are stored in a dedicated `otps` table with `email + code` compound index.
-
-### Brute-Force Protection & Account Lockout
-
-| Metric | Value |
-|:---|:---|
-| **Max failed login attempts** | 5 |
-| **Lockout duration** | 30 minutes |
-| **Security email alert** | Sent on 5th failed attempt |
-| **Counter reset** | On successful login |
-
-### Authorization Layers
-
-| Middleware | File | Purpose |
-|:---|:---|:---|
-| `withAuth` | `middleware/withAuth.ts` | Validates JWT session, resolves current plan from DB, returns 401 if unauthenticated |
-| `withAdminAuth` | `middleware/withAdminAuth.ts` | **Zero-Trust Admin Guard** — verifies DB role + email whitelist, returns **404** (not 403) to non-admins to cloak admin routes |
-| `withRateLimit` | `middleware/withRateLimit.ts` | Redis sliding-window rate limiter, extracts real IP from `X-Real-IP` header (set by Nginx) |
-
 #### Admin Route Cloaking (Zero-Trust)
 
 Admin endpoints **do not return 401 or 403** — they return **404 Not Found**. This prevents attackers from confirming the existence of admin API routes through error code enumeration.
@@ -707,34 +517,34 @@ flowchart TD
     Upload["User Upload"] --> Middleware
 
     subgraph Layer0 ["Layer 0: Edge Middleware"]
-        Middleware["src/middleware.ts<br/>• Fresh 128-bit nonce per request<br/>• Strict nonce-based CSP (no unsafe-eval in prod)<br/>• HSTS, X-Frame-Options, Referrer-Policy<br/>• Permissions-Policy"]
+        Middleware["src/middleware.ts<br/>• Fresh 128-bit nonce per request<br/>• Strict nonce-based CSP"]
     end
 
     subgraph Layer1 ["Layer 1: Network"]
-        Nginx["Nginx Reverse Proxy<br/>• Rate limit: 10 req/s per IP<br/>• Burst: 20 requests<br/>• Security headers fallback<br/>• Max body: 50MB"]
+        Nginx["Nginx Reverse Proxy<br/>• Rate limit: 10 req/s per IP<br/>• Burst: 20 requests"]
     end
 
     subgraph Layer2 ["Layer 2: Application"]
-        Rate["Redis Rate Limiter<br/>• Sliding window per IP<br/>• Custom limits per endpoint"]
-        Validation["Zod Schema Validation<br/>• Input sanitization<br/>• Type coercion"]
-        Magic["Magic Byte Verification<br/>• PDF: %PDF<br/>• ZIP/OOXML: PK\\x03\\x04<br/>• JPEG: FF D8 FF<br/>• PNG: 89 50 4E 47"]
-        Sanitize["Filename Sanitizer<br/>• Path traversal prevention<br/>• Shell injection prevention<br/>• 200 char max length"]
+        Rate["Redis Rate Limiter"]
+        Validation["Zod Schema Validation"]
+        Magic["Magic Byte Verification"]
+        Sanitize["Filename Sanitizer"]
     end
 
     subgraph Layer3 ["Layer 3: Antivirus"]
-        ClamAV["ClamAV Daemon<br/>• TCP INSTREAM protocol<br/>• 8KB chunk scanning<br/>• Auto-updating signatures"]
+        ClamAV["ClamAV Daemon<br/>• TCP INSTREAM protocol"]
     end
 
     subgraph Layer4 ["Layer 4: Access Control"]
         Auth["JWT Authentication"]
-        IDOR["IDOR Protection<br/>• Tenant ownership checks<br/>• anon_token for guests<br/>• Resource-level ACL"]
-        Admin["Admin Cloaking<br/>• Returns 404 to non-admins<br/>• DB role + email whitelist"]
+        IDOR["IDOR Protection"]
+        Admin["Admin Cloaking"]
     end
 
     subgraph Layer5 ["Layer 5: Data"]
-        TTL["1-Hour Auto-Deletion<br/>• cleanupWorker.ts<br/>• 15-minute sweep interval"]
-        Signed["Signed URLs<br/>• 5-minute expiry<br/>• Cryptographic validation"]
-        Encrypt["Password Hashing<br/>• bcryptjs"]
+        TTL["1-Hour Auto-Deletion"]
+        Signed["Signed URLs"]
+        Encrypt["Password Hashing"]
     end
 
     Middleware --> Nginx --> Rate --> Validation --> Magic --> Sanitize
@@ -744,96 +554,9 @@ flowchart TD
     Admin --> TTL --> Signed
 ```
 
-### Security Measures Checklist
-
-#### 🔐 Nonce-Based Content Security Policy (NEW)
-
-The most critical XSS defense is the **per-request nonce** generated by `src/middleware.ts`:
-
-| Environment | CSP Mode | script-src |
-|:---|:---|:---|
-| **Production** | Strict nonce-only | `'nonce-{random}' 'strict-dynamic'` — no `unsafe-eval`, no `unsafe-inline` |
-| **Development** | Relaxed (React HMR needs eval) | `'nonce-{random}' 'strict-dynamic' 'unsafe-eval'` |
-
-**How it works:**
-1. Middleware generates a fresh 128-bit random nonce on every request
-2. CSP header is set with `'nonce-{base64}'` in `script-src`
-3. Nonce is forwarded to root `layout.tsx` via `x-nonce` request header
-4. Root layout passes nonce to `<body nonce={nonce}>` — Next.js stamps all generated `<script>` tags with it
-5. Any injected script (XSS payload) without the nonce is **blocked by the browser**
-
-#### 🌐 HTTP Security Headers
-
-All responses include these headers (via `src/middleware.ts` for HTML, `next.config.mjs` for static assets):
-
-| Header | Value | Protection |
-|:---|:---|:---|
-| `Content-Security-Policy` | Nonce-based (see above) | XSS — blocks injected scripts |
-| `Strict-Transport-Security` | `max-age=31536000; includeSubDomains; preload` | HTTPS enforcement (HSTS) |
-| `X-Frame-Options` | `SAMEORIGIN` | Clickjacking prevention |
-| `X-Content-Type-Options` | `nosniff` | MIME sniffing prevention |
-| `X-XSS-Protection` | `1; mode=block` | Legacy browser XSS filter |
-| `Referrer-Policy` | `strict-origin-when-cross-origin` | Referrer leakage prevention |
-| `Permissions-Policy` | `camera=(), microphone=(), geolocation=()` | Browser feature restriction |
-| `X-DNS-Prefetch-Control` | `on` | Performance + privacy |
-
 #### 🦠 Anti-Malware (ClamAV)
 - **Every uploaded file** passes through ClamAV before any worker processes it.
 - Scanning uses the TCP **INSTREAM** protocol — files are streamed in 8KB chunks directly to the daemon socket (no temp files).
-- Scan results: `clean` → proceed, `infected` → file destroyed + job failed, `error` → upload rejected (fail-safe).
-- ClamAV auto-updates its virus signature database (`CLAMAV_NO_FRESHCLAM: false`).
-
-#### 📝 Input Validation & Sanitization
-| Validation | Details |
-|:---|:---|
-| **Zod Schemas** | All API inputs validated with Zod 4 schemas (conversion, merge, upload, payment) |
-| **MIME Type Check** | Whitelist of 10 allowed MIME types (`ALLOWED_MIME_TYPES`) |
-| **Magic Byte Verification** | File headers checked against known signatures — renaming `.exe` to `.pdf` doesn't work |
-| **Filename Sanitization** | Strips directory components, removes `..` traversal, allows only `[a-zA-Z0-9._-]`, strips leading dots, enforces 200-char max |
-| **File Size Enforcement** | Server-side max 50 MB (`MAX_FILE_SIZE_BYTES`), Nginx max 50 MB (`client_max_body_size`) |
-
-#### 🔑 Authentication Security
-| Measure | Details |
-|:---|:---|
-| **Password Hashing** | bcryptjs with automatic salt generation |
-| **Account Lockout** | 5 failed attempts → 30-minute lock + security email alert |
-| **OTP Expiry** | 6-digit codes expire after 10 minutes |
-| **JWT Signing** | HMAC-signed with `NEXTAUTH_SECRET` (32-byte hex) |
-| **OAuth Safety** | `allowDangerousEmailAccountLinking: false` prevents account takeover |
-
-#### 🛡️ Access Control & Anti-IDOR
-| Measure | Details |
-|:---|:---|
-| **Multi-Tenant Ownership** | Every resource has `user_id` or `anon_token` — verified on every access |
-| **Anonymous Sessions** | Guest conversions use cryptographically generated `anon_token` (httpOnly cookie) |
-| **Admin Route Cloaking** | Non-admins receive 404 (not 401/403) — admin endpoint existence is hidden |
-| **Resource-Level ACL** | `canAccessResource()` checks owner match before serving downloads |
-
-#### 💳 Payment Security
-| Measure | Details |
-|:---|:---|
-| **HMAC-SHA256 Verification** | Razorpay payment signatures verified server-side with `timingSafeEqual` |
-| **Timing Attack Prevention** | `crypto.timingSafeEqual` prevents HMAC comparison timing side-channels |
-| **Webhook Validation** | `X-Razorpay-Signature` header verified on every webhook event |
-| **Server-Side Only** | Payment verification NEVER trusts client assertions |
-
-#### 📦 Data Lifecycle
-| Measure | Details |
-|:---|:---|
-| **1-Hour TTL** | All uploaded and converted files auto-deleted after 60 minutes |
-| **Cleanup Worker** | Runs every 15 minutes, queries DB for expired files, enqueues deletion jobs |
-| **Signed Download URLs** | 5-minute expiry on download links (cryptographically signed via AWS SDK) |
-| **Idempotent Cleanup** | R2 keys nulled in DB after cleanup to prevent duplicate deletions |
-
-#### 📦 Dependency Vulnerability Management
-
-CVEs are proactively patched via npm `overrides` in `package.json`:
-
-| CVE | Package | Fixed Version | Risk |
-|:---|:---|:---|:---|
-| CVE-2026-93749 | `source-map-js` (via `next → postcss`) | `>=1.2.2` | HIGH — DoS via malformed source maps |
-| GHSA-vfj7-8cjw-p6xm | `braces` (via `eslint-config-next`) | `>=3.0.3` | HIGH — Stack-exhaustion DoS |
-| CVE-2026-96889 | `sharp` (librsvg dependency) | `>=0.35.5` | HIGH — librsvg vulnerability |
 
 ---
 
@@ -841,77 +564,24 @@ CVEs are proactively patched via npm `overrides` in `package.json`:
 
 ### Per-Page Metadata Architecture
 
-All 19 converter pages are `'use client'` components (required for file drag-and-drop interactivity), which prevents Next.js from exporting `metadata` directly. The solution is a **server-side `layout.tsx`** wrapper in each converter directory:
-
-```
-src/app/convert/word-to-pdf/
-├── page.tsx          ← 'use client' — interactive converter UI
-└── layout.tsx        ← Server component — exports metadata for this route
-```
-
-Each `layout.tsx` exports:
-- **`title`** — unique, keyword-rich page title
-- **`description`** — compelling meta description (< 160 chars)
-- **`openGraph`** — social sharing preview (title, description, URL, type)
-- **`twitter`** — Twitter/X card (summary_large_image)
-- **`alternates.canonical`** — canonical URL to prevent duplicate content
-
-### robots.txt Policies (`src/app/robots.ts`)
-
-Three rule sets are enforced:
-
-```
-✅ All crawlers   → Allow public pages; Disallow /api/, /admin/, /dashboard/,
-                    /profile/, /login, /signup, /forgot-password, /reset-password,
-                    /monitoring, /sentry-example-page/, /_next/, /error
-
-🚫 AI Training    → Disallow all (GPTBot, Claude-Web, Google-Extended, CCBot,
-                    anthropic-ai, ChatGPT-User, Omgilibot, FacebookBot)
-
-🚫 Scraper Bots   → Disallow all (AhrefsBot, SemrushBot, MJ12bot, DotBot, BLEXBot)
-```
-
-### Sitemap
-
-Auto-generated at `/sitemap.xml` via `src/app/sitemap.ts` listing all public converter pages with appropriate `changefreq` and `priority` values.
+All 19 converter pages use a **server-side `layout.tsx`** wrapper to export robust metadata (Title, OpenGraph, Canonical) while allowing the inner `page.tsx` to remain a interactive Client Component for file uploads.
 
 ---
 
 ## 🔄 CI/CD Pipeline
 
-### Pipeline 1: Main CI (`ci.yml`)
-
-Triggers on every **push** and **pull request** to `main`:
-
-| Step | Tool | Purpose |
-|:---|:---|:---|
-| **Dependency Install** | `npm ci --legacy-peer-deps` | Clean install from lockfile |
-| **Schema Generation** | `npx prisma generate` | Generate typed DB client |
-| **Linting** | ESLint 9 (flat config) | Code quality & Next.js best practices |
-| **Type Checking** | `tsc --noEmit` | TypeScript strict mode compliance |
-| **Dependency Audit** | `npm audit --audit-level=high` | Known CVE detection in dependencies |
-| **Vulnerability Scan** | Trivy (Aqua Security) | CRITICAL + HIGH CVE scan of entire repo |
-
-### Pipeline 2: CodeQL SAST (`codeql.yml`)
-
-| Aspect | Details |
-|:---|:---|
-| **Trigger** | Push, PR, scheduled (Monday 6:28 UTC) |
-| **Language** | JavaScript/TypeScript |
-| **Analysis** | GitHub CodeQL Semantic Analysis |
-| **Purpose** | Detect SQL injection, XSS, prototype pollution, path traversal, unsafe deserialization |
-| **Permissions** | `security-events: write`, `actions: read`, `contents: read` |
-
-### Security Tools Summary
-
-| Tool | Type | Trigger | What It Catches |
-|:---|:---|:---|:---|
-| ![ESLint](https://img.shields.io/badge/ESLint-4B32C3?style=flat-square&logo=eslint&logoColor=white) | Static Analysis | Every push/PR | Code quality, React best practices, unused vars |
-| ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white) | Type Safety | Every push/PR | Type errors, strict null checks, missing imports |
-| ![Trivy](https://img.shields.io/badge/Trivy-1904DA?style=flat-square) | CVE Scanner | Every push/PR | Known vulnerabilities in deps & Docker images |
-| ![CodeQL](https://img.shields.io/badge/CodeQL-000?style=flat-square&logo=github) | SAST | Push/PR/Weekly | Injection flaws, XSS, prototype pollution |
-| ![npm audit](https://img.shields.io/badge/npm_audit-CB3837?style=flat-square&logo=npm&logoColor=white) | Dependency Audit | Every push/PR | Known CVEs in npm packages |
-| ![ClamAV](https://img.shields.io/badge/ClamAV-D22128?style=flat-square) | Antivirus | Runtime | Malware in uploaded files |
+```mermaid
+flowchart TD
+    Push[Push / PR to main] --> Install[npm ci]
+    Install --> Prisma[npx prisma generate]
+    
+    Prisma --> Lint[ESLint Static Analysis]
+    Prisma --> Type[tsc --noEmit Typecheck]
+    Prisma --> Audit[npm audit Dependency CVEs]
+    Prisma --> Trivy[Trivy Docker & Repo Vuln Scan]
+    
+    Push --> CodeQL[GitHub CodeQL SAST Analysis]
+```
 
 ---
 
@@ -923,118 +593,24 @@ Triggers on every **push** and **pull request** to `main`:
 ```http
 POST /api/convert/upload/init
 Content-Type: application/json
-
-{
-  "filename": "quarterly-report.docx",
-  "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "fileSizeBytes": 2048576,
-  "sourceType": "docx",
-  "targetType": "pdf"
-}
-```
-
-**Response (`200 OK`)**:
-```json
-{
-  "success": true,
-  "uploadUrl": "https://s3.us-east-005.backblazeb2.com/fileconvert-storage/uploads/...",
-  "r2Key": "uploads/<userId>/1695312000000-quarterly-report.docx",
-  "anonToken": "c4ca4238a0b923820dcc509a6f75849b"
-}
 ```
 
 #### Create Conversion Job
 ```http
 POST /api/convert/jobs
 Content-Type: application/json
-Authorization: Bearer <session-cookie>
-
-{
-  "r2InputKey": "uploads/<userId>/1695312000000-quarterly-report.docx",
-  "sourceType": "docx",
-  "targetType": "pdf",
-  "fileCount": 1,
-  "dpi": "150"
-}
-```
-
-**Response (`201 Created`)**:
-```json
-{
-  "jobId": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
-  "status": "queued",
-  "workerType": "document",
-  "engineUsed": "gotenberg"
-}
 ```
 
 ### 2. Real-Time Job Progress (SSE)
 ```http
-GET /api/convert/jobs/9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d/live?token=c4ca4238a0b923820dcc509a6f75849b
+GET /api/convert/jobs/<jobId>/live?token=<token>
 Accept: text/event-stream
-```
-
-**Event Stream**:
-```
-event: status
-data: {"status": "scanning", "progress": 25}
-
-event: status
-data: {"status": "processing", "progress": 70, "engine": "gotenberg"}
-
-event: status
-data: {"status": "completed", "progress": 100, "downloadUrl": "/api/convert/jobs/.../download"}
 ```
 
 ### 3. Download Converted File
 ```http
-GET /api/convert/jobs/<jobId>/download?token=<anonToken>
+GET /api/convert/jobs/<jobId>/download?token=<token>
 ```
-
-Returns a **302 redirect** to a 5-minute signed B2 download URL.
-
-### 4. Merge Files
-```http
-POST /api/merge
-Content-Type: application/json
-
-{
-  "fileType": "pdf",
-  "r2InputKeys": [
-    "uploads/<userId>/file1.pdf",
-    "uploads/<userId>/file2.pdf"
-  ]
-}
-```
-
-### 5. Submit Feedback
-```http
-POST /api/feedback
-Content-Type: application/json
-
-{
-  "name": "John Doe",
-  "email": "john@example.com",
-  "message": "Great tool!",
-  "category": "feature"
-}
-```
-
-### 6. Authentication
-
-| Endpoint | Method | Purpose |
-|:---|:---|:---|
-| `/api/auth/[...nextauth]` | GET/POST | NextAuth.js handler (Google + Credentials) |
-| `/api/auth/signup` | POST | New user registration |
-| `/api/auth/otp` | POST | OTP generation & verification |
-| `/api/auth/reset-password` | POST | Password reset with OTP |
-
-### 7. Admin Endpoints
-
-| Endpoint | Method | Purpose | Guard |
-|:---|:---|:---|:---|
-| `/api/admin/queue` | GET | Queue metrics & job counts | `withAdminAuth` (returns 404 to non-admins) |
-| `/api/admin/users` | GET | User list & plan distribution | `withAdminAuth` |
 
 ---
 
@@ -1052,14 +628,14 @@ FileConvert uses **BullMQ 6** backed by **Redis 7** for reliable job processing:
 
 ### Worker Routing
 
-The **Orchestrator** (`orchestrator.ts`) acts as the master daemon:
-
-```
-Job Received → Read workerType → Route to correct processor
-
-workerType: "document" → documentWorker.ts
-workerType: "image"    → imageWorker.ts
-workerType: "ocr"      → ocrWorker.ts
+```mermaid
+flowchart LR
+    Job[Incoming Job] --> Read{Read workerType}
+    Read -- "document" --> Doc[documentWorker.ts]
+    Read -- "image" --> Img[imageWorker.ts]
+    Read -- "ocr" --> Ocr[ocrWorker.ts]
+    Read -- "merge" --> Mrg[mergeWorker.ts]
+    Read -- "file-cleanup" --> Cln[cleanupWorker.ts]
 ```
 
 ### Job Lifecycle
@@ -1078,64 +654,11 @@ stateDiagram-v2
     dead_letter --> [*]
 ```
 
-### Dead Letter Queue
-
-Jobs that fail **3 consecutive times** are moved to `dead_letter` status with the full error history. This prevents infinite retry loops while preserving the failure context for debugging.
-
 ### Cleanup Scheduler
 
 - Runs every **15 minutes** (via `setInterval` in the orchestrator).
 - Queries DB for conversion jobs and merge sessions older than **1 hour**.
 - Enqueues cleanup jobs to delete R2 objects (input + output files).
-- Nulls R2 keys in the database to prevent duplicate cleanup attempts.
-
-### Running Workers Locally vs Docker
-
-```bash
-# Option A: Local (see logs in terminal)
-npm run worker
-
-# Option B: Docker (runs in background, no local logs)
-docker compose up -d worker
-
-# If both are running, stop the Docker worker to avoid job competition:
-docker compose stop worker
-```
-
----
-
-## 💳 Payment Integration
-
-### Razorpay Gateway
-
-| Plan | Price | Features |
-|:---|:---|:---|
-| **Free** | ₹0 | 2 files/session, no merge, basic conversions |
-| **Pro** | ₹89/mo | 10 files/session, 10 merge sessions/day |
-| **Business** | ₹150/mo | Unlimited files, unlimited merges |
-
-### Payment Flow
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant Frontend
-    participant API
-    participant Razorpay
-    
-    User->>Frontend: Select Plan
-    Frontend->>API: POST /api/payment/create-order
-    API->>Razorpay: Create Order (amount, currency)
-    Razorpay-->>API: Order ID
-    API-->>Frontend: Order details
-    Frontend->>Razorpay: Open Razorpay Checkout
-    User->>Razorpay: Complete Payment
-    Razorpay-->>Frontend: Payment ID + Signature
-    Frontend->>API: POST /api/payment/verify
-    API->>API: HMAC-SHA256 verification (timingSafeEqual)
-    API->>API: Update user plan in DB
-    API-->>Frontend: Success
-```
 
 ---
 
@@ -1143,19 +666,8 @@ sequenceDiagram
 
 ### Sentry Integration
 - **Package**: `@sentry/nextjs` v11.
-- **Dev Mode**: Errors logged to console only (Sentry not loaded).
 - **Production**: Errors forwarded via `captureException()` / `captureMessage()`.
 - **Tunnel Route**: `/monitoring` proxies Sentry requests through Next.js to bypass ad-blockers (excluded from robots.txt).
-- **Structured Logging**: All logs include ISO timestamps, severity levels, and contextual metadata.
-
-### Log Format
-```
-[INFO]  2026-10-06T16:20:22.881Z — [DocumentWorker] Processing xlsx:csv for job 2c6b6f6a-...
-[INFO]  2026-10-06T16:20:29.066Z — [SheetJS] Converting xlsx → csv
-[INFO]  2026-10-06T16:20:29.112Z — [Orchestrator] Job 2c6b6f6a-... completed successfully
-[WARN]  2026-10-06T16:22:48.027Z — [CleanupWorker] Deleting 1 R2 object(s) — reason: ttl_expired
-[ERROR] 2026-10-06T16:30:10.000Z — [Orchestrator] Job abc123 failed (attempt 2): Gotenberg error 500
-```
 
 ---
 
@@ -1169,33 +681,56 @@ sequenceDiagram
 | **Server-Side Only** | All sensitive env vars accessed only in `backend/config/env.ts` — never imported in client components |
 | **Build-Time Validation** | `env.ts` throws immediately if a required variable is missing at startup |
 | **No `NEXT_PUBLIC_` Prefix** | Sensitive variables do NOT use the `NEXT_PUBLIC_` prefix, ensuring Next.js never bundles them into client JavaScript |
-| **Docker Port Binding** | All service ports bound to `127.0.0.1` — not accessible from external networks |
-| **CI/CD Secrets** | GitHub Actions secrets configured in repository settings, never hardcoded in workflow files |
-| **OAuth Client Secret** | `GOOGLE_CLIENT_SECRET` is server-side only |
-| **Payment Keys** | `RAZORPAY_KEY_SECRET` and `RAZORPAY_WEBHOOK_SECRET` never leave the server |
-
-### What the Frontend CANNOT Access
-- Database connection strings
-- API keys (Razorpay, CloudConvert, B2, Sentry)
-- SMTP credentials
-- NextAuth secret
-- Admin email list
-- Redis connection URL
 
 ---
 
 ## 🗄️ Database Schema
 
-The PostgreSQL schema (via Prisma) contains 6 models:
-
-| Model | Purpose | Key Fields |
-|:---|:---|:---|
-| **User** | Registered accounts | `email`, `password` (hashed), `role` (user/admin), `plan` (free/pro/business), `failedLoginAttempts`, `lockedUntil` |
-| **Account** | OAuth provider links (NextAuth) | `provider`, `providerAccountId`, `access_token`, `refresh_token` |
-| **ConversionJob** | File conversion records | `source_type`, `target_type`, `status`, `worker_type`, `engine_used`, `clam_scan_result`, `r2_input_key`, `r2_output_key`, `retry_count` |
-| **MergeSession** | File merge records | `file_type`, `file_count`, `status`, `r2_output_key` |
-| **Feedback** | User feedback submissions | `name`, `email`, `message`, `category` (bug/feature/billing/other), `status` |
-| **Otp** | One-time passwords | `email`, `code`, `purpose` (signup/reset_password), `expires_at` |
+```mermaid
+erDiagram
+    User ||--o{ Account : has
+    User ||--o{ ConversionJob : creates
+    User ||--o{ MergeSession : initiates
+    User ||--o{ Feedback : submits
+    
+    User {
+        uuid id PK
+        string email
+        string password
+        string role
+        string plan
+        int failedLoginAttempts
+        datetime lockedUntil
+    }
+    
+    Account {
+        uuid id PK
+        uuid userId FK
+        string provider
+        string providerAccountId
+        string access_token
+    }
+    
+    ConversionJob {
+        uuid id PK
+        uuid userId FK
+        string source_type
+        string target_type
+        string status
+        string worker_type
+        string r2_input_key
+        string r2_output_key
+    }
+    
+    MergeSession {
+        uuid id PK
+        uuid userId FK
+        string file_type
+        int file_count
+        string status
+        string r2_output_key
+    }
+```
 
 All IDs use PostgreSQL's `gen_random_uuid()` for cryptographically random UUIDs. Timestamps use `TIMESTAMPTZ` for timezone-aware storage.
 
@@ -1219,18 +754,8 @@ We welcome contributions from the open-source community!
 5. **Commit** using conventional commits:
    - `feat: add EPUB to PDF conversion support`
    - `fix: resolve memory leak in imageWorker`
-   - `docs: update self-hosting guide`
-   - `security: patch CVE in transitive dependency`
 6. **Push** to your fork: `git push origin feat/amazing-feature`
 7. **Open** a Pull Request
-
-### Code Standards
-- TypeScript strict mode enabled
-- All API inputs validated with Zod schemas
-- No `any` types in new code
-- All file operations go through the `storage.ts` service (never direct S3 calls)
-- Environment variables accessed only through `config/env.ts`
-- Security headers set via `src/middleware.ts` — do not add inline `<script>` tags without nonces
 
 ---
 
