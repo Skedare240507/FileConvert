@@ -18,8 +18,8 @@ export async function POST(req: NextRequest) {
       return Response.json({ error: 'At least two files are required for merging' }, { status: 400 });
     }
 
-    if (!fileType) {
-      return Response.json({ error: 'fileType is required' }, { status: 400 });
+    if (!fileType || !['pdf', 'word', 'ppt'].includes(fileType)) {
+      return Response.json({ error: 'Invalid fileType' }, { status: 400 });
     }
 
     const tenant = await resolveTenantIdentity(req);
