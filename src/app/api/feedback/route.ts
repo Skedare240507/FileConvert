@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/backend/db';
-
+import { withRateLimit } from '@/backend/middleware/withRateLimit';
 import nodemailer from 'nodemailer';
 
 const escapeHtml = (value: string) =>
@@ -11,12 +11,25 @@ const escapeHtml = (value: string) =>
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 
-export async function POST(req: Request) {
+export const POST = withRateLimit(async (req: NextRequest) => {
   try {
     const { name, email, category, message } = await req.json();
 
     if (!name || !email || !category || !message) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    if (
+      typeof name !== 'string' || name.length > 100 ||
+      typeof email !== 'string' || email.length > 200 ||
+      typeof message !== 'string' || message.length > 5000
+    ) {
+      return NextResponse.json({ error: 'Invalid input length or type' }, { status: 400 });
+    }
+
+    const ALLOWED_CATEGORIES = ['bug', 'feature', 'billing', 'other'];
+    if (!ALLOWED_CATEGORIES.includes(category)) {
+      return NextResponse.json({ error: 'Invalid category' }, { status: 400 });
     }
 
     // 1. Save to Database
@@ -94,9 +107,9 @@ export async function POST(req: Request) {
       await transporter.sendMail(mailOptions);
     }
 
-    return NextResponse.json({ success: true, feedback }, { status: 201 });
+    return NextResponse.json({ success: true }, { status: 201 });
   } catch (error: any) {
     console.error('Error submitting feedback:', error);
-    return NextResponse.json({ error: 'Internal Server Error', details: error?.message || String(error) }, { status: 500 });
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
-}
+}, { limit: 5, windowSec: 3600, prefix: 'rl:feedback' });
