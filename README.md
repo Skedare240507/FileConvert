@@ -510,53 +510,85 @@ Admin access requires **all three** of:
 
 ## 🛡️ Security & Hardening
 
-### Defense-in-Depth Overview
+Security in FileConvert is treated as a **first-class citizen**. Rather than relying on a single perimeter defense, the system employs a strict **Defense-in-Depth (DiD)** architecture that assumes all user input and uploaded files are hostile.
+
+### Defense-in-Depth Architecture
 
 ```mermaid
 flowchart TD
-    Upload["User Upload"] --> Middleware
+    Upload["User Upload (Browser)"] --> Middleware
 
-    subgraph Layer0 ["Layer 0: Edge Middleware"]
-        Middleware["src/middleware.ts<br/>• Fresh 128-bit nonce per request<br/>• Strict nonce-based CSP"]
+    subgraph Layer0 ["Layer 0: Edge Defense"]
+        Middleware["Next.js Edge Middleware<br/>• Nonce-Based CSP<br/>• HSTS & Security Headers"]
     end
 
-    subgraph Layer1 ["Layer 1: Network"]
-        Nginx["Nginx Reverse Proxy<br/>• Rate limit: 10 req/s per IP<br/>• Burst: 20 requests"]
+    subgraph Layer1 ["Layer 1: Network & Proxy"]
+        Nginx["Nginx Reverse Proxy<br/>• DDoS Protection<br/>• TLS 1.3 Strict<br/>• 10 req/s Rate Limit"]
     end
 
-    subgraph Layer2 ["Layer 2: Application"]
-        Rate["Redis Rate Limiter"]
-        Validation["Zod Schema Validation"]
-        Magic["Magic Byte Verification"]
-        Sanitize["Filename Sanitizer"]
+    subgraph Layer2 ["Layer 2: API & Application"]
+        Rate["Redis Token Bucket Rate Limiter"]
+        Validation["Zod Strict Schema Validation"]
+        Magic["Magic Byte MIME Verification"]
+        Sanitize["Regex Filename Sanitizer"]
     end
 
-    subgraph Layer3 ["Layer 3: Antivirus"]
-        ClamAV["ClamAV Daemon<br/>• TCP INSTREAM protocol"]
+    subgraph Layer3 ["Layer 3: Antivirus & Payload"]
+        ClamAV["ClamAV Daemon<br/>TCP INSTREAM Protocol (No Disk IO)"]
     end
 
-    subgraph Layer4 ["Layer 4: Access Control"]
-        Auth["JWT Authentication"]
-        IDOR["IDOR Protection"]
-        Admin["Admin Cloaking"]
+    subgraph Layer4 ["Layer 4: Identity & Access"]
+        Auth["JWT NextAuth.js Validation"]
+        IDOR["Resource IDOR Protection"]
+        Admin["Admin Route Cloaking (404)"]
     end
 
-    subgraph Layer5 ["Layer 5: Data"]
-        TTL["1-Hour Auto-Deletion"]
-        Signed["Signed URLs"]
-        Encrypt["Password Hashing"]
+    subgraph Layer5 ["Layer 5: Data Storage"]
+        TTL["Ephemeral Storage (1h TTL)"]
+        Signed["Pre-signed URL Cryptography"]
+        Encrypt["bcrypt Password Hashing"]
     end
 
     Middleware --> Nginx --> Rate --> Validation --> Magic --> Sanitize
     Sanitize --> ClamAV
-    ClamAV -- "Clean" --> Auth --> IDOR --> Admin
-    ClamAV -- "Infected" --> Destroy["File Destroyed"]
+    ClamAV -- "Clean / Safe" --> Auth --> IDOR --> Admin
+    ClamAV -- "Infected / Suspicious" --> Destroy["🚨 Payload Destroyed Instantly"]
     Admin --> TTL --> Signed
 ```
 
-#### 🦠 Anti-Malware (ClamAV)
-- **Every uploaded file** passes through ClamAV before any worker processes it.
-- Scanning uses the TCP **INSTREAM** protocol — files are streamed in 8KB chunks directly to the daemon socket (no temp files).
+### 1. Cryptographic Nonce-Based CSP
+Cross-Site Scripting (XSS) is entirely mitigated at the network edge. 
+- The `src/middleware.ts` generates a **fresh, cryptographically secure 128-bit random nonce** on every single HTTP request.
+- This nonce is stamped onto the `Content-Security-Policy` HTTP header.
+- Next.js injects this exact nonce into all legitimate hydration `<script>` tags.
+- Any unauthorized scripts (e.g., from a compromised dependency or malicious user input) lack the nonce and are blocked by the browser. We strictly enforce `script-src 'self' 'nonce-...'; object-src 'none'; base-uri 'self';`.
+
+### 2. Real-Time Malware Scanning (ClamAV)
+Document conversion systems are prime targets for malicious payloads (e.g., infected PDFs, macro-embedded Word docs).
+- **Every uploaded file** is routed through a localized ClamAV antivirus daemon before being placed in the queue.
+- We utilize the TCP **INSTREAM** protocol. The file is never temporarily saved to disk; it is piped from memory into the ClamAV daemon in 8KB chunks.
+- If a virus, trojan, or malicious macro is detected, the request is immediately terminated with a 400 Bad Request, and the file never reaches the conversion workers.
+
+### 3. Strict Input Validation & Magic Bytes
+Extension spoofing (e.g., renaming `malware.exe` to `document.pdf`) is impossible.
+- **Zod Validation**: All API payloads are strictly typed and parsed. Unknown fields are stripped.
+- **Magic Byte Verification**: We read the actual binary headers (the first few hex bytes) of the uploaded file. If a file claims to be a PDF but doesn't start with `%PDF-` (`25 50 44 46`), it is rejected.
+- **Filename Sanitization**: Uploaded filenames are stripped of path traversal characters (`../`), null bytes (`\0`), and special symbols before interacting with cloud storage.
+
+### 4. Zero-Trust Admin Cloaking
+Admin dashboards are often targets for brute-force directory traversal.
+- Admin API routes do **not** return `401 Unauthorized` or `403 Forbidden` if you lack access.
+- Instead, they return a generic `404 Not Found`. This prevents attackers from enumerating or confirming the existence of administrative endpoints.
+- Admin access requires three layers: a valid JWT, a database role of `admin`, and the user's email matching a hardcoded server-side `.env` whitelist.
+
+### 5. Ephemeral Storage & IDOR Protection
+User privacy is guaranteed by design.
+- **Insecure Direct Object Reference (IDOR)** is prevented by binding every conversion job and file to the authenticated user's unique UUID. A user cannot query or download another user's file.
+- **1-Hour Time-To-Live (TTL)**: No data is kept forever. The `cleanupWorker` runs every 15 minutes, permanently destroying input and output files from the S3 bucket that are older than 60 minutes.
+
+### 6. DoS & Brute Force Protection
+- **Nginx Rate Limiting**: The reverse proxy caps API requests to 10 req/sec per IP, mitigating simple volumetric attacks.
+- **Account Lockouts**: The authentication system tracks failed login attempts. Upon 5 consecutive failures, the account is locked for 30 minutes to prevent credential stuffing and brute-force attacks, and a security alert email is dispatched to the user.
 
 ---
 
