@@ -72,7 +72,8 @@ function getGhostscriptBinDir(): string | undefined {
 }
 
 export async function renderPdfToJpgPages(pdfBuffer: Buffer, dpiVal: number = 150): Promise<{ name: string, data: Buffer }[]> {
-  const tmpId = crypto.randomUUID();
+  const tmpId = crypto.
+  randomUUID();
   const tmpPdfPath = path.join(os.tmpdir(), `${tmpId}.pdf`);
   const tmpJpgPrefix = path.join(os.tmpdir(), `${tmpId}_page_`);
 
