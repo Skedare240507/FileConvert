@@ -79,14 +79,14 @@ export async function scanBuffer(buffer: Buffer): Promise<ScanOutcome> {
     socket.on('data', (data) => chunks.push(data));
 
     socket.on('end', () => {
-      const response = Buffer.concat(chunks).toString('utf-8').trim();
+      const response = Buffer.concat(chunks).toString('utf-8').replace(/\0/g, '').trim();
       logger.info('[ClamAV] Scan response:', response);
 
-      if (response.includes('OK')) {
-        resolve({ result: 'clean' });
-      } else if (response.includes('FOUND')) {
+      if (response.includes('FOUND')) {
         const match = response.match(/stream:\s+(.+)\s+FOUND/);
         resolve({ result: 'infected', virusName: match?.[1] ?? 'unknown' });
+      } else if (response.includes('OK')) {
+        resolve({ result: 'clean' });
       } else {
         logger.warn('[ClamAV] Unexpected response:', response);
         resolve({ result: 'error' });
