@@ -17,6 +17,10 @@ export const POST = withRateLimit(
         return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
       }
 
+      if (typeof otpCode !== 'string') {
+        return NextResponse.json({ message: "Invalid OTP format" }, { status: 400 });
+      }
+
       // Length limits to prevent oversized payloads
       if (name.length > 100) {
         return NextResponse.json({ message: "Name must be 100 characters or fewer" }, { status: 400 });
