@@ -123,7 +123,26 @@
 
 ## 🏛️ System Architecture
 
-FileConvert separates presentation from heavy computation using a distributed worker cluster:
+### 🧩 Architecture Paradigm: **Modular Distributed Monolith + Asynchronous Microservices (Hybrid)**
+
+FileConvert is built using a **Modular Distributed Monolith with Asynchronous Worker Microservices** pattern:
+
+| Dimension | Architectural Pattern | Implementation Details |
+|:---|:---|:---|
+| **Core Application** | **Modular Monolith** | Next.js 16 (React 19 App Router) serves the frontend UI, authentication, SSR, and API route handlers in a unified, type-safe codebase. |
+| **Computation Layer** | **Distributed Micro-Workers** | CPU-intensive workloads are offloaded asynchronously to independent worker containers via BullMQ & Redis queues. |
+| **Conversion Engines** | **Polyglot Microservices** | Specialized containerized microservices: **Gotenberg 8** (LibreOffice/Chromium), **Python pdf2docx microservice** (Flask/FastAPI), and **ClamAV Daemon**. |
+| **Load Balancing & Gateway** | **Reverse Proxy & Layer 7 Load Balancer** | **Nginx Alpine** handles TLS termination, upstream HTTP/1.1 keep-alive connection pooling, static asset edge caching, and burst rate limiting. |
+| **Data & Storage Layer** | **External Pooled Persistence** | **PostgreSQL** via Supabase connection pooler (PgBouncer) + **Backblaze B2 / Cloudflare R2** object storage with HTTPS connection pooling. |
+
+#### Why this architecture?
+1. **Zero Thread-Locking**: Heavy document rendering (LibreOffice, OCR, Python PDF parsing) never blocks the web event loop.
+2. **Independent Scaling**: Web traffic and conversion worker instances can be scaled independently on separate nodes.
+3. **Resilience & Fault Isolation**: If an engine crashes on a corrupted file, the core website, sessions, and database remain unaffected.
+4. **Connection Pooling Everywhere**:
+   - **Load Balancer $\to$ Next.js**: Nginx maintains an active pool of up to 64 persistent keep-alive TCP connections.
+   - **Next.js $\to$ Storage**: S3Client uses a custom `https.Agent` connection pool (max 50 persistent sockets) eliminating TLS handshake latency.
+   - **Next.js / Workers $\to$ Database**: Prisma routes through Supabase PgBouncer with transaction-level connection pooling.
 
 ```mermaid
 flowchart TD
