@@ -67,7 +67,7 @@ const orchestratorWorker = new Worker<ConversionJobPayload>(
   },
   {
     connection: redisConnection,
-    concurrency: 5,
+    concurrency: 25,
     // Custom backoff: [5s, 30s, 2min]
     settings: {
       backoffStrategy: (attemptsMade: number) =>
