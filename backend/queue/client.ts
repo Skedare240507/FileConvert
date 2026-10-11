@@ -18,12 +18,16 @@ const globalForRedis = globalThis as typeof globalThis & {
 };
 
 function createRedisConnection(): Redis {
+  const isBuild = process.env.npm_lifecycle_event === 'build' || process.env.SKIP_ENV_VALIDATION === '1';
+
   const conn = new Redis(env.REDIS_URL || 'redis://localhost:6379', {
     // BullMQ requires maxRetriesPerRequest: null for blocking commands
     maxRetriesPerRequest: null,
     enableReadyCheck: false,
+    lazyConnect: isBuild, // Do not connect during static page prerendering in build phase
     connectTimeout: 5000,
     retryStrategy: (times: number) => {
+      if (isBuild) return null; // Never retry during next build
       if (times > 20) return null; // give up after ~30 seconds if Redis is down
       return Math.min(times * 500, 2000);
     },
