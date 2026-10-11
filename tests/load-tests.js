@@ -98,6 +98,7 @@ export default function () {
       headers: { 
         Accept: 'application/json',
         'X-Forwarded-For': clientIp,
+        'x-load-test-secret': 'dev-load-test-pass',
       },
       tags: { name: 'upload_direct' },
     }
@@ -151,6 +152,7 @@ export default function () {
         'Content-Type': 'application/json',
         Accept: 'application/json',
         'X-Forwarded-For': clientIp,
+        'x-load-test-secret': 'dev-load-test-pass',
         Cookie: cookieHeader,
       },
       tags: { name: 'create_job' },
