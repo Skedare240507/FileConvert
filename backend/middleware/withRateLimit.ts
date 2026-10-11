@@ -51,6 +51,17 @@ export function withRateLimit(handler: Handler, options: RateLimitOptions): Hand
       req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
       'unknown';
 
+    // Allow load testing when x-load-test-secret header matches LOAD_TEST_SECRET env var
+    // Or in development when explicit bypass header is passed
+    const loadTestSecret = process.env.LOAD_TEST_SECRET;
+    const incomingSecret = req.headers.get('x-load-test-secret');
+    if (loadTestSecret && incomingSecret === loadTestSecret) {
+      return handler(req);
+    }
+    if (process.env.NODE_ENV === 'development' && incomingSecret === 'dev-load-test-pass') {
+      return handler(req);
+    }
+
     const key = `${prefix}:${ip}`;
 
     try {
