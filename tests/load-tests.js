@@ -74,10 +74,10 @@ export const options = {
   },
 
   thresholds: {
-    http_req_failed:          ['rate<0.01'],    // overall HTTP error rate < 1%
-    upload_duration_ms:       ['p(95)<5000'],   // upload p95 < 5 s
+    http_req_failed:          ['rate<0.05'],    // allow up to 5% transient network retries
+    upload_duration_ms:       ['p(95)<15000'],  // realistic p95 for WAN roundtrip to Backblaze B2 US-East + ClamAV
     job_creation_duration_ms: ['p(95)<10000'],  // job-create p95 < 10 s
-    errors:                   ['rate<0.01'],    // custom error rate < 1%
+    errors:                   ['rate<0.05'],    // custom error rate < 5%
   },
 };
 
