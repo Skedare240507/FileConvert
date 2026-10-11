@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "worker": "tsx --env-file=.env backend/workers/orchestrator.ts",
+    "load-test": "docker run --rm -i --add-host=host.docker.internal:host-gateway -v \"%cd%:/app\" grafana/k6 run /app/tests/load-tests.js",
     "postinstall": "prisma generate"
   },
   "dependencies": {
