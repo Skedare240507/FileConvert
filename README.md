@@ -436,6 +436,7 @@ DATABASE_URL="postgresql://postgres:password@localhost:5432/fileconvert?schema=p
 
 # NEXTAUTH
 NEXTAUTH_URL="http://localhost:3000"
+
 NEXTAUTH_SECRET="generate-a-secure-32-byte-hex-secret"
 
 # GOOGLE OAUTH
