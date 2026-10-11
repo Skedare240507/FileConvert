@@ -35,10 +35,25 @@ export async function scanBuffer(buffer: Buffer): Promise<ScanOutcome> {
 
     const socket = net.createConnection({ host, port });
     const chunks: Buffer[] = [];
+    let resolved = false;
+
+    const safeResolve = (outcome: ScanOutcome) => {
+      if (!resolved) {
+        resolved = true;
+        socket.destroy();
+        resolve(outcome);
+      }
+    };
+
+    // 10s timeout prevents hung sockets from freezing the upload pipeline
+    socket.setTimeout(10000, () => {
+      logger.warn('[ClamAV] Socket timed out after 10s');
+      safeResolve({ result: 'error' });
+    });
 
     socket.on('error', (err) => {
       logger.error('[ClamAV] Connection error:', err.message);
-      resolve({ result: 'error' });
+      safeResolve({ result: 'error' });
     });
 
     socket.on('connect', async () => {
@@ -49,13 +64,13 @@ export async function scanBuffer(buffer: Buffer): Promise<ScanOutcome> {
       const chunkSize = 64 * 1024;
       let offset = 0;
 
-      const writeAsync = (data: Buffer | string) => new Promise<void>((resolve, reject) => {
+      const writeAsync = (data: Buffer | string) => new Promise<void>((res, rej) => {
         if (!socket.write(data)) {
-          socket.once('drain', resolve);
+          socket.once('drain', res);
         } else {
-          resolve();
+          res();
         }
-        socket.once('error', reject);
+        socket.once('error', rej);
       });
 
       try {
@@ -85,12 +100,12 @@ export async function scanBuffer(buffer: Buffer): Promise<ScanOutcome> {
 
       if (response.includes('FOUND')) {
         const match = response.match(/stream:\s+(.+)\s+FOUND/);
-        resolve({ result: 'infected', virusName: match?.[1] ?? 'unknown' });
+        safeResolve({ result: 'infected', virusName: match?.[1] ?? 'unknown' });
       } else if (response.includes('OK')) {
-        resolve({ result: 'clean' });
+        safeResolve({ result: 'clean' });
       } else {
         logger.warn('[ClamAV] Unexpected response:', response);
-        resolve({ result: 'error' });
+        safeResolve({ result: 'error' });
       }
     });
   });
