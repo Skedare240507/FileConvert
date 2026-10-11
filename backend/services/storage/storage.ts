@@ -14,6 +14,7 @@
  *   B2_BUCKET            Bucket name
  */
 
+import https from 'https';
 import {
   S3Client,
   PutObjectCommand,
@@ -23,8 +24,21 @@ import {
   UploadPartCommand,
   CompleteMultipartUploadCommand,
 } from '@aws-sdk/client-s3';
+import { NodeHttpHandler } from '@smithy/node-http-handler';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { env } from '@/backend/config/env';
+
+// Connection pooling agent for S3/B2 storage (reuses TCP/TLS connections)
+const b2HttpHandler = new NodeHttpHandler({
+  httpsAgent: new https.Agent({
+    keepAlive: true,
+    maxSockets: 50,
+    maxFreeSockets: 10,
+    timeout: 60000,
+  }),
+  connectionTimeout: 10000,
+  requestTimeout: 120000,
+});
 
 const b2 = new S3Client({
   region: env.B2_REGION || 'us-east-005',
@@ -33,6 +47,7 @@ const b2 = new S3Client({
     accessKeyId: env.B2_ACCESS_KEY_ID || 'dummy',
     secretAccessKey: env.B2_SECRET_ACCESS_KEY || 'dummy',
   },
+  requestHandler: b2HttpHandler,
 });
 
 const BUCKET = env.B2_BUCKET;

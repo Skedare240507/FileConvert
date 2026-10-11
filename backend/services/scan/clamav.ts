@@ -45,7 +45,8 @@ export async function scanBuffer(buffer: Buffer): Promise<ScanOutcome> {
       // INSTREAM protocol: send the command, then 4-byte big-endian chunk sizes
       socket.write('zINSTREAM\0');
 
-      const chunkSize = 8192;
+      // 64KB chunks reduce event-loop ticks & context switches for high-concurrency scans
+      const chunkSize = 64 * 1024;
       let offset = 0;
 
       const writeAsync = (data: Buffer | string) => new Promise<void>((resolve, reject) => {
