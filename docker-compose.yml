@@ -21,7 +21,7 @@ services:
     security_opt:
       - no-new-privileges:true
     init: true
-    mem_limit: 1g
+    mem_limit: 2g
     container_name: fileconvert-gotenberg
     restart: unless-stopped
     ports:
@@ -30,11 +30,11 @@ services:
       TZ: Asia/Kolkata
     command:
       - "gotenberg"
-      - "--api-timeout=120s"
-      # Keep LibreOffice process alive between conversions (avoids 8-15s cold-start penalty)
-      - "--libreoffice-start-timeout=30s"
-      # Restart LibreOffice every 20 conversions to prevent memory bloat while staying warm
-      - "--libreoffice-restart-after=20"
+      - "--api-timeout=60s"
+      # Keep LibreOffice process alive between conversions (avoids cold-start penalty)
+      - "--libreoffice-start-timeout=20s"
+      # Restart LibreOffice every 50 conversions to sustain continuous fast conversions
+      - "--libreoffice-restart-after=50"
       - "--chromium-disable-javascript=true"
       - "--chromium-allow-list=file:///tmp/.*"
     healthcheck:
