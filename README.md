@@ -20,7 +20,6 @@
 
   <p align="center">
     <a href="https://github.com/Skedare240507/FileConvert/releases"><img src="https://img.shields.io/github/v/release/Skedare240507/FileConvert?style=flat-square&color=4F46E5" alt="Release" /></a>
-    <a href="https://github.com/Skedare240507/FileConvert/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License: MIT" /></a>
     <a href="https://github.com/Skedare240507/FileConvert/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Skedare240507/FileConvert/ci.yml?branch=main&style=flat-square&label=CI%20Pipeline&logo=githubactions&logoColor=white" alt="CI Status" /></a>
     <a href="https://github.com/Skedare240507/FileConvert/actions/workflows/codeql.yml"><img src="https://img.shields.io/github/actions/workflow/status/Skedare240507/FileConvert/codeql.yml?branch=main&style=flat-square&label=CodeQL&logo=github&logoColor=white" alt="CodeQL" /></a>
     <a href="https://nextjs.org"><img src="https://img.shields.io/badge/Next.js-16.3-black?style=flat-square&logo=next.js" alt="Next.js 16" /></a>
